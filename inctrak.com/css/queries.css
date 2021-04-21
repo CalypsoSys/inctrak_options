@@ -1,0 +1,153 @@
+/* for big tablet from 1034px to 1200px */
+@media only screen and (max-width: 1200px) {
+  .navbar,
+  .con {
+    margin: 0 80px;
+  }
+
+  .con-head {
+    margin-top: 80px;
+  }
+
+  .con1 {
+    margin: 0 80px;
+  }
+    
+    .aboutUs {
+    margin-top: 500px;
+  }
+}
+
+/* for screens less than 1023px */
+@media only screen and (max-width: 1023px) {
+   
+}
+
+/* turn on mobile nav  */
+@media only screen and (max-width: 991px) {
+  .navbar,
+  .con {
+    margin: 0 40px;
+  }
+
+  .con-head {
+    margin-top: 80px;
+  }
+
+  .navbar-nav {
+    background-color: #fff;
+    color: #30cbce;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+  }
+
+  .nav-item {
+    text-align: center;
+  }
+    .aboutUs {
+    margin-top: 500px;
+  }
+
+  .con1 {
+    margin: 0 40px;
+  }
+  .nav-link {
+    color: #30cbce !important;
+    text-align: center;
+    position: relative;
+    border-bottom: 0.3px solid #30cbce;
+    /* width: 50%; */
+  }
+    
+    .stan {
+        width: 90%;
+    }
+
+  .laptop {
+    width: 400px;
+    right: -10px;
+    top: 430px;
+  }
+
+  .lap {
+    width: 500px;
+  }
+
+  .phone {
+    right: 180px;
+    top: 580px;
+  }
+
+  .phon {
+    width: 280px;
+  }
+}
+
+/* for mini tablets */
+@media only screen and (max-width: 767px) {
+  .aboutUs {
+    margin-top: 900px;
+  }
+
+  .display-4 {
+    margin: 40px 60px;
+  }
+
+  .dash {
+    width: 100%;
+  }
+
+  .img {
+    padding: 5px;
+  }
+}
+
+/* for mobile phones */
+@media only screen and (max-width: 480px) {
+  html,
+  body {
+    font-size: 100%;
+  }
+    
+    .stan {
+        width: 88%;
+        margin: 0 20px;
+    }
+
+  .aboutUs {
+    margin-top: 1000px;
+  }
+
+  .navbar {
+    margin: 0 10px;
+  }
+
+  .laptop {
+    right: 120px;
+    top: 500px;
+  }
+
+  .phone {
+    right: 70px;
+    top: 620px;
+  }
+
+  .addr {
+    margin: 0 50px;
+  }
+
+  .phon {
+    width: 200px;
+  }
+
+  .lap {
+    width: 400px;
+  }
+  .con {
+    margin: 0 20px;
+  }
+  .laptop {
+    width: 100px;
+  }
+}

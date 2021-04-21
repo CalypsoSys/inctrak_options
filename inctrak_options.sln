@@ -3,7 +3,101 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{75938678-1FEF-4A39-8683-BB051AE169F0}"
+	ProjectSection(SolutionItems) = preProject
+		docs\inctrak.txt = docs\inctrak.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "blog.inctrak.com", "blog.inctrak.com", "{C7F6DD39-9FD6-456A-B6EC-8286E7135CFF}"
+	ProjectSection(SolutionItems) = preProject
+		blog.inctrak.com\docker-compose.yml = blog.inctrak.com\docker-compose.yml
+		blog.inctrak.com\googleeb6f88a2168cf1dd.html = blog.inctrak.com\googleeb6f88a2168cf1dd.html
+		blog.inctrak.com\header1.jpg = blog.inctrak.com\header1.jpg
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "goals.inctrak.com", "goals.inctrak.com\goals.inctrak.com.csproj", "{38D2E437-B25D-46FC-9311-90589C7CC818}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "docs.inctrak.com", "docs.inctrak.com\", "{6A6BE514-F84E-4CB3-ACF0-1532578FC3DE}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_51439"
+		Debug.AspNetCompiler.PhysicalPath = "docs.inctrak.com\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51439\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_51439"
+		Release.AspNetCompiler.PhysicalPath = "docs.inctrak.com\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51439\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "51439"
+		SlnRelativePath = "docs.inctrak.com\"
+	EndProjectSection
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "inctrak.com", "inctrak.com\", "{EBE4CB36-61D5-4211-A08B-61DE127CBE8B}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_51507"
+		Debug.AspNetCompiler.PhysicalPath = "inctrak.com\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51507\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_51507"
+		Release.AspNetCompiler.PhysicalPath = "inctrak.com\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51507\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "51507"
+		SlnRelativePath = "inctrak.com\"
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inctrak.db", "inctrak.db", "{9EA7369E-9562-4442-9277-0FF399DA7229}"
+	ProjectSection(SolutionItems) = preProject
+		inctrak.db\inctrak.sql = inctrak.db\inctrak.sql
+		inctrak.db\inctrak_errors.sql = inctrak.db\inctrak_errors.sql
+		inctrak.db\inctrak_feedback.sql = inctrak.db\inctrak_feedback.sql
+		inctrak.db\inctrak_goals.sql = inctrak.db\inctrak_goals.sql
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModelDriver", "ModelDriver\ModelDriver.csproj", "{3E4F42C9-8D17-4EB4-8046-3916B6677392}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shared.inctrak.com", "shared.inctrak.com\shared.inctrak.com.csproj", "{13E5D928-8DB8-41F1-99AC-F20D0C59C11C}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{38D2E437-B25D-46FC-9311-90589C7CC818}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38D2E437-B25D-46FC-9311-90589C7CC818}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38D2E437-B25D-46FC-9311-90589C7CC818}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38D2E437-B25D-46FC-9311-90589C7CC818}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A6BE514-F84E-4CB3-ACF0-1532578FC3DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A6BE514-F84E-4CB3-ACF0-1532578FC3DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A6BE514-F84E-4CB3-ACF0-1532578FC3DE}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A6BE514-F84E-4CB3-ACF0-1532578FC3DE}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{EBE4CB36-61D5-4211-A08B-61DE127CBE8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBE4CB36-61D5-4211-A08B-61DE127CBE8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBE4CB36-61D5-4211-A08B-61DE127CBE8B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBE4CB36-61D5-4211-A08B-61DE127CBE8B}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{3E4F42C9-8D17-4EB4-8046-3916B6677392}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E4F42C9-8D17-4EB4-8046-3916B6677392}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E4F42C9-8D17-4EB4-8046-3916B6677392}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E4F42C9-8D17-4EB4-8046-3916B6677392}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13E5D928-8DB8-41F1-99AC-F20D0C59C11C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13E5D928-8DB8-41F1-99AC-F20D0C59C11C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13E5D928-8DB8-41F1-99AC-F20D0C59C11C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13E5D928-8DB8-41F1-99AC-F20D0C59C11C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

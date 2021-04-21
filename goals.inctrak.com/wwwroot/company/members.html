@@ -1,0 +1,85 @@
+﻿<div class="page-header">
+    <button id="id_busy_btn" ng-class="busyBtn" disabled>
+        <span ng-class="working"></span>Member {{busyStatus}}
+    </button>
+    &nbsp;<a href="#/">Home</a>&nbsp;<a ng-repeat="b in breadCrumbs" ng-href="/{{b.url}}">{{b.name}}</a>&nbsp;
+</div>
+<p class="lead">
+    <div class="form-horizontal" ng-include="searchTemplate" ng-show="showMembers" />
+    <div class="table-responsive" ng-show="showSearchResults">
+        <div class="table-responsive" ng-show="showMembers">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Current Goals</th>
+                        <th>Total Goals</th>
+                        <th>Has User</th>
+                    </tr>
+                </thead>
+                <tr ng-repeat="member in listItems">
+                    <td><a href="javascript:void(0)" ng-click="loadMember(member.MEMBER_PK)">{{member.NAME}}</a></td>
+                    <td>{{member.CURRENT_GOALS| number}}</td>
+                    <td>{{member.TOTAL_GOALS| number}}</td>
+                    <td>{{member.HAS_USER}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</p>
+
+<form class="form-horizontal" ng-show="showMember" ng-submit="processForm()">
+    <h3>Member</h3>
+    <div class="form-group">
+        <label for="inputName">Name</label>
+        <input type="text" class="form-control" id="inputName" placeholder="Enter the Member Name" ng-model="data.Member.NAME">
+    </div>
+    <div class="row">
+        <div class="col-sm-3" ng-hide="data.Member.GOOGLE_USER">
+            <label for="idUserName">Username</label>
+            <input id="idUserName" class="form-control" type="text" ng-model="data.Member.USER_NAME" ng-disabled="disableUnEmail(data.Member)" />
+        </div>
+        <div class="col-sm-3">
+            <label for="idEmailAddress">Email Address</label>
+            <input id="idEmailAddress" class="form-control" type="text" ng-model="data.Member.EMAIL_ADDRESS" ng-disabled="disableUnEmail(data.Member)" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            <input type="radio" name="user_action" ng-model="data.Member.USER_ACTION" value="create_user" />
+            <span>Create New User</span>
+        </div>
+        <div class="col-sm-2" ng-hide="isNewUser(data.Member)">
+            <input type="radio" name="user_action" ng-model="data.Member.USER_ACTION" value="update_user" />
+            <span>Update User</span>
+        </div>
+        <div class="col-sm-2" ng-hide="isNewUser(data.Member)">
+            <input type="radio" name="user_action" ng-model="data.Member.USER_ACTION" value="delete_user" />
+            <span>Delete User</span>
+        </div>
+        <div class="col-sm-2">
+            <input type="radio" name="user_action" ng-model="data.Member.USER_ACTION" value="none" />
+            <span>No User Action</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            <input type="checkbox" name="google_user" ng-model="data.Member.GOOGLE_USER" value="none" />
+            <span>Google User</span>
+        </div>
+        <div class="col-sm-2">
+            <input type="checkbox" name="send_email" ng-model="data.Member.SEND_EMAIL" value="none" />
+            <span>Send Email Message</span>
+        </div>
+        </div>
+    <div class="row">
+        <em>Any changes to the user account will trigger a reset of activation status and activation email to be sent if selected.</em>
+    </div>
+    <br />
+    <div class="form-group">
+        <button type="submit" class="btn btn-default">Submit</button>
+        <a href="javascript:void(0)" ng-click="removeMember(data.Member.MEMBER_PK)">Remove</a>
+    </div>
+</form>
+
+<div class="form-horizontal" ng-include="dialogTemplate" />

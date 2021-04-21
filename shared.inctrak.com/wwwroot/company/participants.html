@@ -1,0 +1,93 @@
+﻿<div class="page-header">
+    <button id="id_busy_btn" ng-class="busyBtn" disabled>
+        <span ng-class="working"></span>Participant {{busyStatus}}
+    </button>
+    &nbsp;<a href="#/">Home</a>&nbsp;<a ng-repeat="b in breadCrumbs" ng-href="/{{b.url}}">{{b.name}}</a>&nbsp;
+</div>
+<p class="lead">
+    <div class="form-horizontal" ng-include="searchTemplate" ng-show="showParticipants" />
+    <div class="table-responsive" ng-show="showSearchResults">
+        <div class="table-responsive" ng-show="showParticipants">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Grants</th>
+                        <th>Shares</th>
+                        <th>Has User</th>
+                    </tr>
+                </thead>
+                <tr ng-repeat="participant in listItems">
+                    <td><a href="javascript:void(0)" ng-click="loadParticipant(participant.PARTICIPANT_PK)">{{participant.NAME}}</a></td>
+                    <td>{{participant.TOTAL_GRANTS}}</td>
+                    <td>{{participant.GRANTED_SHARES}}</td>
+                    <td>{{participant.HAS_USER}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</p>
+
+<form class="form-horizontal" ng-show="showParticipant" ng-submit="processForm()">
+    <h3>Participant</h3>
+    <div class="form-group">
+        <label for="inputName">Name</label>
+        <input type="text" class="form-control" id="inputName" placeholder="Enter the Participant Name" ng-model="data.Participant.NAME">
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            <label for="partTypeId">Type </label>
+            <select class="form-control" ng-model="data.Participant.PARTICIPANT_TYPE_FK" id="partTypeId">
+                <option ng-repeat="pt in data.PartTypes" ng-selected="{{data.Participant.PARTICIPANT_TYPE_FK == pt.PARTICIPANT_TYPE_PK}}" value="{{pt.PARTICIPANT_TYPE_PK}}">{{pt.NAME}}</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3" ng-hide="data.Participant.GOOGLE_USER">
+            <label for="idUserName">Username</label>
+            <input id="idUserName" class="form-control" type="text" ng-model="data.Participant.USER_NAME" ng-disabled="disableUnEmail(data.Participant)" />
+        </div>
+        <div class="col-sm-3">
+            <label for="idEmailAddress">Email Address</label>
+            <input id="idEmailAddress" class="form-control" type="text" ng-model="data.Participant.EMAIL_ADDRESS" ng-disabled="disableUnEmail(data.Participant)" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            <input type="radio" name="user_action" ng-model="data.Participant.USER_ACTION" value="create_user" />
+            <span>Create New User</span>
+        </div>
+        <div class="col-sm-2" ng-hide="isNewUser(data.Participant)">
+            <input type="radio" name="user_action" ng-model="data.Participant.USER_ACTION" value="update_user" />
+            <span>Update User</span>
+        </div>
+        <div class="col-sm-2" ng-hide="isNewUser(data.Participant)">
+            <input type="radio" name="user_action" ng-model="data.Participant.USER_ACTION" value="delete_user" />
+            <span>Delete User</span>
+        </div>
+        <div class="col-sm-2">
+            <input type="radio" name="user_action" ng-model="data.Participant.USER_ACTION" value="none" />
+            <span>No User Action</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            <input type="checkbox" name="google_user" ng-model="data.Participant.GOOGLE_USER" value="none" />
+            <span>Google User</span>
+        </div>
+        <div class="col-sm-2">
+            <input type="checkbox" name="send_email" ng-model="data.Participant.SEND_EMAIL" value="none" />
+            <span>Send Email Message</span>
+        </div>
+        </div>
+    <div class="row">
+        <em>Any changes to the user account will trigger a reset of activation status and activation email to be sent if selected.</em>
+    </div>
+    <br />
+    <div class="form-group">
+        <button type="submit" class="btn btn-default">Submit</button>
+        <a href="javascript:void(0)" ng-click="removeParticipant(data.Participant.PARTICIPANT_PK)">Remove</a>
+    </div>
+</form>
+
+<div class="form-horizontal" ng-include="dialogTemplate" />

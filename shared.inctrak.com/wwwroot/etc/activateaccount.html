@@ -1,0 +1,12 @@
+﻿<div class="page-header">
+    <button id="id_busy_btn" ng-class="busyBtn" disabled>
+        <span ng-class="working"></span>Activate Account {{busyStatus}}
+    </button>
+</div>
+
+<form ng-submit="processForm()">
+    <h3>Activate</h3>
+    <button type="submit" class="btn btn-default">Activate</button>
+</form>
+
+<div class="form-horizontal" ng-include="dialogTemplate" />

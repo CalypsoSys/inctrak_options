@@ -1,0 +1,10 @@
+docker build -t inctrak .
+docker rmi $(docker images -f "dangling=true" -q)
+
+
+docker exec -it inctrak_db /bin/bash
+
+docker save inctrak > /tmp/inctrak.tar
+docker load < inctrak.tar
+
+docker system purge

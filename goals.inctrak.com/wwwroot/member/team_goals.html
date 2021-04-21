@@ -1,0 +1,30 @@
+﻿<div class="page-header">
+    <button id="id_busy_btn" ng-class="busyBtn" disabled>
+        <span ng-class="working"></span>Team Goals Summary {{busyStatus}}
+    </button>
+    &nbsp;<a href="#/">Home</a>&nbsp;<a ng-repeat="b in breadCrumbs" ng-href="/{{b.url}}">{{b.name}}</a>&nbsp;
+</div>
+<p class="lead">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>Team</th>
+                    <th>Schedule</th>
+                    <th>Goal</th>
+                    <th>Due Date</th>
+                </tr>
+            </thead>
+            <tr ng-repeat="goal in listItems">
+                <td>{{goal.DEPARTMENT}}</a></td>
+                <td>{{goal.TEAM}}</a></td>
+                <td>{{goal.SCHEDULE}}</a></td>
+                <td>{{goal.GOAL}}</td>
+                <td>{{goal.DUE_DATE | date:'shortDate'}}</td>
+            </tr>
+        </table>
+    </div>
+</p>
+
+<div class="form-horizontal" ng-include="dialogTemplate" />

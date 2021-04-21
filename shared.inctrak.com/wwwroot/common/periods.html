@@ -1,0 +1,39 @@
+﻿<table class="table table-striped table-condensed table-bordered">
+    <thead>
+        <tr>
+            <th>Period Amount</th>
+            <th>Period Duration</th>
+            <th>Amount Type</th>
+            <th>Amount</th>
+            <th>Number of Periods</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tr ng-repeat="period in data.Periods">
+        <td>
+            <input type="number" ng-model="period.PERIOD_AMOUNT" min="1">
+        </td>
+        <td>
+            <select ng-model="period.PERIOD_TYPE_FK">
+                <option ng-repeat="pt in data.PeriodTypes" ng-selected="{{period.PERIOD_TYPE_FK == pt.PERIOD_TYPE_PK}}" value="{{pt.PERIOD_TYPE_PK}}">{{pt.NAME}}</option>
+            </select>
+        </td>
+        <td>
+            <select ng-model="period.AMOUNT_TYPE_FK">
+                <option ng-repeat="at in data.AmountTypes" ng-selected="{{period.AMOUNT_TYPE_FK == at.AMOUNT_TYPE_PK}}" value="{{at.AMOUNT_TYPE_PK}}">{{at.NAME}}</option>
+            </select>
+        </td>
+        <td>
+            <input type="number" ng-model="period.AMOUNT" step="0.000001" ng-hide="hideAmount(period)">
+            <input ng-if="$last" type="checkbox" ng-checked="{{period.EVEN_OVER_N == 1}}" ng-model="period.EVEN_OVER_N" ng-true-value="1" ng-false-value="0" />
+            <span ng-if="$last">Calculate amounts</span>
+        </td>
+        <td>
+            <input type="number" ng-model="period.INCREMENTS" min="1" ng-hide="hideIncrement(period)">
+            <input ng-if="$last" type="checkbox" ng-checked="{{period.EVEN_OVER_N == 2}}" ng-model="period.EVEN_OVER_N" ng-true-value="2" ng-false-value="0" />
+            <span ng-if="$last">Calculate periods</span>
+        </td>
+        <td><a href="javascript:void(0)" ng-click="delPeriod(period)">Remove</a></td>
+    </tr>
+    <tr><td colspan="6"><a href="javascript:void(0)" ng-click="addPeriod()">Add Period</a></td></tr>
+</table>

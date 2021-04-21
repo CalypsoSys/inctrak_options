@@ -1,0 +1,49 @@
+﻿<div class="page-header">
+    <button id="id_busy_btn" ng-class="busyBtn" disabled>
+        <span ng-class="working"></span>Schedules {{busyStatus}}
+    </button>
+    &nbsp;<a href="#/">Home</a>&nbsp;<a ng-repeat="b in breadCrumbs" ng-href="/{{b.url}}">{{b.name}}</a>&nbsp;
+</div>
+<p class="lead">
+    <div class="table-responsive" ng-show="showSchedules">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Total Goals</th>
+                </tr>
+            </thead>
+            <tr ng-repeat="schedule in listItems">
+                <td><a href="javascript:void(0)" ng-click="loadSchedule(schedule.SCHEDULE_PK)">{{schedule.NAME}}</a></td>
+                <td>{{schedule.START_DATE | date:'shortDate'}}</td>
+                <td>{{schedule.END_DATE | date:'shortDate'}}</td>
+                <td>{{schedule.TOTAL_GOALS}}</td>
+            </tr>
+        </table>
+    </div>
+</p>
+
+<form class="form-horizontal" ng-show="showSchedule" ng-submit="processForm()">
+    <h3>Schedule</h3>
+    <div class="form-group">
+        <label for="inputName">Name</label>
+        <input type="text" class="form-control" id="inputName" placeholder="Enter the Schedule Name" ng-model="data.Schedule.NAME">
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <label for="idStartDate">Start Date</label>
+            <input id="idStartDate" class="form-control" type="date" ng-model="data.Schedule.START_DATE" />
+        </div>
+        <div class="col-sm-3">
+            <label for="idEndDate">End Date</label>
+            <input id="idEndDate" class="form-control" type="date" ng-model="data.Schedule.END_DATE" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-default">Submit</button>
+    <a href="javascript:void(0)" ng-click="removeSchedule(data.Schedule.SCHEDULE_PK)">Remove</a>
+</form>
+
+<div class="form-horizontal" ng-include="dialogTemplate" />

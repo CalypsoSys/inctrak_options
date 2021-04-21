@@ -1,0 +1,79 @@
+﻿<div class="page-header">
+    <button id="id_busy_btn" ng-class="busyBtn" disabled>
+        <span ng-class="working"></span>Grant {{busyStatus}}
+    </button>
+    &nbsp;<a href="#/">Home</a>&nbsp;<a ng-repeat="b in breadCrumbs" ng-href="/{{b.url}}">{{b.name}}</a>&nbsp;
+</div>
+<p class="lead">
+    <div class="table-responsive" ng-show="showGrants">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Plan Name</th>
+                    <th>Vesting Schedule</th>
+                    <th>Grant Date</th>
+                    <th>Vest Start</th>
+                    <th>Option Price</th>
+                    <th>Shares</th>
+                </tr>
+            </thead>
+            <tr ng-repeat="grant in listItems">
+                <td><a href="javascript:void(0)" ng-click="loadGrant(grant.GRANT_PK)">{{grant.PLAN_NAME}}</a></td>
+                <td>{{grant.VEST_NAME}}</td>
+                <td>{{grant.DATE_OF_GRANT | date:'shortDate'}}</td>
+                <td>{{grant.VESTING_START | date:'shortDate'}}</td>
+                <td>{{grant.OPTION_PRICE}}</td>
+                <td>{{grant.SHARES}}</td>
+            </tr>
+        </table>
+    </div>
+</p>
+
+<form class="form-horizontal" ng-show="showGrant" >
+    <h3>Grant</h3>
+    <div class="form-group">
+        <label class="control-label">Plan Name</label>
+        <p class="form-control-static">{{data.Grant.PLAN_NAME}}</p>
+    </div>
+    <div class="form-group">
+        <label class="control-label">Vesting Schedule</label>
+        <p class="form-control-static">{{data.Grant.VEST_NAME}}</p>
+    </div>
+
+    <div class="row">
+        <label class="col-sm-2 control-label">Grant Date</label>
+        <div class="col-sm-4">
+            <p class="form-control-static">{{data.Grant.DATE_OF_GRANT | date:'fullDate'}}</p>
+        </div>
+        <label class="col-sm-2 control-label">Termination Date</label>
+        <div class="col-sm-4">
+            <p class="form-control-static">{{data.Grant.TerminationDate | date:'fullDate'}}</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <label class="col-sm-2 control-label">Vest Start</label>
+        <div class="col-sm-4">
+            <p class="form-control-static">{{data.Grant.VESTING_START | date:'fullDate'}}</p>
+        </div>
+        <label class="col-sm-2 control-label">Vest End</label>
+        <div class="col-sm-4">
+            <p class="form-control-static">{{data.Grant.VestingEnd | date:'fullDate'}}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <label class="col-sm-2 control-label">Option Price</label>
+        <div class="col-sm-4">
+            <p class="form-control-static">{{data.Grant.OPTION_PRICE}}</p>
+        </div>
+        <label class="col-sm-2 control-label">Shares</label>
+        <div class="col-sm-4">
+            <p class="form-control-static">{{data.Grant.SHARES}}</p>
+        </div>
+    </div>
+
+    <div ng-include="vestScheduleTemplate" />
+</form>
+
+<div class="form-horizontal" ng-include="dialogTemplate" />

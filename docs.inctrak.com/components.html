@@ -1,0 +1,535 @@
+﻿<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->  
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->  
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->  
+<head>
+    <title>IncTrak Documentation</title>
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta name="description" content="Manage startup company stock and company stock options, using stock classes, ISO, vesting schedules, grants, participants, termination schedules. No more spreadsheets or other limited formats. Easy reporting for both management and optionees. For administrator of plans and participants." />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">  
+    <link rel="icon" href="IncTrakIcon.png">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css">   
+    <!-- Plugins CSS -->    
+    <link rel="stylesheet" href="assets/plugins/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="assets/plugins/prism/prism.css">
+    <link rel="stylesheet" href="assets/plugins/lightbox/dist/ekko-lightbox.min.css">
+    <link rel="stylesheet" href="assets/plugins/elegant_font/css/style.css">
+
+    <!-- Theme CSS -->
+    <link id="theme-style" rel="stylesheet" href="assets/css/styles.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-50852156-8"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-50852156-8');
+    </script>    
+</head> 
+
+<body class="body-pink">
+    <div class="page-wrapper">
+        <!-- ******Header****** -->
+        <header id="header" class="header">
+            <div class="container">
+                <div class="branding">
+                    <h1 class="logo">
+                        <a href="index.html">
+                            <img src="assets/images/IncTrakLogoPink.png" height="100" width="200" />
+                            <!--
+                            <span aria-hidden="true" class="icon_documents_alt icon"></span>
+                            <span class="text-highlight">Inc</span><span class="text-bold">Trak</span>
+                            -->
+                        </a>
+                    </h1>
+                </div><!--//branding-->
+                <ol class="breadcrumb">
+                    <li><a href="index.html">Home</a></li>
+                    <li class="active">Components</li>
+                </ol>
+            </div><!--//container-->
+        </header><!--//header-->
+        <div class="doc-wrapper">
+            <div class="container">
+                <div id="doc-header" class="doc-header text-center">
+                    <h1 class="doc-title"><span aria-hidden="true" class="icon icon_puzzle_alt"></span> Components</h1>
+                </div><!--//doc-header-->
+                <div class="doc-body">
+                    <div class="doc-content">
+                        <div class="content-inner">
+                            
+                            <section id="company-components" class="doc-section">
+                                <h2 class="section-title">Company Components</h2>
+                                <div id="dashboard" class="section-block">
+                                    <h3 class="block-title">Dashboard</h3>
+                                    <p>The dashboard section give a overview and summary of all the option plans in effect.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Dashboard Overview</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/01_company_dashboard.png" data-title="Dashboard Overview" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/01_company_dashboard.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/01_company_dashboard.png" data-title="Dashboard Overview" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The dashboard shows Summary information on your companies stock option plans. The graph shows relative counts per plans total shares, shares granted and shares remaining.</p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Navigation Overview</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/02_company_navigation.png" data-title="Navigation Overview" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/02_company_navigation.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/02_company_navigation.png" data-title="Navigation Overview" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>All site navigation is handled through the menu at the top of the screen.</p>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+
+                                <div id="stockclass" class="section-block">
+                                    <h3 class="block-title">Stock Classes</h3>
+                                    <p>The stock class section allows you create, edit and delete stock classes.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Stock Class List</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/a_company_stockclass_list.png" data-title="Stock Class List" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/a_company_stockclass_list.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/a_company_stockclass_list.png" data-title="Stock Class List" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The stock class list shows you all stock classes. You can create new stock classes by selecting the "Create New Stock Class>" link and see detail or edit existing plans by selecting the related link.</p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Stock Class Details</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/a_company_stockclass_edit.png" data-title="Stock Class Details" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/a_company_stockclass_edit.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/a_company_stockclass_edit.png" data-title="Stock Class Details" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>Set the Plan name and total number for the stock class, Click "Submit" to save changes and "Remove" to delete the stock class.</p>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+
+                                <div id="stockholder" class="section-block">
+                                    <h3 class="block-title">Stock Holders</h3>
+                                    <p>The stock holder section allows you create, edit and delete stock holders.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Stock Holder List</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/a_company_stockholder_list.png" data-title="Stock Holder List" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/a_company_stockholder_list.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/a_company_stockholder_list.png" data-title="Stock Holder List" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The stock holder list shows you a searchable list of stock holders. You can create new stock holders by selecting the "Create New Stock Holder>" link and see detail or edit existing holders by selecting the related link.</p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Stock Holder Details</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/a_company_stockholder_edit.png" data-title="Stock Holder Details" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/a_company_stockholder_edit.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/a_company_stockholder_edit.png" data-title="Stock Holder Details" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>Set the Participant stock holder name, stock class, date of sale, price per share and the number stocks. Click "Submit" to save changes and "Remove" to delete the stock holder.</p>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+                                <div id="plans" class="section-block">
+                                    <h3 class="block-title">Equity Stock Plans</h3>
+                                    <p>The plans section allows you create, edit and delete equity compensation plans.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Plans List</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/03_company_plan_list.png" data-title="Plans List" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/03_company_plan_list.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/03_company_plan_list.png" data-title="Plans List" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The plan list shows you all existing plans. You can create new plans by selecting the "Create New Plan>" link and see detail or edit existing plans by selecting the related link.</p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Plan Details</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/04_company_plan.png" data-title="Plans Details" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/04_company_plan.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/04_company_plan.png" data-title="Plans Details" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>Set the Plan name and total number of shares allocated, Click "Submit" to save changes and "Remove" to delete the plan.</p>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+
+                                <div id="vestingschedule" class="section-block">
+                                    <h3 class="block-title">Vesting Schedules</h3>
+                                    <p>The Vesting Schedules section allows you create, edit and delete the vesting schedules that will define over what period of time share are vested.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Vesting Schedule List</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/05_company_vschedule_list.png" data-title="Vesting Schedule List" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/05_company_vschedule_list.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/05_company_vschedule_list.png" data-title="Vesting Schedule List" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The vesting schedule list shows you all existing vesting schedule. You can create new vesting schedules by selecting the "Create New Schedule>" link and see detail or edit existing vesting schedules by selecting the related link.</p>
+                                        </div>
+                                    </div><!--//row-->
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Create Vesting Schedule</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/06_vesting_schedule2.png" data-title="Create Vesting Schedule" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/06_vesting_schedule1.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/06_vesting_schedule2.png" data-title="Create Vesting Schedule" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>Set the Vesting Schedule name and define the vesting periods.</p>
+                                            <ul>
+                                                <li>The period amount defines the number of period durations for this period</li>
+                                                <li>The period duration defines the length of time this period is for in combination with the period amount</li>
+                                                <li>The amount type defines how the amount of is calculated - either a percentage or a fixed amount of shares.</li>
+                                                <li>The amount defines either the percentage or share amount to vest in this period.</li>
+                                                <li>The number of periods defined the count of periods over which this vesting calculation is defined.</li>
+                                                <li>On the last period you can choose to let the system calculate either the amount or periods to satisfy the grant.</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/06_vesting_schedule1.png" data-title="Create Vesting Schedule" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/06_vesting_schedule1.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/06_vesting_schedule1.png" data-title="Create Vesting Schedule" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <ul>
+                                                <li>Period duration can be over days, weeks, months or years</li>
+                                                <li>Amount type can be percentage or shares</li>
+                                                <li>
+                                                    In the example above each period reads as
+                                                    <ol>
+                                                        <li>Every 6 months vest 12 percent of the options granted. Do this every 6 months 2 times</li>
+                                                        <li>Every 4 months vest 8 percent of the options granted. Do this every 4 months 3 times</li>
+                                                        <li>Every 2 months vest 4 percent of the options granted. Do this every 2 months 6 times</li>
+                                                        <li>Every month vest <em>N</em> percent of the options granted. Do this every month and calculate how many <em>N</em> times until all shares in grant are vested.</li>
+                                                        <li>See below in the optionee section show this vesting schedule gets calculated for every vesting increment.</li>
+                                                    </ol>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+
+                                <div id="terminationdates" class="section-block">
+                                    <h3 class="block-title">Termination Dates</h3>
+                                    <p>The Termination Dates section allows you create, edit and delete the Termination Date definitions that will define what a grant is terminated.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Termination Date List</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/07_term_list.png" data-title="Termination Date List" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/07_term_list.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/07_term_list.png" data-title="Termination Date List" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The Termination date list shows you all existing termination date definitions. You can create new termination dates by selecting the "Create New Termination Date>" link and see detail or edit existing termination dates by selecting the related link.</p>
+                                        </div>
+                                    </div><!--//row-->
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Absolute Date</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/08_term_absolute.png" data-title="Absolute Dates" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/08_term_absolute.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/08_term_absolute.png" data-title="Absolute Dates" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>To define a termination date on a absolute date select the "Is Absolute Date" check-box and enter the appropriate date.</p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>From Dates</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/09_term_from.png" data-title="From Dates" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/09_term_from.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/09_term_from.png" data-title="From Dates" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>You can create a termination date in the future relative to the Grant Date, Vesting start date or a specific entered date.</p>
+                                        </div>
+                                    </div><!--//row-->
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>From Specific Date</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/10_term_specific_date.png" data-title="From Specific Date" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/10_term_specific_date.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/10_term_specific_date.png" data-title="From Specific Date" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>For a specific date, enter the date and the years, months and days from the enter date for the grant to expire.</p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Save Termination Date</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/11_term_date.png" data-title="Save Termination Date" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/11_term_date.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/11_term_date.png" data-title="Save Termination Date" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>For termination dates from grant date or vesting start date enter the years, months and days from then for the grant to expire</p>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+
+                                <div id="participants" class="section-block">
+                                    <h3 class="block-title">Participants</h3>
+                                    <p>The Participants section allows you create, edit and delete Participants that will be granted options and their site access.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Participant Search</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/12_participant_search.png" data-title="Participant Search" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/12_participant_search.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/12_participant_search.png" data-title="Participant Search" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The participant list lets you search for participants in the system or be able to create new participants by selecting the "Create New Participant>" link  and see detail or edit existing participants by selecting the related link..</p>
+                                            <ul>
+                                                <li>Any - will find matching participant names that match any of the words entered in the search bar</li>
+                                                <li>All - will find matching participant names that all of the words entered in the search bar</li>
+                                                <li>Exact - will find matching participant names that are an exact match of the words entered in the search bar</li>
+                                            </ul>
+                                        </div>
+                                    </div><!--//row-->
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Save New Participant</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/13_participant_save_with_user_access.png" data-title="Save New Participant" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/13_participant_save_with_user_access.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/13_participant_save_with_user_access.png" data-title="Save New Participant" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>
+                                                Set the participants name and site access information. Username and email address will be used to send a activation email and grant access to the site.
+                                                If selecting integrated access with a Google account just the email address is required and a activation email is optional
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Save Existing Participant</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/14_participant_user_options.png" data-title="Save Existing Participants" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/14_participant_user_options.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/14_participant_user_options.png" data-title="Save Existing Participant" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The options for participant site access</p>
+                                            <ul>
+                                                <li>Username - the user name that can be used to access this site</li>
+                                                <li>Email Address - the email address that can be used to active and set access to this site</li>
+                                                <li>Create New User - if user information is changed this option will create new access settings, but leave any old access settings</li>
+                                                <li>Update User - if user information is changed this option will overwrite existing access settings</li>
+                                                <li>Delete User - The user access related to this account will removed from the system</li>
+                                                <li>No User Action - Nothing will be changed.</li>
+                                            </ul>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+
+                                <div id="grants" class="section-block">
+                                    <h3 class="block-title">Grants</h3>
+                                    <p>The Grants section allows you create, edit and delete Grants.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Grant Search</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/15_grant_search.png" data-title="Grant Search" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/15_grant_search.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/15_grant_search.png" data-title="Grant Search" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The grant list lets you search for grants in the system by participant name or be able to create new grants by selecting the "Create New Grant>" link and see detail or edit existing grants by selecting the related link..</p>
+                                            <ul>
+                                                <li>Any - will find matching participants that have grants that match any of the words entered in the search bar</li>
+                                                <li>All - will find matching participants that have grants that all of the words entered in the search bar</li>
+                                                <li>Exact - will find matching participants that have grants that are an exact match of the words entered in the search bar</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Participant Search</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/16_grant_participant_search.png" data-title="Participant Search" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/16_grant_participant_search.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/16_grant_participant_search.png" data-title="Participant Search" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The participant field lets you search for participants in the system who you want to assign this grant</p>
+                                        </div>
+                                    </div><!--//row-->
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Create Grant</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/17_grant_selections.png" data-title="Create Grant" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/17_grant_selections.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/17_grant_selections.png" data-title="Create Grant" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>Once a participant is selected, choose the plan, vesting schedule, grant date, vesting start date, share price, shares granted and termination date this for this grant.</p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/company/18_grant_creation.png" data-title="Create Grant" data-toggle="lightbox"><img class="img-responsive" src="assets/images/company/18_grant_creation.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/company/18_grant_creation.png" data-title="Create Grant" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+
+
+
+                            <section id="optionee-components" class="doc-section">
+                                <h2 class="section-title">Optionee Components</h2>
+                                <div id="optionee-registration" class="section-block">
+                                    <h3 class="block-title">Registration</h3>
+                                    <p>Participant registration is initiated by the administrator. If registered using a integrated Google account the participant will just be required to accept the terms and conditions</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Email</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/participant/01_optionee_email.png" data-title="Optionee Email" data-toggle="lightbox"><img class="img-responsive" src="assets/images/participant/01_optionee_email.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/participant/01_optionee_email.png" data-title="Optionee Email" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>If the administrator grants access to the site a email message will be sent to the participant so they can active their account.</p>
+                                        </div>
+                                    </div><!--//row-->
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Activate</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/participant/02_optionee_pwd_accept.png" data-title="Activate" data-toggle="lightbox"><img class="img-responsive" src="assets/images/participant/02_optionee_pwd_accept.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/participant/02_optionee_pwd_accept.png" data-title="Activate" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The email link will bring the participant to a page to enter a password for access and accept the terms and conditions of this site.</p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Login</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/participant/03_optionee_login.png" data-title="Login" data-toggle="lightbox"><img class="img-responsive" src="assets/images/participant/03_optionee_login.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/participant/03_optionee_login.png" data-title="Login" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                                <p>Once the participant has activated their account they can login to see their grant information</p>
+                                            </div>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+
+                                <div id="optionee-dashboard" class="section-block">
+                                    <h3 class="block-title">Dashboard</h3>
+                                    <p>The participant dashboard shows a summary of grant information and a graphic of vested vs. unvested shares over time.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Dashboard Overview</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/participant/04_optionee_dashboard.png" data-title="Dashboard Overview" data-toggle="lightbox"><img class="img-responsive" src="assets/images/participant/04_optionee_dashboard.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/participant/04_optionee_dashboard.png" data-title="Dashboard Overview" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The graph is cumulative for each plan the participant is in (i.e. if they have multiple grants in a single plan that will be a summed view)</p>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+
+                                <div id="optionee-summary" class="section-block">
+                                    <h3 class="block-title">Summary</h3>
+                                    <p>The optionee summary shows all the shares the participant has been granted by plan</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Summary Overview</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/participant/05_optionee_summary.png" data-title="Summary Overview" data-toggle="lightbox"><img class="img-responsive" src="assets/images/participant/05_optionee_summary.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/participant/05_optionee_summary.png" data-title="Summary Overview" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>They can see the total amount of currently vested and unvested shares in this view.</p>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+
+                                <div id="optionee-grants" class="section-block">
+                                    <h3 class="block-title">Grants</h3>
+                                    <p>The grant section allows the participant to see the details of each incentive plan that have been granted.</p>
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Grant List</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/participant/06_optionee_grants_list.png" data-title="Grant List" data-toggle="lightbox"><img class="img-responsive" src="assets/images/participant/06_optionee_grants_list.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/participant/06_optionee_grants_list.png" data-title="Grant List" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The grant list shows the incentive plans this participant has been granted and see details of the grant by selecting the related link.. </p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Grant Details</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/participant/07_optionee_grant.png" data-title="Grant Details" data-toggle="lightbox"><img class="img-responsive" src="assets/images/participant/07_optionee_grant.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/participant/07_optionee_grant.png" data-title="Grant Details" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The grant details section show all pertinent information of the grant</p>
+                                        </div>
+                                    </div><!--//row-->
+                                    <div class="row">
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Grant Schedule</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/participant/08_optionee_vest_schedule.png" data-title="Grant Schedule" data-toggle="lightbox"><img class="img-responsive" src="assets/images/participant/08_optionee_vest_schedule.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/participant/08_optionee_vest_schedule.png" data-title="Grant Schedule" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>The fully calculate vesting schedule can be view here. The vesting schedule is calculated for all shares granted.</p>
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <h6>Grant Views</h6>
+                                            <div class="screenshot-holder">
+                                                <a href="assets/images/participant/09_optionee_vest_schedule2.png" data-title="Grant Views" data-toggle="lightbox"><img class="img-responsive" src="assets/images/participant/09_optionee_vest_schedule2.png" alt="screenshot" /></a>
+                                                <a class="mask" href="assets/images/participant/09_optionee_vest_schedule2.png" data-title="Grant Views" data-toggle="lightbox"><i class="icon fa fa-search-plus"></i></a>
+                                            </div>
+                                            <p>You can use the view specific detail radio button to show just the details needed</p>
+                                            <ul>
+                                                <li>Show Period - show/hide the sequential period number</li>
+                                                <li>Show Details - show the percentage and shares increments for each vesting period</li>
+                                                <li>Show Total - show the cumulative percentage and shares for each vesting period</li>
+                                                <li>Show Vested Only - only show periods that have vested before the current system date</li>
+                                            </ul>
+                                        </div>
+                                    </div><!--//row-->
+                                </div><!--//section-block-->
+                            </section><!--//doc-section-->
+
+                        </div><!--//content-inner-->
+                    </div><!--//doc-content-->
+                    <div class="doc-sidebar">
+                        <nav id="doc-nav">
+                            <ul id="doc-menu" class="nav doc-menu hidden-xs" data-spy="affix">
+                                <li>
+                                    <a class="scrollto" href="#company-components">Company Components</a>
+                                    <ul class="nav doc-sub-menu">
+                                        <li><a class="scrollto" href="#dashboard">Dashboard</a></li>
+                                        <li><a class="scrollto" href="#stockclass">Stock Classes</a></li>
+                                        <li><a class="scrollto" href="#stockholder">Stock Holders</a></li>
+                                        <li><a class="scrollto" href="#plans">Equity Stock Plans</a></li>
+                                        <li><a class="scrollto" href="#vestingschedule">Vesting Schedules</a></li>
+                                        <li><a class="scrollto" href="#terminationdates">Termination Dates</a></li>
+                                        <li><a class="scrollto" href="#participants">Participants</a></li>
+                                        <li><a class="scrollto" href="#grants">Grants</a></li>
+                                    </ul><!--//nav-->
+                                </li>
+                                <li>
+                                    <a class="scrollto" href="#optionee-components">Optionee Components</a>
+                                    <ul class="nav doc-sub-menu">
+                                        <li><a class="scrollto" href="#optionee-registration">Registration</a></li>
+                                        <li><a class="scrollto" href="#optionee-dashboard">Dashboard</a></li>
+                                        <li><a class="scrollto" href="#optionee-summary">Summary</a></li>
+                                        <li><a class="scrollto" href="#optionee-grants">Grants</a></li>
+                                    </ul><!--//nav-->
+                                </li>
+                            </ul><!--//doc-menu-->
+                        </nav>
+                    </div><!--//doc-sidebar-->
+                </div><!--//doc-body-->              
+            </div><!--//container-->
+        </div><!--//doc-wrapper-->
+        
+    </div><!--//page-wrapper-->
+    
+    <footer id="footer" class="footer text-center">
+        <div class="container">
+            <!--/* This template is released under the Creative Commons Attribution 3.0 License. Please keep the attribution link below when using for your own project. Thank you for your support. :) If you'd like to use the template without the attribution, you can check out other license options via our website: themes.3rdwavemedia.com */-->
+            <small class="copyright">Calypso Systems, LLC - IncTrak</small>
+            
+        </div><!--//container-->
+    </footer><!--//footer-->
+    
+     
+    <!-- Main Javascript -->          
+    <script type="text/javascript" src="assets/plugins/jquery-1.12.3.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="assets/plugins/prism/prism.js"></script>    
+    <script type="text/javascript" src="assets/plugins/jquery-scrollTo/jquery.scrollTo.min.js"></script>  
+    <script type="text/javascript" src="assets/plugins/lightbox/dist/ekko-lightbox.min.js"></script>                                                                 
+    <script type="text/javascript" src="assets/plugins/jquery-match-height/jquery.matchHeight-min.js"></script>
+    <script type="text/javascript" src="assets/js/main.js"></script>
+    
+</body>
+</html> 
+

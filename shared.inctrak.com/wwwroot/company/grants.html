@@ -1,0 +1,89 @@
+﻿<div class="page-header">
+    <button id="id_busy_btn" ng-class="busyBtn" disabled>
+        <span ng-class="working"></span>Grant {{busyStatus}}
+    </button>
+    &nbsp;<a href="#/">Home</a>&nbsp;<a ng-repeat="b in breadCrumbs" ng-href="/{{b.url}}">{{b.name}}</a>&nbsp;
+</div>
+<p class="lead">
+    <div class="form-horizontal" ng-include="searchTemplate" ng-show="showGrants" />
+    <div class="table-responsive" ng-show="showSearchResults">
+        <div class="table-responsive" ng-show="showGrants">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Participant Name</th>
+                        <th>Plan Name</th>
+                        <th>Shares</th>
+                    </tr>
+                </thead>
+                <tr ng-repeat="grant in listItems">
+                    <td><a href="javascript:void(0)" ng-click="loadGrant(grant.GRANT_PK)">{{grant.PARTICIPANT_NAME}}</a></td>
+                    <td>{{grant.PLAN_NAME}}</td>
+                    <td>{{grant.SHARES}}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</p>
+
+<form class="form-horizontal" ng-show="showGrant" >
+    <h3>Grant</h3>
+    <div class="form-group">
+        <label class="control-label">Participant Name</label>
+        <ui-select ng-model="participant.selected" theme="bootstrap">
+            <ui-select-match placeholder="Select or search a participant in the list..." style="text-align: left;">{{$select.selected.NAME}}</ui-select-match>
+            <ui-select-choices repeat="item in participants" refresh="refreshParticipants($select.search)" >
+                <span ng-bind-html="item.NAME | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+    <div class="form-group">
+        <label for="planId">Plan Name</label>
+        <select id="planId" ng-model="data.Grant.PLAN_FK" class="form-control">
+            <option ng-repeat="plan in data.Plans" ng-selected="{{data.Grant.PLAN_FK == plan.PLAN_PK}}" value="{{plan.PLAN_PK}}">{{plan.NAME}}</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="vestId">Vesting Schedule</label>
+        <select id="vestId" ng-model="data.Grant.VESTING_SCHEDULE_FK" class="form-control">
+            <option ng-repeat="vest in data.Vesting" ng-selected="{{data.Grant.VESTING_SCHEDULE_FK == vest.SCHEDULE_PK}}" value="{{vest.SCHEDULE_PK}}">{{vest.NAME}}</option>
+        </select>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-3">
+            <label for="idGrantDate">Date of Grant</label>
+            <input id="idGrantDate" class="form-control" type="date" ng-model="data.Grant.DATE_OF_GRANT" />
+        </div>
+        <div class="col-sm-3">
+            <label for="idVestDate">Vesting Start Date</label>
+            <input id="idVestDate" class="form-control" type="date" ng-model="data.Grant.VESTING_START" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-3">
+            <label for="idOptionPrice">Option Price Per Share</label>
+            <input id="idOptionPrice" class="form-control" type="number" step="0.000001" ng-model="data.Grant.OPTION_PRICE" />
+        </div>
+        <div class="col-sm-3">
+            <label for="idShares">Shares Granted</label>
+            <input id="idShares" class="form-control" type="number" ng-model="data.Grant.SHARES" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="termId">Termination Date</label>
+        <select id="termId" ng-model="data.Grant.TERMINATION_FK" class="form-control">
+            <option ng-repeat="term in data.Terminations" ng-selected="{{data.Grant.TERMINATION_FK == term.TERMINATION_PK}}" value="{{term.TERMINATION_PK}}">{{term.NAME}}</option>
+        </select>
+    </div>
+
+    <br />
+    <div class="form-group">
+        <button class="btn btn-default" ng-click="processForm()">Submit</button>
+        <a href="javascript:void(0)" ng-click="removeGrant(data.Grant.GRANT_PK)">Remove</a>
+    </div>
+</form>
+
+<div class="form-horizontal" ng-include="dialogTemplate" />

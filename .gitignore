@@ -240,3 +240,4 @@ _Pvt_Extensions
 /packages
 /shared.inctrak.com/appsettings.json
 /manga.inctrak.com/Data
+appsettings.Development.json

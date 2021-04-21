@@ -1,0 +1,245 @@
+﻿<div class="page-header">
+<h1>Dashboard</h1>
+</div>
+<div class="container" ng-show="isAdmin()">
+    <h3>Summary Plan information</h3>
+    <form class="form-horizontal">
+        <div class="row">
+            <label class="col-sm-2 control-label">Plans</label>
+            <div class="col-sm-4">
+                <p class="form-control-static">{{data.Plans.length}}</p>
+            </div>
+            <label class="col-sm-2 control-label">Schedules</label>
+            <div class="col-sm-4">
+                <p class="form-control-static">{{data.Schedules}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <label class="col-sm-2 control-label">Participants</label>
+            <div class="col-sm-4">
+                <p class="form-control-static">{{data.Participants}}</p>
+            </div>
+            <label class="col-sm-2 control-label">Grants</label>
+            <div class="col-sm-4">
+                <p class="form-control-static">{{data.Grants}}</p>
+            </div>
+        </div>
+    </form>
+    <p class="lead">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Plans Name</th>
+                        <th>Total Shares</th>
+                        <th>Granted Shares</th>
+                        <th>Remaining</th>
+                        <th>Grants</th>
+                        <th>Participants</th>
+                    </tr>
+                </thead>
+                <tr ng-repeat="plan in data.Plans">
+                    <td>{{plan.NAME}}</a></td>
+                    <td>{{plan.TOTAL_SHARES | number}}</a></td>
+                    <td>{{plan.GRANTED_SHARES | number}}</a></td>
+                    <td>{{plan.TOTAL_SHARES - plan.GRANTED_SHARES | number}}</a></td>
+                    <td>{{plan.GRANTS | number}}</a></td>
+                    <td>{{plan.PARTICIPANTS | number}}</a></td>
+                </tr>
+            </table>
+        </div>
+    </p>
+    <h3>Relative share counts</h3>
+    <div id="company_counts"></div>
+</div>
+<div class="container" ng-show="isOptionee()">
+    <h3>Summary Grant information</h3>
+    <form class="form-horizontal">
+        <div class="row">
+            <label class="col-sm-2 control-label">Total Granted</label>
+            <div class="col-sm-2">
+                <p class="form-control-static">{{data.TotalGranted | number}}</p>
+            </div>
+            <label class="col-sm-2 control-label">Total Vested</label>
+            <div class="col-sm-2">
+                <p class="form-control-static">{{data.TotalVested | number:3}}</p>
+            </div>
+            <label class="col-sm-2 control-label">Total Unvested</label>
+            <div class="col-sm-2">
+                <p class="form-control-static">{{data.TotalUnVested | number:3}}</p>
+            </div>
+        </div>
+    </form>
+    <h3>Vesting vs. Unvested shares over time</h3>
+    <div id="grants_over_time"></div>
+</div>
+
+<div class="container" ng-hide="loggedIn()">
+    <h3>Quick Vesting Schedule</h3>
+    <form class="form-horizontal">
+        <div class="row">
+            <div class="col-sm-3">
+                <label for="idShares">Shares Granted</label>
+                <input id="idShares" class="form-control" type="number" ng-model="data.Grant.SHARES" />
+            </div>
+            <div class="col-sm-3">
+                <label for="idVestDate">Vesting Start Date</label>
+                <input id="idVestDate" class="form-control" type="date" ng-model="data.Grant.VESTING_START" />
+            </div>
+        </div>
+
+        <div class="table-responsive" ng-include="periodTemplate" />
+        <div ng-include="vestScheduleTemplate" ng-show="showVestSchedule" />
+        <div class="form-group">
+            <button class="btn btn-default" ng-click="processQuickForm()">Submit</button>
+        </div>
+    </form>
+    <h3>Quick overview below, find out more by reading the full <a href="https://docs.inctrak.com">documentation</a></h3>
+    <div class="row">
+        <div class="col-xs-3">
+            <div class="thumbnail">
+                <a href="#" onclick="return false;" ng-click="showDialog1 = true"><img src="/img/company_dash.png" alt="Company Dashboard" width="200" height="200"></a>
+                <h3>Company Dashboard</h3>
+            </div>
+        </div>
+
+        <div class="col-xs-3">
+            <div class="thumbnail">
+                <a href="#" onclick="return false;" ng-click="showDialog2 = true"><img src="/img/optionee_dash.png" alt="Optionee Dashboard" width="200" height="200"></a>
+                <h3>Optionee Dashboard</h3>
+            </div>
+        </div>
+
+        <div class="col-xs-3">
+            <div class="thumbnail">
+                <a href="#" onclick="return false;" ng-click="showDialog3 = true"><img src="/img/company_schedule.png" alt="Create Vesting Schedules" width="200" height="200"></a>
+                <h3>Create Vesting Schedules</h3>
+            </div>
+        </div>
+
+        <div class="col-xs-3">
+            <div class="thumbnail">
+                <a href="#" onclick="return false;" ng-click="showDialog4 = true"><img src="/img/optionee_grants.png" alt="Optionee View of Grants" width="200" height="200"></a>
+                <h3>Optionee View of Grants</h3>
+            </div>
+        </div>
+
+        <div class="col-xs-3">
+            <div class="thumbnail">
+                <a href="#" onclick="return false;" ng-click="showDialog5 = true"><img src="/img/company_grant.png" alt="Issue Grants" width="200" height="200"></a>
+                <h3>Issue Grants</h3>
+            </div>
+        </div>
+
+
+        <div class="col-xs-3">
+            <div class="thumbnail">
+                <a href="#" onclick="return false;" ng-click="showDialog6 = true"><img src="/img/optionee_summary.png" alt="Optionee Summary" width="200" height="200"></a>
+                <h3>Optionee Summary</h3>
+            </div>
+        </div>
+
+        <div class="modal pop-up-1" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel-1" ng-show="showDialog1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="showDialog1 = false">×</button>
+                        <h4 class="modal-title" id="myLargeModalLabel-1">Company Dashboard</h4>
+                        <p>
+                            Show summary information on all plans and grants across all participants for the company.
+                        </p>
+                    </div>
+                    <div class="modal-body">
+                        <img src="/img/company_dash.png" class="img-responsive img-rounded center-block" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal pop-up-2" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel-2" ng-show="showDialog2">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="showDialog2 = false">×</button>
+                        <h4 class="modal-title" id="myLargeModalLabel-1">Optionee Dashboard</h4>
+                        <p>Shows a graph of all options granted and vested vs. unvested shares for the participant over time.</p>
+                    </div>
+                    <div class="modal-body">
+                        <img src="/img/optionee_dash.png" class="img-responsive img-rounded center-block" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal pop-up-3" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel-3" ng-show="showDialog3">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="showDialog3 = false">×</button>
+                        <h4 class="modal-title" id="myLargeModalLabel-1">Create Vesting Schedules</h4>
+                        <p>Create simple to complex vesting schedules for your option plans.</p>
+                    </div>
+                    <div class="modal-body">
+                        <img src="/img/company_schedule.png" alt="MMA Over Time" class="img-responsive img-rounded center-block" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal pop-up-4" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel-4" ng-show="showDialog4">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="showDialog4 = false">×</button>
+                        <h4 class="modal-title" id="myLargeModalLabel-1">Optionee View of Grants</h4>
+                        <p>Shows the participant details on a garticular grant, summary and detailed vesting schedule.</p>
+                    </div>
+                    <div class="modal-body">
+                        <img src="/img/optionee_grants.png" alt="Top N" class="img-responsive img-rounded center-block" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal pop-up-5" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel-5" ng-show="showDialog5">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="showDialog5 = false">×</button>
+                        <h4 class="modal-title" id="myLargeModalLabel-1">Issue Grants</h4>
+                        <p>
+                            Issue grants to your employees and add access so they can view their vesting.
+                        </p>
+                    </div>
+                    <div class="modal-body">
+                        <img src="/img/company_grant.png" class="img-responsive img-rounded center-block" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal pop-up-6" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel-6" ng-show="showDialog6">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="showDialog6 = false">×</button>
+                        <h4 class="modal-title" id="myLargeModalLabel-1">Optionee Summary</h4>
+                        <p>
+                            A summary view for the optionee to see their grant details.
+                        </p>
+                    </div>
+                    <div class="modal-body">
+                        <img src="/img/optionee_summary.png" class="img-responsive img-rounded center-block" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-horizontal" ng-include="dialogTemplate" />
