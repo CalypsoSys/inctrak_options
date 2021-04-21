@@ -5,6 +5,7 @@ VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{75938678-1FEF-4A39-8683-BB051AE169F0}"
 	ProjectSection(SolutionItems) = preProject
+		docs\build_inctrak_image.sh = docs\build_inctrak_image.sh
 		docs\inctrak.txt = docs\inctrak.txt
 	EndProjectSection
 EndProject
