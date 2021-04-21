@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyName>IncTrak.GoalSetter</AssemblyName>
     <RootNamespace>IncTrak.GoalSetter</RootNamespace>
+    <Company>Calypso Systems, LLC</Company>
+    <Description>IncTrak Employee Goal Management</Description>
   </PropertyGroup>
 
   <ItemGroup>

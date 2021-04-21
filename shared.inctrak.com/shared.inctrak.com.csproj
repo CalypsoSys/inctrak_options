@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyName>IncTrak</AssemblyName>
     <RootNamespace>IncTrak</RootNamespace>
+    <Description>IncTrak Employee Stock Option Management Tool</Description>
+    <Company>Calypso Systems, LLC</Company>
   </PropertyGroup>
 
   <ItemGroup>
