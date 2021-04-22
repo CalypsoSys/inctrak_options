@@ -636,22 +636,6 @@ namespace IncTrak.GoalSetter.Controllers
             return Encrypt(string.Format("{0}{1}", user.UserName, user.UserPk), passPhrase, salt1.ToString().Substring(0, 8) + salt2.ToString().Substring(0, 8));
         }
 
-        private void SendMail(string to, string subject, string body)
-        {
-            var client = new SmtpClient(_options.Value.GetSNMPServer(), _options.Value.SNMPPort);
-            client.UseDefaultCredentials = false;
-            client.Credentials = new NetworkCredential(_options.Value.GetSNMPAddress(), _options.Value.GetSNMPPassword());
-            client.EnableSsl = false;
-            client.DeliveryMethod = SmtpDeliveryMethod.Network;
-
-            MailMessage message = new MailMessage(_options.Value.GetSNMPAddress(), to);
-            message.Subject = subject;
-            message.Body = body;
-            message.IsBodyHtml = true;
-            message.Bcc.Add(_options.Value.GetSNMPAddress());
-            client.Send(message);
-        }
-
         // This constant is used to determine the keysize of the encryption algorithm.
         private const int keysize = 256;
         private string Encrypt(string plainText, string passPhrase, string salt)

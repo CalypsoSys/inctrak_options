@@ -112,6 +112,10 @@ namespace IncTrak.GoalSetter.Controllers
                         var response = Ok(new { success = true, message = string.Format("Thanks for the {0}{1}", messageType, who) });
 
                         // TODO response.Headers.Add("Access-Control-Allow-Origin", incTrak);
+                        SendMail("feedback@inctrak.com",
+                            string.Format("Feedback: {0}", feedBack.Subject),
+                            string.Format("Name: {0}<br />Email: {1}<br />Type: {2}<br />Client:{3}<br />Message: {4}", feedBack.Name, feedBack.EmailAddress, messageType, feedBack.ClientData, feedBack.Message));
+
 
                         return response;
                     }

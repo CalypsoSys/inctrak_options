@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Threading.Tasks;
 using IncTrak.GoalSetter.Data;
 using IncTrak.GoalSetter.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace IncTrak.GoalSetter.Controllers
 {
@@ -182,5 +186,34 @@ namespace IncTrak.GoalSetter.Controllers
 
             return clientInfo;
         }
-     }
+
+        protected void SendMail(string to, string subject, string body)
+        {
+            if (_options.Value.UseSNMP)
+            {
+                var client = new SmtpClient(_options.Value.GetSNMPServer(), _options.Value.SNMPPort);
+                client.UseDefaultCredentials = false;
+                client.Credentials = new NetworkCredential(_options.Value.GetSNMPAddress(), _options.Value.GetSNMPPassword());
+                client.EnableSsl = false;
+                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+                MailMessage message = new MailMessage(_options.Value.GetSNMPAddress(), to);
+                message.Subject = subject;
+                message.Body = body;
+                message.IsBodyHtml = true;
+                message.Bcc.Add(_options.Value.GetSNMPAddress());
+                client.Send(message);
+            }
+            else
+            {
+                var client = new SendGridClient(_options.Value.GetEmailApiKey());
+                var fromAddr = new EmailAddress(_options.Value.GetEmailFrom());
+                var toAddr = new EmailAddress(to);
+                var msg = MailHelper.CreateSingleEmail(fromAddr, toAddr, subject, null, body);
+
+                var response = client.SendEmailAsync(msg);
+                response.Wait();
+            }
+        }
+    }
 }
