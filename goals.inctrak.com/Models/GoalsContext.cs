@@ -27,7 +27,7 @@ namespace IncTrak.GoalSetter.Models
             {
                 optionsBuilder
                     .UseLazyLoadingProxies()
-                    .UseNpgsql(_settings.IncTrakGoalsConnection);
+                    .UseNpgsql(_settings.GetIncTrakGoalsConnection());
             }
         }
 

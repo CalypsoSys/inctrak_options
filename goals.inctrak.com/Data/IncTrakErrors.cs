@@ -20,10 +20,10 @@ namespace IncTrak.GoalSetter.Data
         protected override NpgsqlConnection Conn()
         {
             var connStr = new NpgsqlConnectionStringBuilder();
-            connStr.Host = _settings.ErrorsHost;
+            connStr.Host = _settings.GetErrorsHost();
             connStr.Database = "inctrak_errors";
-            connStr.Username = _settings.ErrorsUsername;
-            connStr.Password = _settings.ErrorsPassword;
+            connStr.Username = _settings.GetErrorsUsername();
+            connStr.Password = _settings.GetErrorsPassword();
             var conn = new NpgsqlConnection();
             conn.ConnectionString = connStr.ConnectionString;
 
@@ -71,7 +71,7 @@ namespace IncTrak.GoalSetter.Data
                 {
                     if (login.UUID != null)
                         uuid = login.UUID;
-                    if (login.UserKeyForError != null)
+                    if (login.UserKeyForError != Guid.Empty)
                         userKey = login.UserKeyForError;
                 }
 
@@ -88,7 +88,7 @@ namespace IncTrak.GoalSetter.Data
                     int check = access.ExecuteNonQuery("INSERT INTO OPTIONEEPLAN_ERRORS (MESSAGE, CALL_STACK, UUID, USER_FK, CODE) VALUES (@MESSAGE, @CALL_STACK, @UUID, @USER_FK, @CODE)", eventParams);
                 }
             }
-            catch(Exception excp1)
+            catch
             {
                 // do no harm
             }

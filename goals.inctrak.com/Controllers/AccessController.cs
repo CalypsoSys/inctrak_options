@@ -216,7 +216,7 @@ namespace IncTrak.GoalSetter.Controllers
             var googleRedirectUrl = LoginBaseUrl(redirect);
 
             return new Uri(string.Format("https://accounts.google.com/o/oauth2/v2/auth?client_id={0}&response_type=code&scope=openid%20email%20profile&redirect_uri={1}&state={2}",
-                _options.Value.GoogleClientId, googleRedirectUrl, state));
+                _options.Value.GetGoogleClientId(), googleRedirectUrl, state));
         }
 
         [Route("api/login/register_google/")]
@@ -255,7 +255,7 @@ namespace IncTrak.GoalSetter.Controllers
             {
                 BaseAddress = new Uri("https://www.googleapis.com")
             };
-            var googleTokenUrl = string.Format("oauth2/v4/token?code={0}&client_id={1}&client_secret={2}&redirect_uri={3}&grant_type=authorization_code", code, _options.Value.GoogleClientId, _options.Value.GoogleSecretKey, LoginBaseUrl(redirect));
+            var googleTokenUrl = string.Format("oauth2/v4/token?code={0}&client_id={1}&client_secret={2}&redirect_uri={3}&grant_type=authorization_code", code, _options.Value.GetGoogleClientId(), _options.Value.GetGoogleSecretKey(), LoginBaseUrl(redirect));
 
             var dict = new Dictionary<string, string>
                     {
@@ -638,17 +638,17 @@ namespace IncTrak.GoalSetter.Controllers
 
         private void SendMail(string to, string subject, string body)
         {
-            var client = new SmtpClient(_options.Value.SNMPServer, _options.Value.SNMPPort);
+            var client = new SmtpClient(_options.Value.GetSNMPServer(), _options.Value.SNMPPort);
             client.UseDefaultCredentials = false;
-            client.Credentials = new NetworkCredential(_options.Value.SNMPAddress, _options.Value.SNMPPassword);
+            client.Credentials = new NetworkCredential(_options.Value.GetSNMPAddress(), _options.Value.GetSNMPPassword());
             client.EnableSsl = false;
             client.DeliveryMethod = SmtpDeliveryMethod.Network;
 
-            MailMessage message = new MailMessage(_options.Value.SNMPAddress, to);
+            MailMessage message = new MailMessage(_options.Value.GetSNMPAddress(), to);
             message.Subject = subject;
             message.Body = body;
             message.IsBodyHtml = true;
-            message.Bcc.Add(_options.Value.SNMPAddress);
+            message.Bcc.Add(_options.Value.GetSNMPAddress());
             client.Send(message);
         }
 

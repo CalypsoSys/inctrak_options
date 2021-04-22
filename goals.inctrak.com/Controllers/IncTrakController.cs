@@ -29,7 +29,7 @@ namespace IncTrak.GoalSetter.Controllers
             string url = null;
             try
             {
-                url = _options.Value.IncTrakDns;
+                url = _options.Value.GetIncTrakDns();
             }
             catch { }
 
