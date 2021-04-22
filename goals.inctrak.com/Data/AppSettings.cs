@@ -18,9 +18,13 @@ namespace IncTrak.GoalSetter.Data
         public string IncTrakGoalsConnection { get; set; }
         public string FeedbackConnection { get; set; }
 
+        public bool UseSNMP { get; set; }
         public string SNMPServer { get; set; }
         public int SNMPPort { get; set; }
         public string SNMPAddress { get; set; }
         public string SNMPPassword { get; set; }
+
+        public string EmailApiKey { get; set; }
+        public string EmailFrom { get; set; }
     }
 }

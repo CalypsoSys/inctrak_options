@@ -238,6 +238,4 @@ _Pvt_Extensions
 # FAKE - F# Make
 .fake/
 /packages
-/shared.inctrak.com/appsettings.json
-/manga.inctrak.com/Data
-appsettings.Development.json
+appsettings*.json

@@ -28,7 +28,7 @@ namespace IncTrak.FeedbackModels
             {
                 optionsBuilder
                     .UseLazyLoadingProxies()
-                    .UseNpgsql(_settings.FeedbackConnection);
+                    .UseNpgsql(_settings.GetFeedbackConnection());
             }
         }
 

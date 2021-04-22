@@ -21,7 +21,7 @@ namespace IncTrak.Models
             {
                 optionsBuilder
                     .UseLazyLoadingProxies()
-                    .UseNpgsql(_settings.IncTrakConnection);
+                    .UseNpgsql(_settings.GetIncTrakConnection());
             }
         }
     }
