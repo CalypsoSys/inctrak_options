@@ -88,7 +88,7 @@ namespace IncTrak.Data
                     int check = access.ExecuteNonQuery("INSERT INTO OPTIONEEPLAN_ERRORS (MESSAGE, CALL_STACK, UUID, USER_FK, CODE) VALUES (@MESSAGE, @CALL_STACK, @UUID, @USER_FK, @CODE)", eventParams);
                 }
             }
-            catch(Exception excp1)
+            catch
             {
                 // do no harm
             }
