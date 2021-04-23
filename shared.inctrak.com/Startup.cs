@@ -62,6 +62,7 @@ namespace inctrak.com
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapControllers();
             });
+            app.UseDefaultFiles();
             app.UseStaticFiles();
         }
     }
