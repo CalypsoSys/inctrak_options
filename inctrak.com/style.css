@@ -21,6 +21,11 @@ body {
   scroll-behavior: smooth;
 }
 
+img {
+    max-width: 100%;
+    display: block;
+}
+
 a {
   color: #fff;
 }
