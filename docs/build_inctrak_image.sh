@@ -8,14 +8,14 @@
 
 1. Transfer inctrak.tar to production and update .lastgood
 2. cd /home/calypso/docker/inctrak_demo_dotnet
-3. docker-compose down
+3. docker-compose stop
 4. cd /home/calypso/docker/inctrak_shared_dotnet
-5. docker-compose down
+5. docker-compose stop
 6. cd ..
 7. docker load < inctrak.tar
 8. docker rmi $(docker images -f "dangling=true" -q)
 9. cd /home/calypso/docker/inctrak_demo_dotnet
-10. docker-compose up -d
+10. docker-compose start
 11. cd /home/calypso/docker/inctrak_shared_dotnet
-12. docker-compose up -d
+12. docker-compose start
 
