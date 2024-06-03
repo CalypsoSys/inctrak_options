@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30907.101
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{75938678-1FEF-4A39-8683-BB051AE169F0}"
 	ProjectSection(SolutionItems) = preProject
@@ -11,7 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{75938678-1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "blog.inctrak.com", "blog.inctrak.com", "{C7F6DD39-9FD6-456A-B6EC-8286E7135CFF}"
 	ProjectSection(SolutionItems) = preProject
+		blog.inctrak.com\docker-compose.sample.yml = blog.inctrak.com\docker-compose.sample.yml
 		blog.inctrak.com\docker-compose.yml = blog.inctrak.com\docker-compose.yml
+		blog.inctrak.com\google.sample.html = blog.inctrak.com\google.sample.html
 		blog.inctrak.com\googleeb6f88a2168cf1dd.html = blog.inctrak.com\googleeb6f88a2168cf1dd.html
 		blog.inctrak.com\header1.jpg = blog.inctrak.com\header1.jpg
 	EndProjectSection
@@ -20,7 +22,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "goals.inctrak.com", "goals.
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "docs.inctrak.com", "docs.inctrak.com\", "{6A6BE514-F84E-4CB3-ACF0-1532578FC3DE}"
 	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_51439"
 		Debug.AspNetCompiler.PhysicalPath = "docs.inctrak.com\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51439\"
@@ -41,7 +43,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "docs.inctrak.com", "docs.in
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "inctrak.com", "inctrak.com\", "{EBE4CB36-61D5-4211-A08B-61DE127CBE8B}"
 	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_51507"
 		Debug.AspNetCompiler.PhysicalPath = "inctrak.com\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_51507\"

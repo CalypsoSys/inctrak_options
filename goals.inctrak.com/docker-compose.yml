@@ -24,9 +24,9 @@ services:
     volumes:
       - ./app/appsettings.json:/app/appsettings.json
     environment:
-      VIRTUAL_HOST: goals.inctrak.com
-      LETSENCRYPT_HOST: goals.inctrak.com
-      LETSENCRYPT_EMAIL: calypsosystemsllc@gmail.com
+      VIRTUAL_HOST: goals.<- your domain here ->
+      LETSENCRYPT_HOST: goals.<- your domain here ->
+      LETSENCRYPT_EMAIL: <- your email here ->
     container_name: inctrak_goals
 volumes:
   db_data:
