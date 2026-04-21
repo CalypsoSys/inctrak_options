@@ -29,6 +29,14 @@ IncTrak provides an intuitive, always-accessible experience for both administrat
 - [Shared Portal](https://shared.inctrak.com/)  
 - [Blog](https://blog.inctrak.com/)  
 
+## Development
+
+The active application code now lives in `shared.inctrak.com/`. The `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders are plain static sites.
+
+- `./build.sh` builds the active .NET project from the repo root.
+- `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the application directly.
+- `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the application locally.
+
 ---
 
 ## Key Features
@@ -72,4 +80,3 @@ From the shared portal:
 - **Etc.**: About, Contact, Login/Register, Reset Password, Privacy Policy, Docs  
 
 ---
-
