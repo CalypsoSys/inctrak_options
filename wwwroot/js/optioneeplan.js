@@ -14,6 +14,28 @@ optioneePlanApp.directive('script', function () {
     };
 });
 
+optioneePlanApp.config(function ($httpProvider) {
+    // Rewrite API requests to the configured API origin and attach the SPA login UUID on every call.
+    $httpProvider.interceptors.push(function ($injector) {
+        return {
+            request: function (config) {
+                if (config.url && config.url.indexOf('/api/') === 0) {
+                    var $cookies = $injector.get('$cookies');
+                    var uuid = $cookies.UUID;
+
+                    config.url = window.IncTrakSite.apiUrl(config.url);
+                    config.headers = config.headers || {};
+                    if (uuid && uuid !== "not set" && uuid !== "null" && uuid !== "undefined") {
+                        config.headers['X-IncTrak-UUID'] = uuid;
+                    }
+                }
+
+                return config;
+            }
+        };
+    });
+});
+
 optioneePlanApp.controller('OptioneePlanCtrl', function ($scope, $rootScope, $route, $routeParams, $location, $window, $cookies) {
     $rootScope.metadata = {
         title: 'IncTrak',

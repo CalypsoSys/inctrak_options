@@ -7,11 +7,6 @@
     <Description>IncTrak Employee Stock Option Management Tool</Description>
     <Company>Calypso Systems, LLC</Company>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6">

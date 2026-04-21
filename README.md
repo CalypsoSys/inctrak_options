@@ -31,11 +31,14 @@ IncTrak provides an intuitive, always-accessible experience for both administrat
 
 ## Development
 
-The active application code now lives in `shared.inctrak.com/`. The `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders are plain static sites.
+The API now lives in `shared.inctrak.com/`. The SPA now lives in the repo-root `wwwroot/` folder as a plain static site, and the `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
 
-- `./build.sh` builds the active .NET project from the repo root.
-- `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the application directly.
-- `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the application locally.
+- `./build.sh` builds the API project and its test project from the repo root.
+- `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
+- `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
+- `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` runs the API split tests.
+
+To serve the SPA locally, use any static file server rooted at `wwwroot/` and adjust `wwwroot/js/siteconfig.js` if the API is not running at `https://localhost:5001`.
 
 ---
 

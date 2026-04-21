@@ -1,21 +1,21 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-The active .NET project is `shared.inctrak.com/`, which contains the stock-option management app, controllers, EF models, and shared static assets. Static marketing and documentation sites live in `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` as plain static folders. SQL reference scripts are under `inctrak.db/`.
+The active .NET API project is `shared.inctrak.com/`, which contains the stock-option management controllers, data access, and EF models. The SPA now lives in the repo-root `wwwroot/` folder as a plain static site. Configure the SPA API target in `wwwroot/js/siteconfig.js`. Static marketing and documentation sites live in `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/`. SQL reference scripts are under `inctrak.db/`.
 
 ## Build, Test, and Development Commands
 Run commands from the repository root unless noted.
 
-- `./build.sh` builds the active .NET project from the repo root.
-- `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the stock-option app directly.
-- `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the main app locally.
-- `dotnet test` currently finds no test projects; add a dedicated test project before relying on automated coverage.
+- `./build.sh` builds the API project and its test project from the repo root.
+- `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
+- `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
+- `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` runs the API split tests.
 
 ## Coding Style & Naming Conventions
 Follow the existing C# style: 4-space indentation, braces on new lines, PascalCase for types and public members, camelCase for locals and parameters. Keep controllers in `Controllers/`, EF models in `Models/` or `FeedbackModels/`, and request/response helpers in `Data/dto/`. Preserve current file naming patterns such as `ScheduleController.cs`, `ResetPassword.cs`, and `inctrakContext.cs`. No repo-wide formatter config is checked in, so match surrounding code closely.
 
 ## Testing Guidelines
-There is no committed test suite yet. For behavior changes, at minimum run `./build.sh` and smoke-test the affected endpoints or pages locally. When adding tests, prefer xUnit in a sibling `*.Tests` project and name files after the target class, for example `ScheduleControllerTests.cs`.
+Run `./build.sh` and `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` for behavior changes to the API host. For SPA changes, also smoke-test the static site from a local web server against the API. Add new tests in sibling `*.Tests` projects and name files after the target type, for example `CorsOriginPolicyTests.cs`.
 
 ## Commit & Pull Request Guidelines
 Recent commits use short, imperative subjects such as `Create README.md`, `misc cleanup`, and `docker`. Keep commit titles brief, specific, and action-oriented. Pull requests should include a concise summary, note any config or schema impact, list manual verification steps, and attach screenshots for UI changes in `wwwroot/` or the static sites.

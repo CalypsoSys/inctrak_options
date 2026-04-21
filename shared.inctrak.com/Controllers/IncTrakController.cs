@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using IncTrak.Data;
 using IncTrak.Models;
+using inctrak.com;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -25,29 +26,26 @@ namespace IncTrak.Controllers
 
         protected string LoginBaseUrl(string redirect)
         {
-            //private static string _loginBaseUrl = "http://localhost:49289";
-            //private static string _loginBaseUrl = "https://shared.inctrak.com/api/login/{0}/";
-
-            return GetIncTrakUrl("/api/login/{0}/", redirect);
+            return GetIncTrakApiUrl("/api/login/{0}/", redirect);
         }
 
         protected string GetIncTrakUrl(string path, params object[] args)
         {
-            string url = null;
-            try
-            {
-                url = _options.Value.GetIncTrakDns();
-            }
-            catch { }
+            return BuildUrl(_options.Value.GetIncTrakDns(), "https://shared.inctrak.com/", path, args);
+        }
 
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                url = "https://shared.inctrak.com/";
-            }
+        protected string GetIncTrakApiUrl(string path, params object[] args)
+        {
+            return BuildUrl(_options.Value.GetIncTrakApiDns(), "https://shared.inctrak.com/", path, args);
+        }
+
+        private static string BuildUrl(string configuredUrl, string defaultUrl, string path, params object[] args)
+        {
+            string url = string.IsNullOrWhiteSpace(configuredUrl) ? defaultUrl : configuredUrl;
 
             if (string.IsNullOrWhiteSpace(path) == false)
             {
-                if (args != null || args.Length > 0)
+                if (args != null && args.Length > 0)
                     path = string.Format(path, args);
                 url = url.TrimEnd('/');
                 path = path.TrimStart('/');
@@ -71,7 +69,7 @@ namespace IncTrak.Controllers
             string uuidKey = passedUuid;
             try
             {
-                Request.Cookies.TryGetValue("UUID", out uuidKey);
+                uuidKey = RequestAuthReader.GetUuid(Request);
                 if (passedUuid != Guid.Empty.ToString() && uuidKey != passedUuid)
                 {
                     if (noNull)

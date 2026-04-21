@@ -14,6 +14,7 @@ namespace IncTrak.Data
         private const int _keysize = 256;
 
         public string IncTrakDns { get; set; }
+        public string IncTrakApiDns { get; set; }
         public string GoogleSecretKey { get; set; }
         public string GoogleClientId { get; set; }
         public string ErrorsHost { get; set; }
@@ -32,6 +33,16 @@ namespace IncTrak.Data
         public string GetIncTrakDns()
         {
             return Decrypt(IncTrakDns);
+        }
+
+        public string GetIncTrakApiDns()
+        {
+            if (string.IsNullOrWhiteSpace(IncTrakApiDns))
+            {
+                return null;
+            }
+
+            return Decrypt(IncTrakApiDns);
         }
 
         public string GetGoogleSecretKey()

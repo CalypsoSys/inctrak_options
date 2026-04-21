@@ -22,8 +22,15 @@ namespace inctrak.com
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-            services.AddCors(); // Make sure you call this previous to AddMvc
-            //services.AddMvc();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("StaticSiteClient", policy =>
+                {
+                    policy.SetIsOriginAllowed(CorsOriginPolicy.IsAllowedOrigin)
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
             services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
@@ -42,13 +49,7 @@ namespace inctrak.com
                 app.UseHsts();
             }
 
-            // Make sure you call this before calling app.UseMvc()
-            app.UseCors(
-                options => options
-                            .WithOrigins("https://inctrak.com", "https://www.inctrak.com")
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-            );
+            app.UseCors("StaticSiteClient");
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -62,8 +63,6 @@ namespace inctrak.com
                 endpoints.MapDefaultControllerRoute();
                 endpoints.MapControllers();
             });
-            app.UseDefaultFiles();
-            app.UseStaticFiles();
         }
     }
 }
