@@ -16,6 +16,22 @@ test('inctrak.com loads only the local replacement script', () => {
   assert.doesNotMatch(html, /wow\.min\.js/);
 });
 
+test('inctrak.com sticky header activates when the home hero leaves the viewport', () => {
+  const script = read('./inctrak.com/js/script.js');
+
+  assert.match(script, /const homeHeader = document\.querySelector\('header#home'\);/);
+  assert.match(script, /stickyContainer\.classList\.toggle\('sticky', !entry\.isIntersecting && entry\.boundingClientRect\.bottom <= 0\);/);
+});
+
+test('inctrak.com uses observer-based reveals for non-hero animations', () => {
+  const script = read('./inctrak.com/js/script.js');
+
+  assert.match(script, /const heroElements = Array\.from\(animatedElements\)\.filter\(\(element\) => element\.closest\('header#home'\)\);/);
+  assert.match(script, /const scrollRevealElements = Array\.from\(animatedElements\)\.filter\(\(element\) => !element\.closest\('header#home'\)\);/);
+  assert.match(script, /const revealObserver = new IntersectionObserver\(/);
+  assert.match(script, /observer\.unobserve\(entry\.target\);/);
+});
+
 test('docs pages load the shared vanilla docs script', () => {
   const pages = [
     './docs.inctrak.com/index.html',

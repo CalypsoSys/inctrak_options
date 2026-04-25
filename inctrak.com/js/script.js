@@ -41,23 +41,22 @@ function initializeSmoothScroll() {
 
 function initializeStickyHeader() {
   const stickyContainer = document.querySelector('.addsticky');
-  const aboutSection = document.querySelector('.aboutUs');
+  const homeHeader = document.querySelector('header#home');
 
-  if (!stickyContainer || !aboutSection) {
+  if (!stickyContainer || !homeHeader) {
     return;
   }
 
   const observer = new IntersectionObserver(
     ([entry]) => {
-      stickyContainer.classList.toggle('sticky', entry.boundingClientRect.top <= 300 && !entry.isIntersecting);
+      stickyContainer.classList.toggle('sticky', !entry.isIntersecting && entry.boundingClientRect.bottom <= 0);
     },
     {
-      threshold: 0,
-      rootMargin: '-300px 0px 0px 0px'
+      threshold: 0
     }
   );
 
-  observer.observe(aboutSection);
+  observer.observe(homeHeader);
 }
 
 function initializeRevealAnimations() {
@@ -66,35 +65,67 @@ function initializeRevealAnimations() {
     return;
   }
 
-  const observer = new IntersectionObserver(
-    (entries, revealObserver) => {
+  const revealElement = (element) => {
+    if (element.classList.contains('animated')) {
+      return;
+    }
+
+    const delay = element.getAttribute('data-wow-delay');
+    const duration = element.getAttribute('data-wow-duration');
+
+    if (delay) {
+      element.style.animationDelay = delay;
+    }
+
+    if (duration) {
+      element.style.animationDuration = duration;
+    }
+
+    element.classList.add('animated');
+  };
+
+  const shouldRevealElement = (element) => {
+    const rect = element.getBoundingClientRect();
+    const defaultTrigger = element.closest('header#home')
+      ? window.innerHeight
+      : window.innerHeight * 0.55;
+    const offset = Number(element.getAttribute('data-wow-offset') || '0');
+    const triggerLine = defaultTrigger - offset;
+    return rect.top <= triggerLine && rect.bottom > 0;
+  };
+
+  const heroElements = Array.from(animatedElements).filter((element) => element.closest('header#home'));
+  const scrollRevealElements = Array.from(animatedElements).filter((element) => !element.closest('header#home'));
+
+  requestAnimationFrame(() => {
+    heroElements.forEach((element) => revealElement(element));
+  });
+
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
       entries.forEach((entry) => {
-        if (!entry.isIntersecting) {
+        if (!entry.isIntersecting && !shouldRevealElement(entry.target)) {
           return;
         }
 
-        const element = entry.target;
-        const delay = element.getAttribute('data-wow-delay');
-        const duration = element.getAttribute('data-wow-duration');
-
-        if (delay) {
-          element.style.animationDelay = delay;
-        }
-
-        if (duration) {
-          element.style.animationDuration = duration;
-        }
-
-        element.classList.add('animated');
-        revealObserver.unobserve(element);
+        revealElement(entry.target);
+        observer.unobserve(entry.target);
       });
     },
     {
-      threshold: 0.2
+      threshold: 0.2,
+      rootMargin: '0px 0px -10% 0px'
     }
   );
 
-  animatedElements.forEach((element) => observer.observe(element));
+  scrollRevealElements.forEach((element) => {
+    if (shouldRevealElement(element)) {
+      revealElement(element);
+      return;
+    }
+
+    revealObserver.observe(element);
+  });
 }
 
 function initializeMobileMenu() {
