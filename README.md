@@ -31,14 +31,18 @@ IncTrak provides an intuitive, always-accessible experience for both administrat
 
 ## Development
 
-The API now lives in `shared.inctrak.com/`. The SPA now lives in the repo-root `wwwroot/` folder as a plain static site, and the `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
+The API lives in `shared.inctrak.com/`. The frontend source now lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, and the `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
 
-- `./build.sh` builds the API project and its test project from the repo root.
+- `./build.sh` builds and tests the frontend, then builds the API project and its test project from the repo root.
+- `npm install --prefix frontend` installs frontend dependencies.
+- `npm run dev --prefix frontend` starts the Vite dev server.
+- `npm run build --prefix frontend` produces the generated frontend bundle in `frontend/dist/`.
+- `npm run test --prefix frontend` runs the frontend unit tests.
 - `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
 - `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
 - `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` runs the API split tests.
 
-To serve the SPA locally, use any static file server rooted at `wwwroot/` and adjust `wwwroot/js/siteconfig.js` if the API is not running at `https://localhost:5001`.
+For local SPA work, run the Vite dev server from `frontend/`. Configure the API target in `frontend/public/siteconfig.js` or `VITE_API_BASE_URL` if the API is not running at `https://localhost:5001`.
 
 ---
 

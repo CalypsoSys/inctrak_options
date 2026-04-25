@@ -26,8 +26,8 @@ bld/
 
 # Visual Studio 2015 cache/options directory
 .vs/
-# Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
+# Uncomment if you have tasks that create built frontend files in frontend/dist
+#frontend/dist/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -187,6 +187,7 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
+frontend/dist/
 .codex
 orleans.codegen.cs
 

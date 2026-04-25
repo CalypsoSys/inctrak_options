@@ -147,7 +147,7 @@ namespace IncTrak.Controllers
                         user.Password = GetPasswordHash(user, formData.PASSWORD);
                         context.SaveChanges();
                         SendMail(user.EmailAddress, "IncTrak: Activate account link",
-                                    string.Format("Hi {0},<br/>Please 'click' the following link to acctivate your account<br/><br/><a href='{1}'>ACTIVATE ACCOUNT</a><br/><br/>Or paste the following url into your browser.<br/><br/>{1}<br/><br/>This link will be valid for 24 hours, Thanks", user.UserName, GetIncTrakUrl("/#activateaccount/{0}", uuid.Uuid)));
+                                    string.Format("Hi {0},<br/>Please 'click' the following link to acctivate your account<br/><br/><a href='{1}'>ACTIVATE ACCOUNT</a><br/><br/>Or paste the following url into your browser.<br/><br/>{1}<br/><br/>This link will be valid for 24 hours, Thanks", user.UserName, GetIncTrakUrl("/#/auth/activate/{0}", uuid.Uuid)));
 
                         return Ok(new { success = true, message = string.Format("Thanks for registering {0}, you will get an email shortly to activate your account. It will contain a link that will be valid for 24 hours. - thx", formData.USER_NAME) });
                     }
@@ -307,7 +307,7 @@ namespace IncTrak.Controllers
                     string errorMessage = null;
                     if ((errorMessage = CheckRegistrationData(context, googleUser.id, googleUser.email, googleUser.verified_email, state)) != null)
                     {
-                        return Redirect(new Uri(string.Format("/#/login?redirect=true&success=false&message={0}", errorMessage), UriKind.Relative).ToString());
+                        return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=false&message={0}", errorMessage), UriKind.Relative).ToString());
                     }
                     else
                     {
@@ -332,7 +332,7 @@ namespace IncTrak.Controllers
 
                         context.SaveChanges();
 
-                        return Redirect(new Uri(string.Format("/#/login?redirect=true&success=true&uuid={0}&role=admin&message={1}", uuid.Uuid,
+                        return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=true&uuid={0}&role=admin&message={1}", uuid.Uuid,
                             string.Format("Thanks for registering {0}, your google account is now active.- thx", googleUser.given_name)), UriKind.Relative).ToString());
                     }
                 }
@@ -340,7 +340,7 @@ namespace IncTrak.Controllers
             catch (Exception excp)
             {
                 string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "google login base cred");
-                return Redirect(new Uri(string.Format("/#/login?redirect=true&success=false&message={0}", message), UriKind.Relative).ToString());
+                return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=false&message={0}", message), UriKind.Relative).ToString());
             }
         }
 
@@ -379,7 +379,7 @@ namespace IncTrak.Controllers
                     var loginUser = context.Users.Where(up => up.UserName == googleUser.id || up.EmailAddress == googleUser.email).FirstOrDefault();
                     if (loginUser == null)
                     {
-                        return Redirect(new Uri(string.Format("/#/login?redirect=true&success=false&message=Invalid google account/email, try again"), UriKind.Relative).ToString());
+                        return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=false&message=Invalid google account/email, try again"), UriKind.Relative).ToString());
                     }
                     else
                     {
@@ -392,13 +392,13 @@ namespace IncTrak.Controllers
                         if (loginUser.AcceptTerms)
                         {
                             var uuid = SaveUuid(context, loginUser, EnumUuidType.Login, true);
-                            return Redirect(new Uri(string.Format("/#/login?redirect=true&success=true&uuid={0}&role={1}&message={2}", uuid.Uuid, UserRole(loginUser),
+                            return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=true&uuid={0}&role={1}&message={2}", uuid.Uuid, UserRole(loginUser),
                                 string.Format("Welcome back {0}!", googleUser.given_name)), UriKind.Relative).ToString());
                         }
                         else
                         {
                             var uuid = SaveUuid(context, loginUser, EnumUuidType.AcceptTerms, false, true);
-                            return Redirect(new Uri(string.Format("/#/accept_terms/{0}/", uuid.Uuid), UriKind.Relative).ToString());
+                            return Redirect(new Uri(string.Format("/#/auth/accept-terms/{0}/", uuid.Uuid), UriKind.Relative).ToString());
 
                         }
                     }
@@ -407,7 +407,7 @@ namespace IncTrak.Controllers
             catch (Exception excp)
             {
                 string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "google login base cred");
-                return Redirect(new Uri(string.Format("/#/login?redirect=true&success=false&message={0}", message), UriKind.Relative).ToString());
+                return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=false&message={0}", message), UriKind.Relative).ToString());
             }
         }
 
@@ -461,7 +461,7 @@ namespace IncTrak.Controllers
                             string uuid = SaveUuid(context, user, EnumUuidType.ResetPassword, true).Uuid;
 
                             SendMail(user.EmailAddress, "IncTrak: Reset password link",
-                                                string.Format("Hi {0},<br/>Please 'click' the following link to reset your password<br/><br/><a href='{1}'>RESET PASSWORD</a><br/><br/>Or paste the following url into your browser.<br/><br/>{1}<br/><br/>This link will be valid for 24 hours, Thanks", user.UserName, GetIncTrakUrl("/#resetpasswordlink/{0}/", uuid)));
+                                                string.Format("Hi {0},<br/>Please 'click' the following link to reset your password<br/><br/><a href='{1}'>RESET PASSWORD</a><br/><br/>Or paste the following url into your browser.<br/><br/>{1}<br/><br/>This link will be valid for 24 hours, Thanks", user.UserName, GetIncTrakUrl("/#/auth/reset-password/{0}/", uuid)));
 
                             return Ok( new { success = true, message = "A link to reset your password has been mailed to your account. It will contain a link that will be valid for 24 hours." });
                         }
@@ -600,7 +600,7 @@ namespace IncTrak.Controllers
         {
             AccessController ac = new AccessController(options);
             ac.SendMail(user.EmailAddress, "IncTrak: Reset/activate account/password link",
-                                string.Format("Hi {0},<br/>Please 'click' the following link to reset/activate your account/password<br/><br/><a href='{1}'>RESET PASSWORD</a><br/><br/>Or paste the following url into your browser.<br/><br/>{1}<br/><br/>This link will be valid for 24 hours, Thanks", user.UserName, ac.GetIncTrakUrl("/#resetpasswordlink/{0}/", uuid)));
+                                string.Format("Hi {0},<br/>Please 'click' the following link to reset/activate your account/password<br/><br/><a href='{1}'>RESET PASSWORD</a><br/><br/>Or paste the following url into your browser.<br/><br/>{1}<br/><br/>This link will be valid for 24 hours, Thanks", user.UserName, ac.GetIncTrakUrl("/#/auth/reset-password/{0}/", uuid)));
         }
 
         private ActivateUuids SaveUuid(inctrakContext context, Users user, EnumUuidType type, bool save, bool readValueOnly = false)

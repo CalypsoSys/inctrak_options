@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shared.inctrak.com", "shared.inctrak.com\shared.inctrak.com.csproj", "{91A61E1E-4835-873E-4B4E-90DE9A3E04D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shared.inctrak.com.Tests", "shared.inctrak.com.Tests\shared.inctrak.com.Tests.csproj", "{6A6C2D4F-1B10-2276-93ED-7ACEB013470D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91A61E1E-4835-873E-4B4E-90DE9A3E04D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91A61E1E-4835-873E-4B4E-90DE9A3E04D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91A61E1E-4835-873E-4B4E-90DE9A3E04D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91A61E1E-4835-873E-4B4E-90DE9A3E04D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A6C2D4F-1B10-2276-93ED-7ACEB013470D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A6C2D4F-1B10-2276-93ED-7ACEB013470D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A6C2D4F-1B10-2276-93ED-7ACEB013470D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A6C2D4F-1B10-2276-93ED-7ACEB013470D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {56B95BBC-A92E-4DD4-8EB8-7837685066A0}
+	EndGlobalSection
+EndGlobal

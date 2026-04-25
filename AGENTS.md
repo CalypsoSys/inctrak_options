@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-The active .NET API project is `shared.inctrak.com/`, which contains the stock-option management controllers, data access, and EF models. The SPA now lives in the repo-root `wwwroot/` folder as a plain static site. Configure the SPA API target in `wwwroot/js/siteconfig.js`. Static marketing and documentation sites live in `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/`. SQL reference scripts are under `inctrak.db/`.
+The active .NET API project is `shared.inctrak.com/`, which contains the stock-option management controllers, data access, and EF models. The frontend source now lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA using Vue Router, Pinia, Tailwind CSS, and PrimeVue. Configure the SPA API target in `frontend/public/siteconfig.js` or the Vite env config. Static marketing and documentation sites live in `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/`. SQL reference scripts are under `inctrak.db/`.
 
 ## Build, Test, and Development Commands
 Run commands from the repository root unless noted.
@@ -18,7 +18,7 @@ Follow the existing C# style: 4-space indentation, braces on new lines, PascalCa
 Run `./build.sh` and `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` for behavior changes to the API host. For SPA changes, also smoke-test the static site from a local web server against the API. Add new tests in sibling `*.Tests` projects and name files after the target type, for example `CorsOriginPolicyTests.cs`.
 
 ## Commit & Pull Request Guidelines
-Recent commits use short, imperative subjects such as `Create README.md`, `misc cleanup`, and `docker`. Keep commit titles brief, specific, and action-oriented. Pull requests should include a concise summary, note any config or schema impact, list manual verification steps, and attach screenshots for UI changes in `wwwroot/` or the static sites.
+Recent commits use short, imperative subjects such as `Create README.md`, `misc cleanup`, and `docker`. Keep commit titles brief, specific, and action-oriented. Pull requests should include a concise summary, note any config or schema impact, list manual verification steps, and attach screenshots for UI changes in `frontend/` or the static sites.
 
 ## Security & Configuration Tips
 Do not commit PII, secrets, passwords, or machine-specific settings. Follow security best practices when handling sensitive data in code, including storage, transport, masking, and access control for PII, credentials, and secrets. `.gitignore` already excludes `appsettings.json`, `ConnectionStrings.config`, and similar machine-specific files. Keep environment-specific values out of source, and review SQL scripts in `inctrak.db/` carefully before applying them to shared databases.
