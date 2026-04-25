@@ -42,6 +42,15 @@
     align-items: center;
   }
 
+  .navbar-collapse {
+    display: none;
+    width: 100%;
+  }
+
+  .navbar-collapse.show {
+    display: block;
+  }
+
   .nav-item {
     text-align: center;
   }

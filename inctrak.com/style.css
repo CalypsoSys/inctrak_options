@@ -21,6 +21,11 @@ body {
   scroll-behavior: smooth;
 }
 
+section[id],
+header[id] {
+  scroll-margin-top: 110px;
+}
+
 img {
     max-width: 100%;
     display: block;
@@ -153,6 +158,14 @@ h4 {
 .display-3 {
   font-weight: 500;
   font-size: 60px;
+}
+
+.wow {
+  visibility: hidden;
+}
+
+.wow.animated {
+  visibility: visible;
 }
 
 .lead {
