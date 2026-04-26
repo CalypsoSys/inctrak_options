@@ -1,7 +1,5 @@
 # Cloudflare Pages API Gateway
 
-This repo now follows the same split as the `mma` project:
-
 - local development: Vite proxies `/api/*` to the local `shared.inctrak.com` API
 - deployed environments: Cloudflare Pages Functions proxy `/api/*` to the API origin
 
