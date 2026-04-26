@@ -7,12 +7,8 @@ namespace IncTrak.Data
         public string GatewaySecretHeaderName { get; set; } = "X-Internal-Api-Key";
         public string GatewaySecret { get; set; }
         public string IncTrakDns { get; set; }
-        public string IncTrakApiDns { get; set; }
         public string GoogleSecretKey { get; set; }
         public string GoogleClientId { get; set; }
-        public string ErrorsHost { get; set; }
-        public string ErrorsUsername { get; set; }
-        public string ErrorsPassword { get; set; }
         public string IncTrakConnection { get; set; }
         public string FeedbackConnection { get; set; }
         public bool UseSNMP { get; set; }
@@ -22,16 +18,12 @@ namespace IncTrak.Data
         public string SNMPPassword { get; set; }
         public string EmailApiKey { get; set; }
         public string EmailFrom { get; set; }
+        public string AccessLogPath { get; set; } = "logs/access.log";
         public string ErrorLogPath { get; set; } = "logs/errors.log";
 
         public string GetIncTrakDns()
         {
             return IncTrakDns;
-        }
-
-        public string GetIncTrakApiDns()
-        {
-            return IncTrakApiDns;
         }
 
         public string GetGoogleSecretKey()
@@ -42,21 +34,6 @@ namespace IncTrak.Data
         public string GetGoogleClientId()
         {
             return GoogleClientId;
-        }
-
-        public string GetErrorsHost()
-        {
-            return ErrorsHost;
-        }
-
-        public string GetErrorsUsername()
-        {
-            return ErrorsUsername;
-        }
-
-        public string GetErrorsPassword()
-        {
-            return ErrorsPassword;
         }
 
         public string GetIncTrakConnection()
@@ -92,6 +69,11 @@ namespace IncTrak.Data
         public string GetEmailFrom()
         {
             return EmailFrom;
+        }
+
+        public string GetAccessLogPath()
+        {
+            return AccessLogPath;
         }
 
         public string GetErrorLogPath()

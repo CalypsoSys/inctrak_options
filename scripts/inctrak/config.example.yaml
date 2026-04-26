@@ -6,7 +6,8 @@ ASPNETCORE_ENVIRONMENT: Development
 
 AppSettings:
   IncTrakDns: http://localhost:5173
-  IncTrakApiDns: http://localhost:5000/api
+  AccessLogPath: /app/logs/access.log
+  ErrorLogPath: /app/logs/errors.log
   AllowedOrigins:
     - http://localhost:5173
     - https://inctrak.com
@@ -19,9 +20,6 @@ AppSettings:
   FeedbackConnection: Host=localhost;Port=5432;Database=inctrak_feedback;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
   GoogleClientId: ${INCTRAK_GOOGLE_CLIENT_ID}
   GoogleSecretKey: ${INCTRAK_GOOGLE_SECRET_KEY}
-  ErrorsHost: ${INCTRAK_ERRORS_HOST}
-  ErrorsUsername: ${INCTRAK_ERRORS_USERNAME}
-  ErrorsPassword: ${INCTRAK_ERRORS_PASSWORD}
   UseSNMP: false
   SNMPServer: ${INCTRAK_SMTP_SERVER}
   SNMPPort: 25
@@ -29,4 +27,3 @@ AppSettings:
   SNMPPassword: ${INCTRAK_SMTP_PASSWORD}
   EmailApiKey: ${INCTRAK_SENDGRID_API_KEY}
   EmailFrom: ${INCTRAK_EMAIL_FROM}
-  ErrorLogPath: ${INCTRAK_ERROR_LOG_PATH}

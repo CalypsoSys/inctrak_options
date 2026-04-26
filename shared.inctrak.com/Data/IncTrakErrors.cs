@@ -1,35 +1,12 @@
 ﻿using IncTrak.Controllers;
 using IncTrak.Domain;
-using Npgsql;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Security;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace IncTrak.Data
 {
-    class IncTrakErrors : DataAccess
+    public static class IncTrakErrors
     {
-        protected IncTrakErrors(AppSettings settings) : base(settings)
-        {
-        }
-
-        protected override NpgsqlConnection Conn()
-        {
-            var connStr = new NpgsqlConnectionStringBuilder();
-            connStr.Host = _settings.GetErrorsHost();
-            connStr.Database = "inctrak_errors";
-            connStr.Username = _settings.GetErrorsUsername();
-            connStr.Password = _settings.GetErrorsPassword();
-            var conn = new NpgsqlConnection();
-            conn.ConnectionString = connStr.ConnectionString;
-
-            return conn;
-        }
-
         public static string LogError(AppSettings settings, LoginRights login, Exception excp, string message, params object[] args)
         {
             string errorCode = Base36.NumberToBase36(DateTime.Now.Ticks);
@@ -46,25 +23,6 @@ namespace IncTrak.Data
                         messageOut = message;
 
                 }
-                string excption = "N/A";
-                try
-                {
-                    StringBuilder output = new StringBuilder();
-                    for (int i = 2; excp != null; i++)
-                    {
-                        string indent = string.Empty.PadLeft(i, '\t');
-                        output.AppendFormat("{0}Exception: {1}\r\n", indent, excp.Message);
-                        output.AppendFormat("{0}Stack Trace: {1}\r\n", indent, excp.StackTrace.Replace("\r\n", string.Format("\r\n{0}", indent)));
-                        excp = excp.InnerException;
-                    }
-                    output.AppendLine();
-                    excption = output.ToString();
-                }
-                catch
-                {
-                    if (excp != null)
-                        excption = excp.ToString();
-                }
                 string uuid = "N/A";
                 Guid userKey = Guid.Empty;
                 if (login != null)
@@ -75,18 +33,25 @@ namespace IncTrak.Data
                         userKey = login.UserKeyForError;
                 }
 
-                using (DataAccess access = new IncTrakErrors(settings))
+                StringBuilder output = new StringBuilder();
+                output.AppendFormat(
+                    "[{0:yyyy-MM-dd HH:mm:ss zzz}] code={1} message={2} uuid={3} userKey={4}\n",
+                    DateTimeOffset.Now,
+                    errorCode,
+                    FileLogWriter.SanitizeSingleLine(messageOut),
+                    FileLogWriter.SanitizeSingleLine(uuid),
+                    userKey == Guid.Empty ? "-" : userKey.ToString());
+
+                for (int i = 0; excp != null; i++)
                 {
-                    var eventParams = new NpgsqlParameter[]
-                        {
-                            new NpgsqlParameter("@MESSAGE", messageOut),
-                            new NpgsqlParameter("@CALL_STACK", excption),
-                            new NpgsqlParameter("@UUID", uuid),
-                            new NpgsqlParameter("@USER_FK", userKey),
-                            new NpgsqlParameter("@CODE", errorCode),
-                        };
-                    int check = access.ExecuteNonQuery("INSERT INTO OPTIONEEPLAN_ERRORS (MESSAGE, CALL_STACK, UUID, USER_FK, CODE) VALUES (@MESSAGE, @CALL_STACK, @UUID, @USER_FK, @CODE)", eventParams);
+                    string prefix = i == 0 ? "exception" : string.Format("inner_exception_{0}", i);
+                    output.AppendFormat("\t{0}: {1}\n", prefix, FileLogWriter.SanitizeSingleLine(excp.Message));
+                    AppendIndentedBlock(output, excp.StackTrace ?? "(no stack trace)", "\t\t");
+                    excp = excp.InnerException;
                 }
+
+                output.AppendLine();
+                FileLogWriter.WriteLine(settings?.GetErrorLogPath(), output.ToString().TrimEnd('\r', '\n'));
             }
             catch
             {
@@ -94,6 +59,16 @@ namespace IncTrak.Data
             }
 
             return string.Format("Unknown error occured code: [{0}], try again?", errorCode);
+        }
+
+        private static void AppendIndentedBlock(StringBuilder output, string value, string indent)
+        {
+            string[] lines = (value ?? string.Empty).Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
+            foreach (string line in lines)
+            {
+                output.Append(indent);
+                output.AppendLine(string.IsNullOrWhiteSpace(line) ? "(blank)" : line.TrimEnd());
+            }
         }
     }
 }

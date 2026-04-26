@@ -36,7 +36,18 @@ namespace IncTrak.Controllers
 
         protected string GetIncTrakApiUrl(string path, params object[] args)
         {
-            return BuildUrl(_options.Value.GetIncTrakApiDns(), "https://shared.inctrak.com/", path, args);
+            return BuildUrl(GetRequestOrigin(), "https://shared.inctrak.com/", path, args);
+        }
+
+        protected string GetRequestOrigin()
+        {
+            if (Request?.Host.HasValue == true && string.IsNullOrWhiteSpace(Request.Scheme) == false)
+            {
+                string pathBase = Request.PathBase.HasValue ? Request.PathBase.Value : string.Empty;
+                return $"{Request.Scheme}://{Request.Host}{pathBase}";
+            }
+
+            return "https://shared.inctrak.com/";
         }
 
         private static string BuildUrl(string configuredUrl, string defaultUrl, string path, params object[] args)
