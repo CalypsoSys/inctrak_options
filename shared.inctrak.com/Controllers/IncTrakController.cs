@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IncTrak.Data;
@@ -12,6 +13,7 @@ using inctrak.com;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Web;
 
 namespace IncTrak.Controllers
 {
@@ -191,9 +193,8 @@ namespace IncTrak.Controllers
 
         protected void SendMail(string to, string subject, string body)
         {
-            SendSlackMessage(
-                _options.Value.GetSlackFeedbackWebhookUrl(),
-                BuildSlackMailMessage(to, subject, body));
+            // Auth/account mail flows are being retired. Keep the call sites harmless until
+            // those flows are removed or replaced with a proper delivery mechanism.
         }
 
         protected void SendSlackMessage(string webhookUrl, string text)
@@ -226,6 +227,17 @@ namespace IncTrak.Controllers
                 string.IsNullOrWhiteSpace(to) ? "unknown" : to.Trim(),
                 string.IsNullOrWhiteSpace(subject) ? "none" : subject.Trim(),
                 ConvertHtmlToSlackText(body));
+        }
+
+        public static string BuildFeedbackSlackMessage(string name, string emailAddress, string messageType, string clientData, string message)
+        {
+            return string.Format(
+                "New feedback submitted\nType: {0}\nName: {1}\nEmail: {2}\nClient: {3}\nMessage: {4}",
+                string.IsNullOrWhiteSpace(messageType) ? "unknown" : messageType.Trim(),
+                string.IsNullOrWhiteSpace(name) ? "none" : name.Trim(),
+                string.IsNullOrWhiteSpace(emailAddress) ? "none" : emailAddress.Trim(),
+                FileLogWriter.SanitizeSingleLine(clientData),
+                string.IsNullOrWhiteSpace(message) ? "none" : message.Trim());
         }
 
         private static string ConvertHtmlToSlackText(string value)

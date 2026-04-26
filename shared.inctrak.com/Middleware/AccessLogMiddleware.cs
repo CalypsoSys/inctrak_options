@@ -1,8 +1,11 @@
 using IncTrak.Data;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace IncTrak.Middleware
@@ -30,7 +33,7 @@ namespace IncTrak.Middleware
                 stopwatch.Stop();
                 string remoteIp = FileLogWriter.SanitizeSingleLine(GetRemoteIp(context));
                 string method = FileLogWriter.SanitizeSingleLine(context.Request.Method);
-                string path = FileLogWriter.SanitizeSingleLine(context.Request.Path + context.Request.QueryString);
+                string path = FileLogWriter.SanitizeSingleLine(BuildLogPath(context.Request));
                 string protocol = FileLogWriter.SanitizeSingleLine(context.Request.Protocol);
                 string referer = FileLogWriter.SanitizeSingleLine(context.Request.Headers.Referer.ToString());
                 string userAgent = FileLogWriter.SanitizeSingleLine(context.Request.Headers.UserAgent.ToString());
@@ -60,6 +63,41 @@ namespace IncTrak.Middleware
                 return cfConnectingIp;
 
             return context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        }
+
+        public static string BuildLogPath(HttpRequest request)
+        {
+            string path = request.Path.ToString();
+            if (request.QueryString.HasValue == false)
+                return path;
+
+            var query = QueryHelpers.ParseQuery(request.QueryString.Value);
+            if (query.Count == 0)
+                return path;
+
+            IEnumerable<string> pairs = query.Select(entry =>
+            {
+                string value = IsSensitiveQueryKey(entry.Key)
+                    ? "[REDACTED]"
+                    : string.Join(",", entry.Value);
+                return string.Format("{0}={1}", entry.Key, value);
+            });
+
+            return string.Format("{0}?{1}", path, string.Join("&", pairs));
+        }
+
+        private static bool IsSensitiveQueryKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                return false;
+
+            string normalized = key.Trim().ToLowerInvariant();
+            return normalized.Contains("token") ||
+                   normalized.Contains("secret") ||
+                   normalized.Contains("password") ||
+                   normalized.Contains("code") ||
+                   normalized.Contains("uuid") ||
+                   normalized.EndsWith("key");
         }
     }
 }

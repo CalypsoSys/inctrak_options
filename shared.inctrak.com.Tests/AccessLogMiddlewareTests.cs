@@ -57,5 +57,22 @@ namespace inctrak.com.Tests
                     Directory.Delete(tempRoot, true);
             }
         }
+
+        [Fact]
+        public void BuildLogPath_RedactsSensitiveQueryParameters()
+        {
+            var context = new DefaultHttpContext();
+            context.Request.Path = "/api/login/resetpasswordlink/";
+            context.Request.QueryString = new QueryString("?code=abc123&x=1&ResetPasswordKey=secret-value");
+
+            string path = AccessLogMiddleware.BuildLogPath(context.Request);
+
+            Assert.Contains("/api/login/resetpasswordlink/?", path);
+            Assert.Contains("code=[REDACTED]", path);
+            Assert.Contains("ResetPasswordKey=[REDACTED]", path);
+            Assert.Contains("x=1", path);
+            Assert.DoesNotContain("abc123", path);
+            Assert.DoesNotContain("secret-value", path);
+        }
     }
 }

@@ -40,6 +40,23 @@ namespace inctrak.com.Tests
             Assert.DoesNotContain("<a href", message);
         }
 
+        [Fact]
+        public void BuildFeedbackSlackMessage_FormatsFeedbackOnlyPayload()
+        {
+            string message = IncTrakController.BuildFeedbackSlackMessage(
+                "Jane Doe",
+                "jane@example.test",
+                "General Feedback",
+                "ID: 203.0.113.1 User: abc",
+                "Please add exports.");
+
+            Assert.Contains("New feedback submitted", message);
+            Assert.Contains("Type: General Feedback", message);
+            Assert.Contains("Name: Jane Doe", message);
+            Assert.Contains("Email: jane@example.test", message);
+            Assert.Contains("Message: Please add exports.", message);
+        }
+
         private sealed class TestIncTrakController : IncTrakController
         {
             public TestIncTrakController(IOptions<AppSettings> options) : base(options)
