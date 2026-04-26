@@ -6,6 +6,7 @@
     <RootNamespace>IncTrak</RootNamespace>
     <Description>IncTrak Employee Stock Option Management Tool</Description>
     <Company>Calypso Systems, LLC</Company>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
