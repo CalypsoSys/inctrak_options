@@ -8,7 +8,7 @@ namespace inctrak.com.Tests
         [InlineData("https://inctrak.com")]
         [InlineData("https://www.inctrak.com")]
         [InlineData("https://shared.inctrak.com")]
-        [InlineData("http://localhost:5173")]
+        [InlineData("http://localhost:5174")]
         [InlineData("https://localhost:8080")]
         [InlineData("http://127.0.0.1:5500")]
         public void IsAllowedOrigin_AllowsConfiguredAndLocalOrigins(string origin)

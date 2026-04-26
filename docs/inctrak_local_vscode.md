@@ -57,7 +57,7 @@ That visible launch:
 - builds the API
 - launches the API on `http://localhost:5000` and `https://localhost:5001`
 - starts the Vite dev server
-- opens the frontend in Chrome at `http://localhost:5173`
+- opens the frontend in Chrome at `http://127.0.0.1:5174`
 
 You can still run the frontend manually with:
 

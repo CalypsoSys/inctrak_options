@@ -9,8 +9,8 @@ namespace inctrak.com
             "https://inctrak.com",
             "https://www.inctrak.com",
             "https://shared.inctrak.com",
-            "http://localhost:5173",
-            "https://localhost:5173",
+            "http://localhost:5174",
+            "https://localhost:5174",
             "https://localhost:8080",
             "http://127.0.0.1:5500"
         };

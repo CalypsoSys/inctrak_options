@@ -7,9 +7,9 @@ ASPNETCORE_ENVIRONMENT: Development
 AppSettings:
   AccessLogPath: /app/logs/access.log
   ErrorLogPath: /app/logs/errors.log
-  IncTrakDns: http://localhost:5173
+  IncTrakDns: http://127.0.0.1:5174
   AllowedOrigins:
-    - http://localhost:5173
+    - http://127.0.0.1:5174
     - https://inctrak.com
     - https://www.inctrak.com
     - https://shared.inctrak.com
