@@ -38,6 +38,7 @@ The API lives in `shared.inctrak.com/`. The frontend source lives in `frontend/`
 - `npm run dev --prefix frontend` starts the Vite dev server.
 - `npm run build --prefix frontend` produces the generated frontend bundle in `frontend/dist/`.
 - `npm run test --prefix frontend` runs the frontend unit tests.
+- `node --test scripts/tests/static-sites.test.mjs` runs the static-site regression checks.
 - `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
 - `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
 - `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` runs the API split tests.

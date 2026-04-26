@@ -7,7 +7,7 @@ function read(path) {
 }
 
 test('inctrak.com loads the matrixease-style site runtime', () => {
-  const html = read('./inctrak.com/index.html');
+  const html = read('../../inctrak.com/index.html');
 
   assert.match(html, /<script src="js\/site\.js"><\/script>/);
   assert.match(html, /class="display-3 load-reveal reveal-fade-up"/);
@@ -20,7 +20,7 @@ test('inctrak.com loads the matrixease-style site runtime', () => {
 });
 
 test('inctrak.com sticky header matches matrixease about-section trigger', () => {
-  const script = read('./inctrak.com/js/site.js');
+  const script = read('../../inctrak.com/js/site.js');
 
   assert.match(script, /\(function \(global\) \{/);
   assert.match(script, /function shouldEnableSticky\(scrollY, triggerTop, offset\)/);
@@ -30,8 +30,8 @@ test('inctrak.com sticky header matches matrixease about-section trigger', () =>
 });
 
 test('inctrak.com reveal animations match matrixease transition behavior', () => {
-  const script = read('./inctrak.com/js/site.js');
-  const css = read('./inctrak.com/style.css');
+  const script = read('../../inctrak.com/js/site.js');
+  const css = read('../../inctrak.com/style.css');
 
   assert.match(script, /function parseTimingValue\(value, fallbackSeconds\)/);
   assert.match(script, /function shouldAnimateEntry\(entry\)/);
@@ -54,13 +54,13 @@ test('inctrak.com reveal animations match matrixease transition behavior', () =>
 
 test('docs pages load the shared vanilla docs script', () => {
   const pages = [
-    './docs.inctrak.com/index.html',
-    './docs.inctrak.com/quick.html',
-    './docs.inctrak.com/components.html',
-    './docs.inctrak.com/faqs.html',
-    './docs.inctrak.com/showcase.html',
-    './docs.inctrak.com/videos.html',
-    './docs.inctrak.com/license.html'
+    '../../docs.inctrak.com/index.html',
+    '../../docs.inctrak.com/quick.html',
+    '../../docs.inctrak.com/components.html',
+    '../../docs.inctrak.com/faqs.html',
+    '../../docs.inctrak.com/showcase.html',
+    '../../docs.inctrak.com/videos.html',
+    '../../docs.inctrak.com/license.html'
   ];
 
   for (const page of pages) {
