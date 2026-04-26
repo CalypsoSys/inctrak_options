@@ -24,6 +24,22 @@ namespace inctrak.com.Tests
             Assert.Equal("https://localhost:5001/api/login/test/", controller.GetLoginUrl("test"));
         }
 
+        [Fact]
+        public void BuildSlackMailMessage_ConvertsHtmlToReadableText()
+        {
+            string message = TestIncTrakController.BuildSlackMessage(
+                "feedback@inctrak.com",
+                "IncTrak: Activate account link",
+                "Hi Joe,<br/>Please <a href='https://example.test/activate'>click</a> the link.<br/><br/>Thanks");
+
+            Assert.Contains("To: feedback@inctrak.com", message);
+            Assert.Contains("Subject: IncTrak: Activate account link", message);
+            Assert.Contains("Hi Joe,", message);
+            Assert.Contains("Please click the link.", message);
+            Assert.Contains("Thanks", message);
+            Assert.DoesNotContain("<a href", message);
+        }
+
         private sealed class TestIncTrakController : IncTrakController
         {
             public TestIncTrakController(IOptions<AppSettings> options) : base(options)
@@ -33,6 +49,11 @@ namespace inctrak.com.Tests
             public string GetLoginUrl(string redirect)
             {
                 return LoginBaseUrl(redirect);
+            }
+
+            public static string BuildSlackMessage(string to, string subject, string body)
+            {
+                return BuildSlackMailMessage(to, subject, body);
             }
         }
     }

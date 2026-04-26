@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IncTrak.Data;
 using IncTrak.Models;
@@ -10,8 +12,6 @@ using inctrak.com;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 
 namespace IncTrak.Controllers
 {
@@ -191,31 +191,61 @@ namespace IncTrak.Controllers
 
         protected void SendMail(string to, string subject, string body)
         {
-            if (_options.Value.UseSNMP)
-            {
-                var client = new SmtpClient(_options.Value.GetSNMPServer(), _options.Value.SNMPPort);
-                client.UseDefaultCredentials = false;
-                client.Credentials = new NetworkCredential(_options.Value.GetSNMPAddress(), _options.Value.GetSNMPPassword());
-                client.EnableSsl = false;
-                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+            SendSlackMessage(
+                _options.Value.GetSlackFeedbackWebhookUrl(),
+                BuildSlackMailMessage(to, subject, body));
+        }
 
-                MailMessage message = new MailMessage(_options.Value.GetSNMPAddress(), to);
-                message.Subject = subject;
-                message.Body = body;
-                message.IsBodyHtml = true;
-                message.Bcc.Add(_options.Value.GetSNMPAddress());
-                client.Send(message);
-            }
-            else
-            {
-                var client = new SendGridClient(_options.Value.GetEmailApiKey());
-                var fromAddr = new EmailAddress(_options.Value.GetEmailFrom());
-                var toAddr = new EmailAddress(to);
-                var msg = MailHelper.CreateSingleEmail(fromAddr, toAddr, subject, null, body);
+        protected void SendSlackMessage(string webhookUrl, string text)
+        {
+            if (string.IsNullOrWhiteSpace(webhookUrl))
+                throw new InvalidOperationException("AppSettings:SlackFeedbackWebhookUrl must be configured for Slack notifications.");
 
-                var response = client.SendEmailAsync(msg);
-                response.Wait();
+            using (var client = new HttpClient())
+            using (var content = new StringContent(JsonSerializer.Serialize(new { text }), Encoding.UTF8, "application/json"))
+            {
+                var response = client.PostAsync(webhookUrl, content).GetAwaiter().GetResult();
+                if (response.IsSuccessStatusCode == false)
+                {
+                    string responseBody = response.Content == null
+                        ? string.Empty
+                        : response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                    throw new InvalidOperationException(string.Format(
+                        "Slack webhook rejected notification. StatusCode={0}, Body={1}",
+                        (int)response.StatusCode,
+                        string.IsNullOrWhiteSpace(responseBody) ? "(empty)" : responseBody));
+                }
             }
+        }
+
+        public static string BuildSlackMailMessage(string to, string subject, string body)
+        {
+            return string.Format(
+                "Notification\nTo: {0}\nSubject: {1}\nMessage: {2}",
+                string.IsNullOrWhiteSpace(to) ? "unknown" : to.Trim(),
+                string.IsNullOrWhiteSpace(subject) ? "none" : subject.Trim(),
+                ConvertHtmlToSlackText(body));
+        }
+
+        private static string ConvertHtmlToSlackText(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return "none";
+
+            string plainText = value
+                .Replace("<br/>", "\n", StringComparison.OrdinalIgnoreCase)
+                .Replace("<br />", "\n", StringComparison.OrdinalIgnoreCase)
+                .Replace("<br>", "\n", StringComparison.OrdinalIgnoreCase)
+                .Replace("</p>", "\n", StringComparison.OrdinalIgnoreCase)
+                .Replace("</div>", "\n", StringComparison.OrdinalIgnoreCase);
+
+            plainText = Regex.Replace(plainText, "<[^>]+>", string.Empty);
+            plainText = System.Net.WebUtility.HtmlDecode(plainText);
+            plainText = plainText.Replace("\r\n", "\n").Replace('\r', '\n');
+            plainText = Regex.Replace(plainText, "\n{3,}", "\n\n").Trim();
+
+            return string.IsNullOrWhiteSpace(plainText) ? "none" : plainText;
         }
     }
 }

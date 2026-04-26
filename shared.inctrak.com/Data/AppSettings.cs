@@ -11,13 +11,7 @@ namespace IncTrak.Data
         public string GoogleClientId { get; set; }
         public string IncTrakConnection { get; set; }
         public string FeedbackConnection { get; set; }
-        public bool UseSNMP { get; set; }
-        public string SNMPServer { get; set; }
-        public int SNMPPort { get; set; }
-        public string SNMPAddress { get; set; }
-        public string SNMPPassword { get; set; }
-        public string EmailApiKey { get; set; }
-        public string EmailFrom { get; set; }
+        public string SlackFeedbackWebhookUrl { get; set; }
         public string AccessLogPath { get; set; } = "logs/access.log";
         public string ErrorLogPath { get; set; } = "logs/errors.log";
 
@@ -46,29 +40,9 @@ namespace IncTrak.Data
             return FeedbackConnection;
         }
 
-        public string GetSNMPServer()
+        public string GetSlackFeedbackWebhookUrl()
         {
-            return SNMPServer;
-        }
-
-        public string GetSNMPAddress()
-        {
-            return SNMPAddress;
-        }
-
-        public string GetSNMPPassword()
-        {
-            return SNMPPassword;
-        }
-
-        public string GetEmailApiKey()
-        {
-            return EmailApiKey;
-        }
-
-        public string GetEmailFrom()
-        {
-            return EmailFrom;
+            return SlackFeedbackWebhookUrl;
         }
 
         public string GetAccessLogPath()

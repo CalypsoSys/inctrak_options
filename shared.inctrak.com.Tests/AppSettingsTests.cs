@@ -15,5 +15,16 @@ namespace inctrak.com.Tests
 
             Assert.Equal("/home/joe/dotnet/mma/output/access.log", settings.GetAccessLogPath());
         }
+
+        [Fact]
+        public void GetSlackFeedbackWebhookUrl_ReturnsConfiguredValue()
+        {
+            var settings = new AppSettings
+            {
+                SlackFeedbackWebhookUrl = "https://hooks.slack.test/services/example"
+            };
+
+            Assert.Equal("https://hooks.slack.test/services/example", settings.GetSlackFeedbackWebhookUrl());
+        }
     }
 }
