@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using IncTrak.Data;
+using IncTrak.Middleware;
 
 namespace inctrak.com
 {
@@ -71,6 +72,7 @@ namespace inctrak.com
                 app.UseHttpsRedirection();
             }
 
+            app.UseMiddleware<AccessLogMiddleware>();
             app.UseRouting();
             app.Use(async (context, next) =>
             {
