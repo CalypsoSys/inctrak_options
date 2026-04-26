@@ -1,11 +1,20 @@
 namespace IncTrak.Data
 {
+    public class RateLimitSettings
+    {
+        public bool Enabled { get; set; }
+        public int PermitLimit { get; set; } = 120;
+        public int WindowSeconds { get; set; } = 60;
+        public int QueueLimit { get; set; }
+    }
+
     public class AppSettings
     {
         public string[] AllowedOrigins { get; set; } = inctrak.com.CorsOriginPolicy.DefaultAllowedOrigins;
         public bool RequireGatewaySecret { get; set; }
         public string GatewaySecretHeaderName { get; set; } = "X-Internal-Api-Key";
         public string GatewaySecret { get; set; }
+        public RateLimitSettings RateLimit { get; set; } = new RateLimitSettings();
         public string IncTrakDns { get; set; }
         public string GoogleSecretKey { get; set; }
         public string GoogleClientId { get; set; }

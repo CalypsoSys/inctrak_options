@@ -81,5 +81,35 @@ namespace inctrak.com.Tests
 
             Assert.NotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         }
+
+        [Fact]
+        public async Task ApiOnlyHost_RateLimitsRequestsWhenEnabled()
+        {
+            using var server = new TestServer(new WebHostBuilder()
+                .ConfigureAppConfiguration((_, config) =>
+                {
+                    config.AddInMemoryCollection(new[]
+                    {
+                        new KeyValuePair<string, string?>("AppSettings:RateLimit:Enabled", "true"),
+                        new KeyValuePair<string, string?>("AppSettings:RateLimit:PermitLimit", "1"),
+                        new KeyValuePair<string, string?>("AppSettings:RateLimit:WindowSeconds", "60"),
+                        new KeyValuePair<string, string?>("AppSettings:RateLimit:QueueLimit", "0")
+                    });
+                })
+                .UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+            using var firstRequest = new HttpRequestMessage(HttpMethod.Get, "/api/login/get_creds/");
+            firstRequest.Headers.Add("CF-Connecting-IP", "203.0.113.10");
+            using var secondRequest = new HttpRequestMessage(HttpMethod.Get, "/api/login/get_creds/");
+            secondRequest.Headers.Add("CF-Connecting-IP", "203.0.113.10");
+
+            HttpResponseMessage firstResponse = await client.SendAsync(firstRequest);
+            HttpResponseMessage secondResponse = await client.SendAsync(secondRequest);
+
+            Assert.NotEqual(HttpStatusCode.TooManyRequests, firstResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.TooManyRequests, secondResponse.StatusCode);
+            Assert.True(secondResponse.Headers.Contains("Retry-After"));
+            Assert.Contains("60", secondResponse.Headers.GetValues("Retry-After"));
+        }
     }
 }

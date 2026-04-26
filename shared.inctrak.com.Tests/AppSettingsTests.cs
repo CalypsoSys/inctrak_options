@@ -26,5 +26,16 @@ namespace inctrak.com.Tests
 
             Assert.Equal("https://hooks.slack.test/services/example", settings.GetSlackFeedbackWebhookUrl());
         }
+
+        [Fact]
+        public void RateLimit_HasExpectedDefaults()
+        {
+            var settings = new AppSettings();
+
+            Assert.False(settings.RateLimit.Enabled);
+            Assert.Equal(120, settings.RateLimit.PermitLimit);
+            Assert.Equal(60, settings.RateLimit.WindowSeconds);
+            Assert.Equal(0, settings.RateLimit.QueueLimit);
+        }
     }
 }

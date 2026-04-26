@@ -5,9 +5,14 @@
 ASPNETCORE_ENVIRONMENT: Development
 
 AppSettings:
-  IncTrakDns: http://localhost:5173
   AccessLogPath: /app/logs/access.log
   ErrorLogPath: /app/logs/errors.log
+  RateLimit:
+    Enabled: false
+    PermitLimit: 120
+    WindowSeconds: 60
+    QueueLimit: 0
+  IncTrakDns: http://localhost:5173
   AllowedOrigins:
     - http://localhost:5173
     - https://inctrak.com

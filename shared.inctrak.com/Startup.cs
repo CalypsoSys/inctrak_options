@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using IncTrak.Data;
 using IncTrak.Middleware;
+using System.Threading.RateLimiting;
 
 namespace inctrak.com
 {
@@ -47,6 +48,35 @@ namespace inctrak.com
                               .AllowAnyMethod()
                               .AllowAnyHeader();
                     }
+                });
+            });
+            services.AddRateLimiter(options =>
+            {
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                options.OnRejected = async (context, token) =>
+                {
+                    context.HttpContext.Response.Headers["Retry-After"] = Math.Max(1, appSettings.RateLimit.WindowSeconds).ToString();
+                    await context.HttpContext.Response.WriteAsync("Too many requests.", token);
+                };
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                {
+                    if (appSettings.RateLimit.Enabled == false)
+                    {
+                        return RateLimitPartition.GetNoLimiter("disabled");
+                    }
+
+                    string partitionKey = httpContext.Connection.RemoteIpAddress?.ToString()
+                        ?? httpContext.Request.Headers["CF-Connecting-IP"].ToString()
+                        ?? "unknown";
+
+                    return RateLimitPartition.GetFixedWindowLimiter(partitionKey, _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = Math.Max(1, appSettings.RateLimit.PermitLimit),
+                        Window = TimeSpan.FromSeconds(Math.Max(1, appSettings.RateLimit.WindowSeconds)),
+                        QueueLimit = Math.Max(0, appSettings.RateLimit.QueueLimit),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        AutoReplenishment = true
+                    });
                 });
             });
             services.AddControllers().AddJsonOptions(options =>
@@ -98,6 +128,7 @@ namespace inctrak.com
                 await next();
             });
             app.UseCors("FrontendOrigins");
+            app.UseRateLimiter();
 
             app.UseEndpoints(endpoints =>
             {
