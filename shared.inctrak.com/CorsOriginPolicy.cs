@@ -4,6 +4,17 @@ namespace inctrak.com
 {
     public static class CorsOriginPolicy
     {
+        public static readonly string[] DefaultAllowedOrigins =
+        {
+            "https://inctrak.com",
+            "https://www.inctrak.com",
+            "https://shared.inctrak.com",
+            "http://localhost:5173",
+            "https://localhost:5173",
+            "https://localhost:8080",
+            "http://127.0.0.1:5500"
+        };
+
         public static bool IsAllowedOrigin(string origin)
         {
             if (!Uri.TryCreate(origin, UriKind.Absolute, out Uri parsedOrigin))
@@ -22,9 +33,15 @@ namespace inctrak.com
                 return true;
             }
 
-            return string.Equals(origin, "https://inctrak.com", StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(origin, "https://www.inctrak.com", StringComparison.OrdinalIgnoreCase) ||
-                   string.Equals(origin, "https://shared.inctrak.com", StringComparison.OrdinalIgnoreCase);
+            foreach (string allowedOrigin in DefaultAllowedOrigins)
+            {
+                if (string.Equals(origin, allowedOrigin, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

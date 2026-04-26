@@ -1,0 +1,90 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "backend: render local env",
+      "type": "shell",
+      "command": "node ./scripts/inctrak/render-config-env.mjs --format env --output ./.vscode/shared.inctrak-api.env ./scripts/inctrak/config.local.yaml",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "backend: build",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/shared.inctrak.com/shared.inctrak.com.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "backend: prepare local launch",
+      "dependsOn": [
+        "backend: render local env",
+        "backend: build"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*VITE.*",
+          "endsPattern": ".*Local:.*"
+        }
+      }
+    },
+    {
+      "label": "backend: wait for ready",
+      "type": "shell",
+      "command": "for attempt in $(seq 1 60); do if (echo > /dev/tcp/127.0.0.1/5000) >/dev/null 2>&1; then exit 0; fi; sleep 1; done; echo \"Backend did not become ready on http://127.0.0.1:5000 within 60 seconds.\" >&2; exit 1",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: prepare browser launch",
+      "dependsOn": [
+        "frontend: dev",
+        "backend: wait for ready"
+      ],
+      "dependsOrder": "parallel"
+    }
+  ]
+}

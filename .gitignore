@@ -190,6 +190,8 @@ node_modules/
 frontend/dist/
 .codex
 orleans.codegen.cs
+.vscode/shared.inctrak-api.env
+scripts/inctrak/config.local.yaml
 
 # RIA/Silverlight projects
 Generated_Code/

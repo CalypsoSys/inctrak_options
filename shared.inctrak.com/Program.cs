@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace inctrak.com
 {
@@ -21,8 +16,26 @@ namespace inctrak.com
             }
             catch (Exception excp)
             {
+                TryLogStartupException(excp);
                 Console.WriteLine(excp);
             }
+        }
+
+        private static void TryLogStartupException(Exception excp)
+        {
+            string path = Environment.GetEnvironmentVariable("AppSettings__ErrorLogPath");
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                path = Path.Combine("logs", "errors.log");
+            }
+
+            string directory = Path.GetDirectoryName(path);
+            if (string.IsNullOrWhiteSpace(directory) == false)
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.AppendAllText(path, $"[{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}] startup_exception{Environment.NewLine}{excp}{Environment.NewLine}");
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

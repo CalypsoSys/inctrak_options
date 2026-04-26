@@ -1,0 +1,51 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Backend: shared.inctrak.com (no browser)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "backend: prepare local launch",
+      "program": "${workspaceFolder}/shared.inctrak.com/bin/Debug/net10.0/IncTrak.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/shared.inctrak.com",
+      "envFile": "${workspaceFolder}/.vscode/shared.inctrak-api.env",
+      "env": {
+        "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000"
+      },
+      "stopAtEntry": false,
+      "presentation": {
+        "group": "local",
+        "order": 1,
+        "hidden": true
+      }
+    },
+    {
+      "name": "Frontend: Vite",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "preLaunchTask": "frontend: prepare browser launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend",
+      "presentation": {
+        "group": "local",
+        "order": 1,
+        "hidden": true
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Local: frontend + backend",
+      "configurations": [
+        "Backend: shared.inctrak.com (no browser)",
+        "Frontend: Vite"
+      ],
+      "stopAll": true,
+      "presentation": {
+        "group": "local",
+        "order": 1
+      }
+    }
+  ]
+}

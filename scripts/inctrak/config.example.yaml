@@ -1,0 +1,32 @@
+# Copy this file to scripts/inctrak/config.local.yaml for local VS Code runs
+# or to another environment-specific file for deployment-time rendering.
+# Values written as ${VARIABLE_NAME} are resolved from the process environment.
+
+ASPNETCORE_ENVIRONMENT: Development
+
+AppSettings:
+  IncTrakDns: http://localhost:5173
+  IncTrakApiDns: http://localhost:5000/api
+  AllowedOrigins:
+    - http://localhost:5173
+    - https://inctrak.com
+    - https://www.inctrak.com
+    - https://shared.inctrak.com
+  RequireGatewaySecret: false
+  GatewaySecretHeaderName: X-Internal-Api-Key
+  GatewaySecret: ${INCTRAK_GATEWAY_SECRET}
+  IncTrakConnection: Host=localhost;Port=5432;Database=inctrak;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
+  FeedbackConnection: Host=localhost;Port=5432;Database=inctrak_feedback;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
+  GoogleClientId: ${INCTRAK_GOOGLE_CLIENT_ID}
+  GoogleSecretKey: ${INCTRAK_GOOGLE_SECRET_KEY}
+  ErrorsHost: ${INCTRAK_ERRORS_HOST}
+  ErrorsUsername: ${INCTRAK_ERRORS_USERNAME}
+  ErrorsPassword: ${INCTRAK_ERRORS_PASSWORD}
+  UseSNMP: false
+  SNMPServer: ${INCTRAK_SMTP_SERVER}
+  SNMPPort: 25
+  SNMPAddress: ${INCTRAK_SMTP_ADDRESS}
+  SNMPPassword: ${INCTRAK_SMTP_PASSWORD}
+  EmailApiKey: ${INCTRAK_SENDGRID_API_KEY}
+  EmailFrom: ${INCTRAK_EMAIL_FROM}
+  ErrorLogPath: ${INCTRAK_ERROR_LOG_PATH}
