@@ -7,11 +7,6 @@ ASPNETCORE_ENVIRONMENT: Development
 AppSettings:
   AccessLogPath: /app/logs/access.log
   ErrorLogPath: /app/logs/errors.log
-  RateLimit:
-    Enabled: false
-    PermitLimit: 120
-    WindowSeconds: 60
-    QueueLimit: 0
   IncTrakDns: http://localhost:5173
   AllowedOrigins:
     - http://localhost:5173
@@ -21,6 +16,11 @@ AppSettings:
   RequireGatewaySecret: false
   GatewaySecretHeaderName: X-Internal-Api-Key
   GatewaySecret: ${INCTRAK_GATEWAY_SECRET}
+  RateLimit:
+    Enabled: false
+    PermitLimit: 120
+    WindowSeconds: 60
+    QueueLimit: 0
   IncTrakConnection: Host=localhost;Port=5432;Database=inctrak;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
   FeedbackConnection: Host=localhost;Port=5432;Database=inctrak_feedback;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
   GoogleClientId: ${INCTRAK_GOOGLE_CLIENT_ID}
