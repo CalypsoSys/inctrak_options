@@ -6,6 +6,7 @@ namespace IncTrak.Data
     {
         private static readonly object TenantContextKey = new object();
         private static readonly object UserContextKey = new object();
+        private static readonly object SupabaseIdentityKey = new object();
 
         public TenantContext GetTenantContext(HttpContext httpContext)
         {
@@ -37,6 +38,22 @@ namespace IncTrak.Data
         public void SetUserContext(HttpContext httpContext, UserContext userContext)
         {
             httpContext.Items[UserContextKey] = userContext;
+        }
+
+        public SupabaseIdentity GetSupabaseIdentity(HttpContext httpContext)
+        {
+            if (httpContext?.Items.TryGetValue(SupabaseIdentityKey, out object value) == true &&
+                value is SupabaseIdentity identity)
+            {
+                return identity;
+            }
+
+            return new SupabaseIdentity();
+        }
+
+        public void SetSupabaseIdentity(HttpContext httpContext, SupabaseIdentity identity)
+        {
+            httpContext.Items[SupabaseIdentityKey] = identity;
         }
     }
 }

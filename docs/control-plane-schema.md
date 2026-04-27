@@ -441,9 +441,9 @@ Suggested future `AppSettings` keys:
 - `SupabaseUrl`
   - Supabase project URL
 - `SupabaseAnonKey`
-  - frontend/public Supabase key for browser auth flows
+  - frontend/public Supabase publishable key for browser auth flows
 - `SupabaseJwtSecret`
-  - backend JWT validation secret or equivalent verifier configuration
+  - optional legacy HS256 fallback for older Supabase projects; the default path should validate against JWKS/public signing keys
 
 Suggested future YAML shape:
 
@@ -453,11 +453,17 @@ AppSettings:
   TenantTemplateDatabaseName: inctrak_template
   TenantDatabasePrefix: inctrak_
   SupabaseUrl: ${INCTRAK_SUPABASE_URL}
-  SupabaseAnonKey: ${INCTRAK_SUPABASE_ANON_KEY}
+  SupabaseAnonKey: ${INCTRAK_SUPABASE_PUBLISHABLE_KEY}
   SupabaseJwtSecret: ${INCTRAK_SUPABASE_JWT_SECRET}
 ```
 
 These keys now belong in the YAML/env config when you want the API to resolve tenant and user data from the control-plane database rather than relying only on trusted header overrides.
+
+Current implementation note:
+
+- backend bearer-token auth is now partially wired
+- the preferred validation path is Supabase JWKS/public-key verification using `SupabaseUrl`
+- `SupabaseJwtSecret` is only needed if you intentionally want legacy HS256 validation support
 
 ## Open Design Questions
 

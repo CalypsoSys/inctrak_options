@@ -56,7 +56,7 @@ namespace inctrak.com.Tests
                     UserId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                     ExternalIdentity = "33333333-3333-3333-3333-333333333333"
                 }
-            });
+            }, new RequestContextAccessor());
 
             UserContext userContext = resolver.ResolveUser(context);
 
@@ -78,6 +78,31 @@ namespace inctrak.com.Tests
             Assert.Equal(Guid.Parse("22222222-2222-2222-2222-222222222222"), userContext.UserId);
             Assert.Equal(MembershipRole.TenantAdmin, userContext.Role);
             Assert.Equal("supabase-user-1", userContext.ExternalIdentity);
+        }
+
+        [Fact]
+        public void ResolveUser_UsesSupabaseIdentityFromRequestContextWhenHeaderIsMissing()
+        {
+            var context = new DefaultHttpContext();
+            var requestContextAccessor = new RequestContextAccessor();
+            requestContextAccessor.SetSupabaseIdentity(context, new SupabaseIdentity
+            {
+                ExternalIdentity = "33333333-3333-3333-3333-333333333333",
+                EmailAddress = "founder@calypsosys.com"
+            });
+            var resolver = new ControlPlaneUserResolver(new HeaderUserResolver(), new FakeControlPlaneStore
+            {
+                User = new ControlPlaneUserRecord
+                {
+                    UserId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    ExternalIdentity = "33333333-3333-3333-3333-333333333333"
+                }
+            }, requestContextAccessor);
+
+            UserContext userContext = resolver.ResolveUser(context);
+
+            Assert.Equal(Guid.Parse("22222222-2222-2222-2222-222222222222"), userContext.UserId);
+            Assert.Equal("33333333-3333-3333-3333-333333333333", userContext.ExternalIdentity);
         }
 
         private class FakeControlPlaneStore : IControlPlaneStore

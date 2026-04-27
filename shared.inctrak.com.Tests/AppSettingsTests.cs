@@ -39,6 +39,21 @@ namespace inctrak.com.Tests
         }
 
         [Fact]
+        public void GetSupabaseSettings_ReturnConfiguredValues()
+        {
+            var settings = new AppSettings
+            {
+                SupabaseUrl = "https://example.supabase.co",
+                SupabaseAnonKey = "sb_publishable_example",
+                SupabaseJwtSecret = "legacy-secret"
+            };
+
+            Assert.Equal("https://example.supabase.co", settings.GetSupabaseUrl());
+            Assert.Equal("sb_publishable_example", settings.GetSupabaseAnonKey());
+            Assert.Equal("legacy-secret", settings.GetSupabaseJwtSecret());
+        }
+
+        [Fact]
         public void RateLimit_HasExpectedDefaults()
         {
             var settings = new AppSettings();

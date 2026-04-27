@@ -18,7 +18,7 @@ test('pre-commit config includes the gitleaks hook', () => {
   const config = read('../../.pre-commit-config.yaml')
 
   assert.match(config, /repo: https:\/\/github\.com\/gitleaks\/gitleaks/)
-  assert.match(config, /rev: v8\.24\.2/)
+  assert.match(config, /rev: v8\.30\.1/)
   assert.match(config, /id: gitleaks/)
 })
 

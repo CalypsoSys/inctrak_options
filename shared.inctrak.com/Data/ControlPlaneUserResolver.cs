@@ -6,11 +6,13 @@ namespace IncTrak.Data
     {
         private readonly HeaderUserResolver _headerUserResolver;
         private readonly IControlPlaneStore _controlPlaneStore;
+        private readonly RequestContextAccessor _requestContextAccessor;
 
-        public ControlPlaneUserResolver(HeaderUserResolver headerUserResolver, IControlPlaneStore controlPlaneStore)
+        public ControlPlaneUserResolver(HeaderUserResolver headerUserResolver, IControlPlaneStore controlPlaneStore, RequestContextAccessor requestContextAccessor)
         {
             _headerUserResolver = headerUserResolver;
             _controlPlaneStore = controlPlaneStore;
+            _requestContextAccessor = requestContextAccessor;
         }
 
         public UserContext ResolveUser(HttpContext httpContext)
@@ -22,6 +24,12 @@ namespace IncTrak.Data
             }
 
             string externalIdentity = headerContext.ExternalIdentity;
+            if (string.IsNullOrWhiteSpace(externalIdentity))
+            {
+                externalIdentity = _requestContextAccessor.GetSupabaseIdentity(httpContext).ExternalIdentity;
+                headerContext.ExternalIdentity = externalIdentity;
+            }
+
             if (string.IsNullOrWhiteSpace(externalIdentity))
             {
                 return headerContext;

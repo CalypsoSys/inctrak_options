@@ -20,6 +20,9 @@ namespace IncTrak.Data
         public string GoogleClientId { get; set; }
         public string IncTrakConnection { get; set; }
         public string ControlPlaneConnection { get; set; }
+        public string SupabaseUrl { get; set; }
+        public string SupabaseAnonKey { get; set; }
+        public string SupabaseJwtSecret { get; set; }
         public string FeedbackConnection { get; set; }
         public string SlackFeedbackWebhookUrl { get; set; }
         public string AccessLogPath { get; set; } = "logs/access.log";
@@ -55,6 +58,21 @@ namespace IncTrak.Data
         public string GetControlPlaneConnection()
         {
             return ControlPlaneConnection;
+        }
+
+        public string GetSupabaseUrl()
+        {
+            return SupabaseUrl;
+        }
+
+        public string GetSupabaseAnonKey()
+        {
+            return SupabaseAnonKey;
+        }
+
+        public string GetSupabaseJwtSecret()
+        {
+            return SupabaseJwtSecret;
         }
 
         public string GetSlackFeedbackWebhookUrl()

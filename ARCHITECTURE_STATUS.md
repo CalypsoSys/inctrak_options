@@ -27,7 +27,7 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Tenant site model | Use one tenant site per company rather than separate admin and participant hostnames | Planned | Admins and participants should both use `<tenant>.inctrak.com`, with role-based routing and authorization. |
 | Tenant isolation | Use separate tenant databases rather than Postgres RLS initially | Planned | Safer fit for the current legacy/transition codebase. |
 | Tenant database creation | Use PostgreSQL template cloning | Partial | `inctrak.db/template-bootstrap.sql` now exists as the bootstrap source for `inctrak_template`. |
-| Authentication | Prefer Supabase Auth over continuing custom auth | Planned | Supabase currently looks like the best fit among the low-cost managed options considered so far. |
+| Authentication | Prefer Supabase Auth over continuing custom auth | Partial | Supabase bearer-token validation is now wired in the backend, with JWKS/public-key verification as the preferred path. |
 | Public vesting tool | Keep quick vesting on a dedicated public hostname | Planned | Target hostname is `vesting.inctrak.com`. |
 
 ## Status Matrix
@@ -46,8 +46,8 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Control-plane database | Stores tenants, slugs, memberships, provisioning jobs, and domains | Partial | `inctrak.db/control_plane.sql` now exists and the backend can resolve through a control-plane store, but production provisioning and broad runtime usage are still pending. |
 | Tenant template database | `inctrak_template` used to clone new tenant databases | Partial | Bootstrap SQL exists; template creation and provisioning automation do not yet exist. |
 | Tenant provisioning pipeline | Create DB, seed tenant, create first admin, mark tenant ready | Not implemented | Needs async job flow and operational state tracking. |
-| Managed auth | Supabase handles auth providers and sessions | Not implemented | Current app still contains legacy auth tables and flows. |
-| Tenant-aware authorization | App maps authenticated users to tenants and roles from control-plane data | Partial | Trusted-header overrides remain, and the backend now supports control-plane store lookup for tenant, user, and membership resolution ahead of Supabase integration. |
+| Managed auth | Supabase handles auth providers and sessions | Partial | Backend bearer-token validation is now in place, but the frontend login flow and real user provisioning are still pending. |
+| Tenant-aware authorization | App maps authenticated users to tenants and roles from control-plane data | Partial | Trusted-header overrides remain, and the backend now supports Supabase-backed user resolution through the control-plane store. |
 | Legacy auth retirement | Old password reset/activation/social flows are removed | Partial | Legacy mail sending has been neutralized, but old auth logic is still present. |
 | Logging and audit | Access/error logging is file-based and production-friendly | Partial | File logging and access logging are in place; structured audit work is still open. |
 
@@ -155,6 +155,7 @@ These pieces already support the future architecture:
 - control-plane bootstrap SQL now exists for the shared tenant/identity metadata database
 - request-scoped control-plane tenant/user context scaffolding now exists in the backend
 - control-plane store-backed tenant, user, and membership resolution now exists in the backend
+- Supabase bearer-token auth now exists in the backend, with JWKS/public-key verification as the preferred path
 - tenant admin versus participant enforcement now has a protected backend probe path with tests
 - template bootstrap SQL now exists for tenant DB cloning
 

@@ -28,11 +28,14 @@ namespace inctrak.com
         {
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             AppSettings appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>() ?? new AppSettings();
+            services.AddHttpClient(nameof(SupabaseTokenValidator));
             services.AddSingleton<RequestContextAccessor>();
             services.AddSingleton<HeaderTenantResolver>();
             services.AddSingleton<HeaderUserResolver>();
             services.AddSingleton<HeaderMembershipResolver>();
             services.TryAddSingleton<IControlPlaneStore, NpgsqlControlPlaneStore>();
+            services.TryAddSingleton<HmacSupabaseTokenValidator>();
+            services.TryAddSingleton<ISupabaseTokenValidator, SupabaseTokenValidator>();
             services.AddSingleton<ITenantResolver, ControlPlaneTenantResolver>();
             services.AddSingleton<IUserResolver, ControlPlaneUserResolver>();
             services.AddSingleton<IMembershipResolver, ControlPlaneMembershipResolver>();
@@ -113,6 +116,7 @@ namespace inctrak.com
 
             app.UseMiddleware<AccessLogMiddleware>();
             app.UseRouting();
+            app.UseMiddleware<SupabaseAuthMiddleware>();
             app.UseMiddleware<ControlPlaneContextMiddleware>();
             app.Use(async (context, next) =>
             {
