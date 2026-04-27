@@ -20,6 +20,7 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Frontend hosting | Move toward Cloudflare Worker-hosted frontend and wildcard routing rather than Cloudflare Pages | Planned | Pages is not a good fit for `*.inctrak.com` tenant subdomains. |
 | Backend hosting | Keep `shared.inctrak.com` API-only | Partial | API split and env-first config are already in place. |
 | Tenant routing | Use `signup.inctrak.com`, `vesting.inctrak.com`, and `*.inctrak.com` | Planned | Worker should resolve hostnames and forward trusted tenant context. |
+| Tenant site model | Use one tenant site per company rather than separate admin and participant hostnames | Planned | Admins and participants should both use `<tenant>.inctrak.com`, with role-based routing and authorization. |
 | Tenant isolation | Use separate tenant databases rather than Postgres RLS initially | Planned | Safer fit for the current legacy/transition codebase. |
 | Tenant database creation | Use PostgreSQL template cloning | Partial | `inctrak.db/template-bootstrap.sql` now exists as the bootstrap source for `inctrak_template`. |
 | Authentication | Prefer Supabase Auth over continuing custom auth | Planned | Supabase currently looks like the best fit among the low-cost managed options considered so far. |
@@ -36,6 +37,8 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Signup hostname | `signup.inctrak.com` hosts tenant signup and company creation | Not implemented | Signup flow and company slug reservation do not exist yet. |
 | Public vesting hostname | `vesting.inctrak.com` hosts quick vesting | Not implemented | Quick vesting exists in the SPA and API, but not yet as a dedicated public hostname/app mode. |
 | Tenant hostname resolution | `*.inctrak.com` resolves tenants by subdomain | Not implemented | No tenant-control-plane or hostname resolver exists yet. |
+| Tenant role routing | Same tenant hostname supports both admins and participants with different default routes | Not implemented | Admins should land on admin pages, participants on participant pages, without splitting hostnames. |
+| Tenant authorization boundary | Participant/end-user accounts never gain admin access or admin API capability | Not implemented | Must be enforced in backend authorization, not only in frontend navigation. |
 | Control-plane database | Stores tenants, slugs, memberships, provisioning jobs, and domains | Not implemented | Schema still needs to be designed and introduced. |
 | Tenant template database | `inctrak_template` used to clone new tenant databases | Partial | Bootstrap SQL exists; template creation and provisioning automation do not yet exist. |
 | Tenant provisioning pipeline | Create DB, seed tenant, create first admin, mark tenant ready | Not implemented | Needs async job flow and operational state tracking. |
@@ -59,6 +62,12 @@ Current recommendation:
   - organization roles
   - company slug/domain ownership
   - tenant provisioning
+
+Application-shape recommendation:
+
+- customer admins and customer end users should both access the same tenant hostname
+- the application should choose landing routes based on role after authentication
+- admin-only capabilities must be enforced server-side, even if the frontend hides those routes and controls
 
 Why this is the current recommendation:
 
@@ -121,12 +130,13 @@ But for now, distinct ports are the simpler first step.
 Recommended next phases:
 
 1. Introduce Supabase-backed auth strategy and control-plane user model.
-2. Design the control-plane schema for tenants, slugs, domains, memberships, and provisioning jobs.
-3. Add backend tenant context resolution and tenant-aware connection factories.
-4. Add a helper to create `inctrak_template` from `inctrak.db/template-bootstrap.sql`.
-5. Build the signup flow and tenant slug reservation path.
-6. Split quick vesting into a dedicated public frontend mode for `vesting.inctrak.com`.
-7. Introduce Worker-based hostname routing for `signup`, `vesting`, and `*.inctrak.com`.
+2. Design the control-plane schema for tenants, slugs, domains, memberships, roles, and provisioning jobs.
+3. Define the admin versus participant authorization model and enforce it in backend APIs.
+4. Add backend tenant context resolution and tenant-aware connection factories.
+5. Add a helper to create `inctrak_template` from `inctrak.db/template-bootstrap.sql`.
+6. Build the signup flow and tenant slug reservation path.
+7. Split quick vesting into a dedicated public frontend mode for `vesting.inctrak.com`.
+8. Introduce Worker-based hostname routing for `signup`, `vesting`, and `*.inctrak.com`.
 
 ## Implemented Foundations
 
@@ -146,6 +156,7 @@ These pieces already support the future architecture:
 - tenant provisioning will affect connection management, migrations, and operational tooling, so it should be introduced deliberately
 - Cloudflare Pages is not the right long-term fit if wildcard tenant subdomains are a real product requirement
 - local dev complexity can grow quickly once signup, vesting, tenant, Worker, backend, and Supabase flows all coexist
+- role separation must be enforced in backend authorization from the start so participant users cannot accidentally reach admin APIs through URL guessing or direct requests
 
 ## Update Conventions
 
