@@ -1,5 +1,5 @@
--- Example local seed data for the IncTrak control-plane database.
--- Copy and adapt this file for local use rather than editing it in place.
+-- Example local-development seed data for the IncTrak control-plane database.
+-- This file is intended for local use and uses a local-friendly hostname.
 
 begin;
 
@@ -31,7 +31,7 @@ values (
     'Calypso Systems',
     'calypsosys',
     'Active',
-    'calypsosys.inctrak.com',
+    'calypsosys.inctrak.localhost',
     'inctrak_calypsosys',
     'template-bootstrap-v1',
     now()
@@ -53,7 +53,7 @@ insert into cp_tenant_domains (
 )
 select
     tenant_pk,
-    'calypsosys.inctrak.com',
+    'calypsosys.inctrak.localhost',
     true,
     'Verified'
 from cp_tenants

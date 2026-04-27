@@ -46,6 +46,12 @@ There are three core concepts:
 
 The control-plane database is the source of truth for these relationships.
 
+Important boundary:
+
+- `cp_users` is global across the platform
+- tenant access is granted only through `cp_memberships`
+- a user existing in `cp_users` alone does not grant access to any tenant
+
 ## When To Create The Database
 
 Recommended timing:
@@ -74,6 +80,14 @@ That example seed file includes idempotent SQL for:
 - one `cp_tenants` row
 - one `cp_tenant_domains` row
 - one `cp_memberships` row
+
+Recommended local hostname pattern:
+
+- `*.inctrak.localhost`
+
+Current example:
+
+- `calypsosys.inctrak.localhost`
 
 ## Roles
 
