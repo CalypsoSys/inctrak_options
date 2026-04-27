@@ -2,6 +2,10 @@
 
 This file tracks the current IncTrak architecture direction, what is already implemented, and what is still planned. It is intended to be a living status document that we update as decisions change and work moves from planned to partial to done.
 
+Supporting detailed design documents:
+
+- [docs/control-plane-schema.md](docs/control-plane-schema.md)
+
 ## Current Direction
 
 IncTrak is moving toward a multi-tenant SaaS model with:
