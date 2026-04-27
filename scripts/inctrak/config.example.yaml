@@ -30,6 +30,4 @@ AppSettings:
   SupabaseJwtSecret: ${INCTRAK_SUPABASE_JWT_SECRET}
   IncTrakConnection: Host=localhost;Port=5432;Database=inctrak;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
   FeedbackConnection: Host=localhost;Port=5432;Database=inctrak_feedback;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
-  GoogleClientId: ${INCTRAK_GOOGLE_CLIENT_ID}
-  GoogleSecretKey: ${INCTRAK_GOOGLE_SECRET_KEY}
   SlackFeedbackWebhookUrl: ${INCTRAK_SLACK_FEEDBACK_WEBHOOK_URL}

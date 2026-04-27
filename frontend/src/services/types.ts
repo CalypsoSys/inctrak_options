@@ -12,13 +12,11 @@ export type LoginForm = {
   GROUP_NAME: string
   IS_REGISTERING: boolean
   ACCEPT_TERMS: boolean
-  GOOGLE_LOGON: boolean
 }
 
 export type LoginResponse = ApiResponse & {
   uuid?: string
   Role?: 'admin' | 'optionee'
-  google_redirect?: string
 }
 
 export type FeedbackForm = {
@@ -66,7 +64,6 @@ export type ParticipantDetail = {
   USER_NAME: string
   EMAIL_ADDRESS: string
   USER_ACTION: string
-  GOOGLE_USER: boolean
   SEND_EMAIL: boolean
 }
 

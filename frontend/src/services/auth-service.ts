@@ -9,8 +9,7 @@ export function createLoginForm(): LoginForm {
     EMAIL_ADDRESS: '',
     GROUP_NAME: '',
     IS_REGISTERING: false,
-    ACCEPT_TERMS: false,
-    GOOGLE_LOGON: false
+    ACCEPT_TERMS: false
   }
 }
 
@@ -19,13 +18,7 @@ export function fetchLoginDefaults(): Promise<LoginForm> {
 }
 
 export function submitLogin(form: LoginForm): Promise<LoginResponse> {
-  let endpoint = 'login_internal/'
-
-  if (form.GOOGLE_LOGON) {
-    endpoint = form.IS_REGISTERING ? 'register_google/' : 'login_google/'
-  } else if (form.IS_REGISTERING) {
-    endpoint = 'register_internal/'
-  }
+  const endpoint = form.IS_REGISTERING ? 'register_internal/' : 'login_internal/'
 
   return apiPost<LoginResponse>(`/api/login/${endpoint}`, form)
 }

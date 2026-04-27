@@ -77,8 +77,8 @@ export function validateParticipant(participant: ParticipantDetail): string[] {
     if (!participant.EMAIL_ADDRESS?.trim()) {
       errors.push('Email address is required for user actions.')
     }
-    if (!participant.GOOGLE_USER && !participant.USER_NAME?.trim()) {
-      errors.push('Username is required for non-Google users.')
+    if (!participant.USER_NAME?.trim()) {
+      errors.push('Username is required for user actions.')
     }
   }
 

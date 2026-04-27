@@ -16,8 +16,6 @@ namespace IncTrak.Data
         public string GatewaySecret { get; set; }
         public RateLimitSettings RateLimit { get; set; } = new RateLimitSettings();
         public string IncTrakDns { get; set; }
-        public string GoogleSecretKey { get; set; }
-        public string GoogleClientId { get; set; }
         public string IncTrakConnection { get; set; }
         public string ControlPlaneConnection { get; set; }
         public string SupabaseUrl { get; set; }
@@ -33,16 +31,6 @@ namespace IncTrak.Data
         public string GetIncTrakDns()
         {
             return IncTrakDns;
-        }
-
-        public string GetGoogleSecretKey()
-        {
-            return GoogleSecretKey;
-        }
-
-        public string GetGoogleClientId()
-        {
-            return GoogleClientId;
         }
 
         public string GetIncTrakConnection()

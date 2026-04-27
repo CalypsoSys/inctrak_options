@@ -4,15 +4,15 @@
       <PageIntro
         eyebrow="Access"
         title="Login or register"
-        description="Use internal credentials or Google sign-in. The same API endpoints remain in place; this page just modernizes the flow."
+        description="Use the current IncTrak login and registration flow while tenant-aware Supabase auth is being wired in."
       />
       <form class="mt-8 space-y-5" @submit.prevent="submitForm">
         <div class="grid gap-5 md:grid-cols-2">
           <div>
             <label class="field-label">Username or Email</label>
-            <input v-model="form.USER_NAME" class="field-input" :disabled="form.GOOGLE_LOGON" type="text" />
+            <input v-model="form.USER_NAME" class="field-input" type="text" />
           </div>
-          <div v-if="!form.GOOGLE_LOGON">
+          <div>
             <label class="field-label">Password</label>
             <Password v-model="form.PASSWORD" fluid toggle-mask :feedback="false" />
           </div>
@@ -27,18 +27,14 @@
             <input v-model="form.GROUP_NAME" class="field-input" type="text" />
           </div>
         </div>
-        <div v-if="form.IS_REGISTERING && !form.GOOGLE_LOGON">
+        <div v-if="form.IS_REGISTERING">
           <label class="field-label">Confirm Password</label>
           <Password v-model="form.PASSWORD2" fluid toggle-mask :feedback="false" />
         </div>
-        <div class="grid gap-4 md:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-2">
           <label class="flex items-center gap-2 rounded-2xl border border-[var(--app-border)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--app-muted)]">
             <input v-model="form.IS_REGISTERING" type="checkbox" />
             Register new account
-          </label>
-          <label class="flex items-center gap-2 rounded-2xl border border-[var(--app-border)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--app-muted)]">
-            <input v-model="form.GOOGLE_LOGON" type="checkbox" />
-            Use Google
           </label>
           <label class="flex items-center gap-2 rounded-2xl border border-[var(--app-border)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--app-muted)]">
             <input v-model="form.ACCEPT_TERMS" type="checkbox" />
@@ -59,7 +55,7 @@
       <ul class="mt-5 space-y-3 text-sm leading-6 text-[var(--app-muted)]">
         <li>Administrators land in the new admin workspace with stock classes, plans, participants, grants, and schedule tools.</li>
         <li>Participants land in the optionee area with stock summary, option summary, and grant detail views.</li>
-        <li>Google callback redirects and email links now target the renamed route model.</li>
+        <li>Email activation, reset, and legacy callback redirects still land on the renamed route model while auth is being modernized.</li>
       </ul>
     </article>
 
@@ -108,7 +104,7 @@ onMounted(async () => {
 })
 
 async function submitForm(): Promise<void> {
-  if (!form.GOOGLE_LOGON && (!form.USER_NAME.trim() || !form.PASSWORD.trim())) {
+  if (!form.USER_NAME.trim() || !form.PASSWORD.trim()) {
     showMessage('Please enter a username or email and password.', false)
     return
   }
@@ -121,11 +117,6 @@ async function submitForm(): Promise<void> {
   isBusy.value = true
   try {
     const response = await submitLogin(form)
-    if (response.google_redirect) {
-      window.location.href = response.google_redirect
-      return
-    }
-
     showMessage(response.message ?? 'Login response received.', response.success !== false)
     if (response.success && response.uuid && response.Role) {
       authStore.setSession(response.uuid, response.Role)

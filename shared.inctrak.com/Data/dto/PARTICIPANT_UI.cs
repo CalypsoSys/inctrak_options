@@ -21,7 +21,6 @@ namespace IncTrak.data
         public string USER_NAME { get; set; }
         public string EMAIL_ADDRESS { get; set; }
         public string USER_ACTION { get; set; }
-        public bool GOOGLE_USER { get; set; }
         public bool SEND_EMAIL { get; set; }
 
         public Participants SetFromParticipant
@@ -74,13 +73,11 @@ namespace IncTrak.data
         public PARTICIPANT_UI()
             : base(Guid.Empty)
         {
-            GOOGLE_USER = false;
             SEND_EMAIL = true;
         }
 
         public PARTICIPANT_UI(Guid groupKeyCheck) : base(groupKeyCheck)
         {
-            GOOGLE_USER = false;
             SEND_EMAIL = true;
         }
 

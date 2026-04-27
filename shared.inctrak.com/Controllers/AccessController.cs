@@ -4,14 +4,9 @@ using IncTrak.Domain;
 using IncTrak.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -211,202 +206,32 @@ namespace IncTrak.Controllers
             }
         }
 
-        private Uri GoogleAuthUri(string redirect, string state)
-        {
-            var googleRedirectUrl = LoginBaseUrl(redirect);
-
-            return new Uri(string.Format("https://accounts.google.com/o/oauth2/v2/auth?client_id={0}&response_type=code&scope=openid%20email%20profile&redirect_uri={1}&state={2}",
-                _options.Value.GetGoogleClientId(), googleRedirectUrl, state));
-        }
-
         [Route("api/login/register_google/")]
         [HttpPost]
         public ActionResult PostRegisterGoogle(USER_UI formData)
         {
-            try
-            {
-                using (inctrakContext context = new OptionsContext(_options.Value))
-                {
-                    string errorMessage = null;
-                    if (!formData.IS_REGISTERING)
-                    {
-                        return Ok( new { success = false, message = "Please select registering checkbox" });
-                    }
-                    else if ((errorMessage = CheckRegistrationGroup(context, formData.GROUP_NAME)) != null)
-                    {
-                        return Ok( new { success = false, message = errorMessage });
-                    }
-                    else
-                    {
-                        return Ok( new { google_redirect = GoogleAuthUri("register_google_user", formData.GROUP_NAME) });
-                    }
-                }
-            }
-            catch (Exception excp)
-            {
-                string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "google registration base cred");
-                return Ok( new { success = false, message = message });
-            }
-        }
-
-        private GoogleUserProfile GetGoogleUserProfile(string code, string redirect)
-        {
-            var httpClient = new HttpClient
-            {
-                BaseAddress = new Uri("https://www.googleapis.com")
-            };
-            var googleTokenUrl = string.Format("oauth2/v4/token?code={0}&client_id={1}&client_secret={2}&redirect_uri={3}&grant_type=authorization_code", code, _options.Value.GetGoogleClientId(), _options.Value.GetGoogleSecretKey(), LoginBaseUrl(redirect));
-
-            var dict = new Dictionary<string, string>
-                    {
-                        { "Content-Type", "application/x-www-form-urlencoded" }
-                    };
-            using (var reqGoogleToken = new HttpRequestMessage(HttpMethod.Post, googleTokenUrl) { Content = new FormUrlEncodedContent(dict) })
-            {
-                var responseGoogleToken = httpClient.SendAsync(reqGoogleToken);
-                responseGoogleToken.Wait(10000);
-                var resultGoogleToken = responseGoogleToken.Result.Content.ReadAsStreamAsync();
-                resultGoogleToken.Wait(10000);
-                using (StreamReader googleTokenDoc = new StreamReader(resultGoogleToken.Result))
-                {
-                    var gmailTokenJson = googleTokenDoc.ReadToEnd();
-
-                    
-                    var gmailToken = JsonConvert.DeserializeObject<GmailToken>(gmailTokenJson);
-
-                    string googleUserProfileUrl = string.Format("oauth2/v1/userinfo?alt=json&access_token={0}", gmailToken.access_token);
-                    using (var reqUserProfile = new HttpRequestMessage(HttpMethod.Get, googleUserProfileUrl))
-                    {
-                        var responseUserProfile = httpClient.SendAsync(reqUserProfile);
-                        responseUserProfile.Wait(10000);
-                        var resultUserProfile = responseUserProfile.Result.Content.ReadAsStreamAsync();
-                        resultUserProfile.Wait(10000);
-                        using (StreamReader userProfileDoc = new StreamReader(resultUserProfile.Result))
-                        {
-
-                            var userProfileJson = userProfileDoc.ReadToEnd();
-
-                            return JsonConvert.DeserializeObject<GoogleUserProfile>(userProfileJson);
-                        }
-                    }
-                }
-            }
+            return RetiredGoogleAuthResponse();
         }
 
         [Route("api/login/register_google_user/")]
         [HttpGet]
         public RedirectResult RegisterGoogleUser(string code, string state, string session_state)
         {
-            try
-            {
-                using (inctrakContext context = new OptionsContext(_options.Value))
-                {
-                    var googleUser = GetGoogleUserProfile(code, "register_google_user");
-                    string errorMessage = null;
-                    if ((errorMessage = CheckRegistrationData(context, googleUser.id, googleUser.email, googleUser.verified_email, state)) != null)
-                    {
-                        return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=false&message={0}", errorMessage), UriKind.Relative).ToString());
-                    }
-                    else
-                    {
-                        Groups group = new Groups();
-                        group.Description = state;
-                        group.GroupKey = ServiceUtil.CleanNonAlpha(state);
-                        context.Groups.Add(group);
-
-                        Users user = new Users();
-                        user.Administrator = true;
-                        user.AcceptTerms = true;
-                        user.UserName = googleUser.id;
-                        user.EmailAddress = googleUser.email;
-                        user.Password = "google";
-                        user.Activated = true;
-                        user.GoogleLogon = true;
-
-                        ActivateUuids uuid = SaveUuid(context, user, EnumUuidType.Login, false);
-                        user.ActivateUuids.Add(uuid);
-                        group.Users.Add(user);
-                        user.GroupFkNavigation = group;
-
-                        context.SaveChanges();
-
-                        return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=true&uuid={0}&role=admin&message={1}", uuid.Uuid,
-                            string.Format("Thanks for registering {0}, your google account is now active.- thx", googleUser.given_name)), UriKind.Relative).ToString());
-                    }
-                }
-            }
-            catch (Exception excp)
-            {
-                string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "google login base cred");
-                return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=false&message={0}", message), UriKind.Relative).ToString());
-            }
+            return RetiredGoogleAuthRedirect();
         }
 
         [Route("api/login/login_google/")]
         [HttpPost]
         public ActionResult PostLoginGoogle(USER_UI formData)
         {
-            try
-            {
-                if (formData.IS_REGISTERING)
-                {
-                    return Ok( new { success = false, message = "Please do not select registering to login" });
-                }
-                else
-                {
-                    return Ok( new { google_redirect = GoogleAuthUri("login_google_user", "login") });
-                }
-            }
-            catch (Exception excp)
-            {
-                string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "google login base cred");
-                return Ok( new { success = false, message = message });
-            }
+            return RetiredGoogleAuthResponse();
         }
 
         [Route("api/login/login_google_user/")]
         [HttpGet]
         public RedirectResult LoginGoogleUser(string code, string state, string session_state)
         {
-            try
-            {
-                using (inctrakContext context = new OptionsContext(_options.Value))
-                {
-                    var googleUser = GetGoogleUserProfile(code, "login_google_user");
-
-                    var loginUser = context.Users.Where(up => up.UserName == googleUser.id || up.EmailAddress == googleUser.email).FirstOrDefault();
-                    if (loginUser == null)
-                    {
-                        return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=false&message=Invalid google account/email, try again"), UriKind.Relative).ToString());
-                    }
-                    else
-                    {
-                        if (loginUser.Activated == false)
-                        {
-                            loginUser.Activated = true;
-                            loginUser.UserName = googleUser.id;
-                            context.SaveChanges();
-                        }
-                        if (loginUser.AcceptTerms)
-                        {
-                            var uuid = SaveUuid(context, loginUser, EnumUuidType.Login, true);
-                            return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=true&uuid={0}&role={1}&message={2}", uuid.Uuid, UserRole(loginUser),
-                                string.Format("Welcome back {0}!", googleUser.given_name)), UriKind.Relative).ToString());
-                        }
-                        else
-                        {
-                            var uuid = SaveUuid(context, loginUser, EnumUuidType.AcceptTerms, false, true);
-                            return Redirect(new Uri(string.Format("/#/auth/accept-terms/{0}/", uuid.Uuid), UriKind.Relative).ToString());
-
-                        }
-                    }
-                }
-            }
-            catch (Exception excp)
-            {
-                string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "google login base cred");
-                return Redirect(new Uri(string.Format("/#/auth/login?redirect=true&success=false&message={0}", message), UriKind.Relative).ToString());
-            }
+            return RetiredGoogleAuthRedirect();
         }
 
 
@@ -586,12 +411,7 @@ namespace IncTrak.Controllers
         public static string ParticipantResetUuid(IOptions<AppSettings> options, inctrakContext context, Users user)
         {
             AccessController ac = new AccessController(options);
-            EnumUuidType accessType;
-            if (user.GoogleLogon)
-                accessType = EnumUuidType.AcceptTerms;
-            else
-                accessType = EnumUuidType.ResetPassword;
-            return ac.SaveUuid(context, user, accessType, false).Uuid;
+            return ac.SaveUuid(context, user, EnumUuidType.ResetPassword, false).Uuid;
         }
 
         public static void ParticpantResetEmail(IOptions<AppSettings> options, Users user, string uuid)
@@ -620,6 +440,21 @@ namespace IncTrak.Controllers
                 context.SaveChanges();
 
             return uuid;
+        }
+
+        private OkObjectResult RetiredGoogleAuthResponse()
+        {
+            return Ok(new
+            {
+                success = false,
+                message = "Google sign-in has been retired. Use the Supabase login flow instead."
+            });
+        }
+
+        private RedirectResult RetiredGoogleAuthRedirect()
+        {
+            string message = Uri.EscapeDataString("Google sign-in has been retired. Use the new login flow instead.");
+            return Redirect(string.Format("/#/auth/login?redirect=true&success=false&message={0}", message));
         }
 
         private string GetPasswordHash(Users user, string passPhrase)

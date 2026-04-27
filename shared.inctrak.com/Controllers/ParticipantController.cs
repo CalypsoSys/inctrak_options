@@ -127,7 +127,6 @@ namespace IncTrak.Controllers
                                     where s.ParticipantPk == participantKey && (s.GroupFk == rights.GroupKey || s.GroupFkNavigation.Users.Any(u => u.UserPk == rights.UserKey))
                                      select s).FirstOrDefault();
                     string userName=null, emailAddress=null;
-                    bool googleUser = false;
                     if (rights.IsAdmin && participant.UserFk.HasValue )
                     {
                         var user = (from u in context.Users
@@ -137,14 +136,13 @@ namespace IncTrak.Controllers
                         {
                             userName = user.UserName;
                             emailAddress = user.EmailAddress;
-                            googleUser = user.GoogleLogon;
                         }
                     }
 
                     var partTypes = (from pt in context.ParticipantTypes
                                          select new PARTICIPANT_TYPES_UI() { PartType = pt }).ToArray();
 
-                    return new { success = true, Participant = new PARTICIPANT_UI(rights.GroupKeyCheck, participant) { USER_NAME = userName, EMAIL_ADDRESS = emailAddress, GOOGLE_USER = googleUser }, PartTypes =partTypes };
+                    return new { success = true, Participant = new PARTICIPANT_UI(rights.GroupKeyCheck, participant) { USER_NAME = userName, EMAIL_ADDRESS = emailAddress }, PartTypes =partTypes };
                 }
             }
             catch (Exception excp)
@@ -197,17 +195,8 @@ namespace IncTrak.Controllers
 
                         if ( saveParticipant.Data.USER_ACTION == "update_user" )
                         {
-                            if (saveParticipant.Data.GOOGLE_USER)
-                            {
-                                participant.UserFkNavigation.GoogleLogon = true;
-                                participant.UserFkNavigation.UserName = "google_user";
-                                participant.UserFkNavigation.Activated = false;
-                            }
-                            else
-                            {
-                                participant.UserFkNavigation.GoogleLogon = false;
-                                participant.UserFkNavigation.UserName = saveParticipant.Data.USER_NAME;
-                            }
+                            participant.UserFkNavigation.GoogleLogon = false;
+                            participant.UserFkNavigation.UserName = saveParticipant.Data.USER_NAME;
                             participant.UserFkNavigation.EmailAddress = saveParticipant.Data.EMAIL_ADDRESS;
                         }
                         else
@@ -216,20 +205,10 @@ namespace IncTrak.Controllers
                             user.Administrator = false;
                             user.AcceptTerms = false;
                             user.EmailAddress = saveParticipant.Data.EMAIL_ADDRESS;
-                            if (saveParticipant.Data.GOOGLE_USER)
-                            {
-                                user.GoogleLogon = true;
-                                user.UserName = "google_user";
-                                user.Activated = false;
-                                user.Password = "google";
-                            }
-                            else
-                            {
-                                user.GoogleLogon = false;
-                                user.UserName = saveParticipant.Data.USER_NAME;
-                                user.Activated = true;
-                                user.Password = "placeholder";
-                            }
+                            user.GoogleLogon = false;
+                            user.UserName = saveParticipant.Data.USER_NAME;
+                            user.Activated = true;
+                            user.Password = "placeholder";
                             user.GroupFk = rights.GroupKey;
                             context.Users.Add(user);
 

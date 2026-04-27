@@ -51,7 +51,7 @@
             </select>
           </div>
           <div class="grid gap-4 md:grid-cols-2">
-            <div v-if="!form.GOOGLE_USER">
+            <div>
               <label class="field-label">Username</label>
               <input v-model="form.USER_NAME" class="field-input" type="text" />
             </div>
@@ -69,11 +69,7 @@
               </label>
             </div>
           </div>
-          <div class="grid gap-3 md:grid-cols-2">
-            <label class="flex items-center gap-2 text-sm font-semibold text-[var(--app-muted)]">
-              <input v-model="form.GOOGLE_USER" type="checkbox" />
-              Google user
-            </label>
+          <div class="grid gap-3 md:grid-cols-1">
             <label class="flex items-center gap-2 text-sm font-semibold text-[var(--app-muted)]">
               <input v-model="form.SEND_EMAIL" type="checkbox" />
               Send activation email
@@ -135,7 +131,6 @@ const form = reactive<ParticipantDetail>({
   USER_NAME: '',
   EMAIL_ADDRESS: '',
   USER_ACTION: 'create_user',
-  GOOGLE_USER: false,
   SEND_EMAIL: true
 })
 
@@ -161,7 +156,6 @@ async function loadItem(id = ''): Promise<void> {
       USER_NAME: '',
       EMAIL_ADDRESS: '',
       USER_ACTION: 'create_user',
-      GOOGLE_USER: false,
       SEND_EMAIL: true
     })
     await router.replace({ name: 'participants' })

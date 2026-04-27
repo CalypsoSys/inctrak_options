@@ -15,7 +15,6 @@ namespace IncTrak.data
         public DateTime UPDATED { get; set; }
         public bool ADMINISTRATOR { get; set; }
         public bool ACCEPT_TERMS { get; set; }
-        public bool GOOGLE_LOGON { get; set; }
         public string PASSWORD2 { get; set; }
         public string GROUP_NAME { get; set; }
         public bool IS_REGISTERING { get; set; }
@@ -36,7 +35,6 @@ namespace IncTrak.data
             UPDATED = db.Updated;
             ADMINISTRATOR = db.Administrator;
             ACCEPT_TERMS = db.AcceptTerms;
-            GOOGLE_LOGON = db.GoogleLogon;
         }
     }
 }
