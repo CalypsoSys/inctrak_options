@@ -43,11 +43,11 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Tenant hostname resolution | `*.inctrak.com` resolves tenants by subdomain | Not implemented | No tenant-control-plane or hostname resolver exists yet. |
 | Tenant role routing | Same tenant hostname supports both admins and participants with different default routes | Partial | Request-scoped tenant/user context and a protected probe endpoint now exist, but real hostname-driven routing and app landing behavior are still pending. |
 | Tenant authorization boundary | Participant/end-user accounts never gain admin access or admin API capability | Partial | Backend role-gated probe endpoints now enforce tenant admin versus participant access, but existing legacy app endpoints are not migrated yet. |
-| Control-plane database | Stores tenants, slugs, memberships, provisioning jobs, and domains | Partial | `inctrak.db/control_plane.sql` now exists as the initial bootstrap source, but it is not wired into runtime services or provisioning yet. |
+| Control-plane database | Stores tenants, slugs, memberships, provisioning jobs, and domains | Partial | `inctrak.db/control_plane.sql` now exists and the backend can resolve through a control-plane store, but production provisioning and broad runtime usage are still pending. |
 | Tenant template database | `inctrak_template` used to clone new tenant databases | Partial | Bootstrap SQL exists; template creation and provisioning automation do not yet exist. |
 | Tenant provisioning pipeline | Create DB, seed tenant, create first admin, mark tenant ready | Not implemented | Needs async job flow and operational state tracking. |
 | Managed auth | Supabase handles auth providers and sessions | Not implemented | Current app still contains legacy auth tables and flows. |
-| Tenant-aware authorization | App maps authenticated users to tenants and roles from control-plane data | Partial | Trusted-header resolver interfaces, request context, and role checks now exist as scaffolding ahead of Supabase and control-plane DB integration. |
+| Tenant-aware authorization | App maps authenticated users to tenants and roles from control-plane data | Partial | Trusted-header overrides remain, and the backend now supports control-plane store lookup for tenant, user, and membership resolution ahead of Supabase integration. |
 | Legacy auth retirement | Old password reset/activation/social flows are removed | Partial | Legacy mail sending has been neutralized, but old auth logic is still present. |
 | Logging and audit | Access/error logging is file-based and production-friendly | Partial | File logging and access logging are in place; structured audit work is still open. |
 
@@ -154,6 +154,7 @@ These pieces already support the future architecture:
 - API rate limiting exists
 - control-plane bootstrap SQL now exists for the shared tenant/identity metadata database
 - request-scoped control-plane tenant/user context scaffolding now exists in the backend
+- control-plane store-backed tenant, user, and membership resolution now exists in the backend
 - tenant admin versus participant enforcement now has a protected backend probe path with tests
 - template bootstrap SQL now exists for tenant DB cloning
 

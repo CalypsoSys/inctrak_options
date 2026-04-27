@@ -19,10 +19,13 @@ namespace IncTrak.Data
         public string GoogleSecretKey { get; set; }
         public string GoogleClientId { get; set; }
         public string IncTrakConnection { get; set; }
+        public string ControlPlaneConnection { get; set; }
         public string FeedbackConnection { get; set; }
         public string SlackFeedbackWebhookUrl { get; set; }
         public string AccessLogPath { get; set; } = "logs/access.log";
         public string ErrorLogPath { get; set; } = "logs/errors.log";
+        public string TenantTemplateDatabaseName { get; set; } = "inctrak_template";
+        public string TenantDatabasePrefix { get; set; } = "inctrak_";
 
         public string GetIncTrakDns()
         {
@@ -49,6 +52,11 @@ namespace IncTrak.Data
             return FeedbackConnection;
         }
 
+        public string GetControlPlaneConnection()
+        {
+            return ControlPlaneConnection;
+        }
+
         public string GetSlackFeedbackWebhookUrl()
         {
             return SlackFeedbackWebhookUrl;
@@ -62,6 +70,16 @@ namespace IncTrak.Data
         public string GetErrorLogPath()
         {
             return ErrorLogPath;
+        }
+
+        public string GetTenantTemplateDatabaseName()
+        {
+            return TenantTemplateDatabaseName;
+        }
+
+        public string GetTenantDatabasePrefix()
+        {
+            return TenantDatabasePrefix;
         }
     }
 }

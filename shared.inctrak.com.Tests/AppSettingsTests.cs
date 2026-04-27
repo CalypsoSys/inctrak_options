@@ -28,6 +28,17 @@ namespace inctrak.com.Tests
         }
 
         [Fact]
+        public void GetControlPlaneConnection_ReturnsConfiguredValue()
+        {
+            var settings = new AppSettings
+            {
+                ControlPlaneConnection = "Host=localhost;Database=inctrak_control;"
+            };
+
+            Assert.Equal("Host=localhost;Database=inctrak_control;", settings.GetControlPlaneConnection());
+        }
+
+        [Fact]
         public void RateLimit_HasExpectedDefaults()
         {
             var settings = new AppSettings();

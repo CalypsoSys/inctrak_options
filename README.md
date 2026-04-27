@@ -52,6 +52,8 @@ For env-driven local backend runs, copy `scripts/inctrak/config.example.yaml` to
 
 For control-plane provisioning metadata, use [inctrak.db/control_plane.sql](inctrak.db/control_plane.sql) as the bootstrap source for the shared control-plane PostgreSQL database.
 
+For local control-plane seeding, start from [inctrak.db/control_plane.seed.example.sql](inctrak.db/control_plane.seed.example.sql) and adapt the sample tenant, domain, user, and membership values before applying it with `psql`.
+
 For tenant database provisioning, use [inctrak.db/template-bootstrap.sql](inctrak.db/template-bootstrap.sql) as the bootstrap source for the `inctrak_template` PostgreSQL database. The older [inctrak.db/inctrak.sql](inctrak.db/inctrak.sql) file remains a legacy schema reference.
 
 ## Secret Scanning

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using IncTrak.Data;
@@ -28,9 +29,13 @@ namespace inctrak.com
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             AppSettings appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>() ?? new AppSettings();
             services.AddSingleton<RequestContextAccessor>();
-            services.AddSingleton<ITenantResolver, HeaderTenantResolver>();
-            services.AddSingleton<IUserResolver, HeaderUserResolver>();
-            services.AddSingleton<IMembershipResolver, HeaderMembershipResolver>();
+            services.AddSingleton<HeaderTenantResolver>();
+            services.AddSingleton<HeaderUserResolver>();
+            services.AddSingleton<HeaderMembershipResolver>();
+            services.TryAddSingleton<IControlPlaneStore, NpgsqlControlPlaneStore>();
+            services.AddSingleton<ITenantResolver, ControlPlaneTenantResolver>();
+            services.AddSingleton<IUserResolver, ControlPlaneUserResolver>();
+            services.AddSingleton<IMembershipResolver, ControlPlaneMembershipResolver>();
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {

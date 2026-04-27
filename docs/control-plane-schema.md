@@ -19,7 +19,8 @@ Current repo status:
 - the initial bootstrap SQL now exists at [inctrak.db/control_plane.sql](../inctrak.db/control_plane.sql)
 - backend request-scoped tenant/user context scaffolding now exists
 - backend probe endpoints now prove tenant admin versus participant authorization behavior
-- Supabase integration and real database-backed resolver implementations do not exist yet
+- the backend now supports a real control-plane store path for tenant, user, and membership lookup
+- Supabase integration still does not exist yet
 
 ## Goals
 
@@ -55,13 +56,24 @@ Recommended timing:
 Why:
 
 - the bootstrap schema is stable enough for local development
-- runtime configuration and real DB-backed services are not wired yet
+- runtime configuration and real DB-backed resolver services are now wired
 - creating a production database too early tends to lock in names and assumptions before the app actually uses them
 
 Practical recommendation:
 
 - yes for local development
 - not yet for production or shared environments
+
+For local seeding convenience, the repo now includes:
+
+- [inctrak.db/control_plane.seed.example.sql](../inctrak.db/control_plane.seed.example.sql)
+
+That example seed file includes idempotent SQL for:
+
+- one `cp_users` row
+- one `cp_tenants` row
+- one `cp_tenant_domains` row
+- one `cp_memberships` row
 
 ## Roles
 
@@ -402,7 +414,7 @@ This gives us the minimum safe foundation before we change the full app auth flo
 
 ## Recommended Config Shape
 
-These settings are not wired into `AppSettings` yet, but this is the recommended next config shape so we do not invent it ad hoc later.
+These settings are now the intended config shape for the control-plane resolver path.
 
 Suggested future `AppSettings` keys:
 
@@ -431,11 +443,7 @@ AppSettings:
   SupabaseJwtSecret: ${INCTRAK_SUPABASE_JWT_SECRET}
 ```
 
-What to do right now:
-
-- do not add these env vars to the live YAML yet unless we are ready to wire them into `AppSettings`
-- keep this section as the agreed target shape
-- once we start DB-backed control-plane services, add them to `scripts/inctrak/config.example.yaml` in the same pass as the code
+These keys now belong in the YAML/env config when you want the API to resolve tenant and user data from the control-plane database rather than relying only on trusted header overrides.
 
 ## Open Design Questions
 

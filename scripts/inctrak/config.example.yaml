@@ -21,6 +21,9 @@ AppSettings:
     PermitLimit: 120
     WindowSeconds: 60
     QueueLimit: 0
+  ControlPlaneConnection: Host=localhost;Port=5432;Database=inctrak_control;Username=postgres;Password=${INCTRAK_CONTROL_DB_PASSWORD}
+  TenantTemplateDatabaseName: inctrak_template
+  TenantDatabasePrefix: inctrak_
   IncTrakConnection: Host=localhost;Port=5432;Database=inctrak;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
   FeedbackConnection: Host=localhost;Port=5432;Database=inctrak_feedback;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
   GoogleClientId: ${INCTRAK_GOOGLE_CLIENT_ID}
