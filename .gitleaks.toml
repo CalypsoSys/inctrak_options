@@ -1,0 +1,4 @@
+title = "IncTrak Gitleaks configuration"
+
+[extend]
+useDefault = true

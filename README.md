@@ -40,6 +40,7 @@ The API lives in `shared.inctrak.com/`. The frontend source lives in `frontend/`
 - `npm run test --prefix frontend` runs the frontend unit tests.
 - `node --test scripts/tests/static-sites.test.mjs` runs the static-site regression checks.
 - `node --test scripts/tests/control-plane-schema.test.mjs` checks the control-plane bootstrap SQL.
+- `node --test scripts/tests/gitleaks-config.test.mjs` checks the Gitleaks repo configuration.
 - `node --test scripts/tests/template-bootstrap.test.mjs` checks the tenant template bootstrap SQL.
 - `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
 - `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
@@ -52,6 +53,26 @@ For env-driven local backend runs, copy `scripts/inctrak/config.example.yaml` to
 For control-plane provisioning metadata, use [inctrak.db/control_plane.sql](inctrak.db/control_plane.sql) as the bootstrap source for the shared control-plane PostgreSQL database.
 
 For tenant database provisioning, use [inctrak.db/template-bootstrap.sql](inctrak.db/template-bootstrap.sql) as the bootstrap source for the `inctrak_template` PostgreSQL database. The older [inctrak.db/inctrak.sql](inctrak.db/inctrak.sql) file remains a legacy schema reference.
+
+## Secret Scanning
+
+The repo now includes a standard local Gitleaks baseline:
+
+- [`.gitleaks.toml`](.gitleaks.toml) extends the built-in default rules
+- [`.pre-commit-config.yaml`](.pre-commit-config.yaml) adds an optional pre-commit hook
+- [`.github/workflows/gitleaks.yml`](.github/workflows/gitleaks.yml) runs the official Gitleaks GitHub Action
+
+Useful commands:
+
+```bash
+gitleaks git .
+gitleaks dir .
+pre-commit install
+```
+
+GitHub Actions note:
+
+- the official `gitleaks/gitleaks-action@v2` may require a `GITLEAKS_LICENSE` repository secret for organization-owned repositories
 
 ---
 
