@@ -14,6 +14,13 @@ The control-plane is responsible for:
 
 It is not responsible for storing tenant business data such as grants, schedules, stock classes, or participant vesting details. Those remain in per-tenant databases cloned from `inctrak_template`.
 
+Current repo status:
+
+- the initial bootstrap SQL now exists at [inctrak.db/control_plane.sql](../inctrak.db/control_plane.sql)
+- backend request-scoped tenant/user context scaffolding now exists
+- backend probe endpoints now prove tenant admin versus participant authorization behavior
+- Supabase integration and real database-backed resolver implementations do not exist yet
+
 ## Goals
 
 - support `signup.inctrak.com`, `vesting.inctrak.com`, and `*.inctrak.com`
@@ -37,6 +44,24 @@ There are three core concepts:
 - the relationship between a user and a tenant, including role
 
 The control-plane database is the source of truth for these relationships.
+
+## When To Create The Database
+
+Recommended timing:
+
+- create a local development control-plane database now if you want to begin schema validation and resolver integration work
+- do not create a long-lived production control-plane database yet unless you are ready to commit to the first naming and configuration shape
+
+Why:
+
+- the bootstrap schema is stable enough for local development
+- runtime configuration and real DB-backed services are not wired yet
+- creating a production database too early tends to lock in names and assumptions before the app actually uses them
+
+Practical recommendation:
+
+- yes for local development
+- not yet for production or shared environments
 
 ## Roles
 
@@ -374,6 +399,43 @@ Recommended first implementation slice:
 - admin versus participant enforcement works
 
 This gives us the minimum safe foundation before we change the full app auth flow.
+
+## Recommended Config Shape
+
+These settings are not wired into `AppSettings` yet, but this is the recommended next config shape so we do not invent it ad hoc later.
+
+Suggested future `AppSettings` keys:
+
+- `ControlPlaneConnection`
+  - Postgres connection string for the shared control-plane database
+- `TenantTemplateDatabaseName`
+  - expected template DB name, for example `inctrak_template`
+- `TenantDatabasePrefix`
+  - prefix for provisioned tenant DBs, for example `inctrak_`
+- `SupabaseUrl`
+  - Supabase project URL
+- `SupabaseAnonKey`
+  - frontend/public Supabase key for browser auth flows
+- `SupabaseJwtSecret`
+  - backend JWT validation secret or equivalent verifier configuration
+
+Suggested future YAML shape:
+
+```yaml
+AppSettings:
+  ControlPlaneConnection: Host=localhost;Port=5432;Database=inctrak_control;Username=postgres;Password=${INCTRAK_CONTROL_DB_PASSWORD}
+  TenantTemplateDatabaseName: inctrak_template
+  TenantDatabasePrefix: inctrak_
+  SupabaseUrl: ${INCTRAK_SUPABASE_URL}
+  SupabaseAnonKey: ${INCTRAK_SUPABASE_ANON_KEY}
+  SupabaseJwtSecret: ${INCTRAK_SUPABASE_JWT_SECRET}
+```
+
+What to do right now:
+
+- do not add these env vars to the live YAML yet unless we are ready to wire them into `AppSettings`
+- keep this section as the agreed target shape
+- once we start DB-backed control-plane services, add them to `scripts/inctrak/config.example.yaml` in the same pass as the code
 
 ## Open Design Questions
 

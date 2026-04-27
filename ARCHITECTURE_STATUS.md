@@ -41,13 +41,13 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Signup hostname | `signup.inctrak.com` hosts tenant signup and company creation | Not implemented | Signup flow and company slug reservation do not exist yet. |
 | Public vesting hostname | `vesting.inctrak.com` hosts quick vesting | Not implemented | Quick vesting exists in the SPA and API, but not yet as a dedicated public hostname/app mode. |
 | Tenant hostname resolution | `*.inctrak.com` resolves tenants by subdomain | Not implemented | No tenant-control-plane or hostname resolver exists yet. |
-| Tenant role routing | Same tenant hostname supports both admins and participants with different default routes | Not implemented | Admins should land on admin pages, participants on participant pages, without splitting hostnames. |
-| Tenant authorization boundary | Participant/end-user accounts never gain admin access or admin API capability | Not implemented | Must be enforced in backend authorization, not only in frontend navigation. |
-| Control-plane database | Stores tenants, slugs, memberships, provisioning jobs, and domains | Not implemented | Schema still needs to be designed and introduced. |
+| Tenant role routing | Same tenant hostname supports both admins and participants with different default routes | Partial | Request-scoped tenant/user context and a protected probe endpoint now exist, but real hostname-driven routing and app landing behavior are still pending. |
+| Tenant authorization boundary | Participant/end-user accounts never gain admin access or admin API capability | Partial | Backend role-gated probe endpoints now enforce tenant admin versus participant access, but existing legacy app endpoints are not migrated yet. |
+| Control-plane database | Stores tenants, slugs, memberships, provisioning jobs, and domains | Partial | `inctrak.db/control_plane.sql` now exists as the initial bootstrap source, but it is not wired into runtime services or provisioning yet. |
 | Tenant template database | `inctrak_template` used to clone new tenant databases | Partial | Bootstrap SQL exists; template creation and provisioning automation do not yet exist. |
 | Tenant provisioning pipeline | Create DB, seed tenant, create first admin, mark tenant ready | Not implemented | Needs async job flow and operational state tracking. |
 | Managed auth | Supabase handles auth providers and sessions | Not implemented | Current app still contains legacy auth tables and flows. |
-| Tenant-aware authorization | App maps authenticated users to tenants and roles from control-plane data | Not implemented | This should replace assumptions built into the older group/user model over time. |
+| Tenant-aware authorization | App maps authenticated users to tenants and roles from control-plane data | Partial | Trusted-header resolver interfaces, request context, and role checks now exist as scaffolding ahead of Supabase and control-plane DB integration. |
 | Legacy auth retirement | Old password reset/activation/social flows are removed | Partial | Legacy mail sending has been neutralized, but old auth logic is still present. |
 | Logging and audit | Access/error logging is file-based and production-friendly | Partial | File logging and access logging are in place; structured audit work is still open. |
 
@@ -152,6 +152,9 @@ These pieces already support the future architecture:
 - VS Code local launcher exists for frontend + backend
 - file-based access and error logging exist
 - API rate limiting exists
+- control-plane bootstrap SQL now exists for the shared tenant/identity metadata database
+- request-scoped control-plane tenant/user context scaffolding now exists in the backend
+- tenant admin versus participant enforcement now has a protected backend probe path with tests
 - template bootstrap SQL now exists for tenant DB cloning
 
 ## Open Risks

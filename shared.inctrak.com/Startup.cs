@@ -27,6 +27,10 @@ namespace inctrak.com
         {
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             AppSettings appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>() ?? new AppSettings();
+            services.AddSingleton<RequestContextAccessor>();
+            services.AddSingleton<ITenantResolver, HeaderTenantResolver>();
+            services.AddSingleton<IUserResolver, HeaderUserResolver>();
+            services.AddSingleton<IMembershipResolver, HeaderMembershipResolver>();
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -104,6 +108,7 @@ namespace inctrak.com
 
             app.UseMiddleware<AccessLogMiddleware>();
             app.UseRouting();
+            app.UseMiddleware<ControlPlaneContextMiddleware>();
             app.Use(async (context, next) =>
             {
                 if (env.IsDevelopment() ||

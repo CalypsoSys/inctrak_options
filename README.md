@@ -39,6 +39,7 @@ The API lives in `shared.inctrak.com/`. The frontend source lives in `frontend/`
 - `npm run build --prefix frontend` produces the generated frontend bundle in `frontend/dist/`.
 - `npm run test --prefix frontend` runs the frontend unit tests.
 - `node --test scripts/tests/static-sites.test.mjs` runs the static-site regression checks.
+- `node --test scripts/tests/control-plane-schema.test.mjs` checks the control-plane bootstrap SQL.
 - `node --test scripts/tests/template-bootstrap.test.mjs` checks the tenant template bootstrap SQL.
 - `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
 - `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
@@ -47,6 +48,8 @@ The API lives in `shared.inctrak.com/`. The frontend source lives in `frontend/`
 For local SPA work, run the Vite dev server from `frontend/`. The SPA now calls relative `/api/*` paths, and Vite proxies those requests to `VITE_API_PROXY_TARGET`, which defaults to `http://localhost:5000`.
 
 For env-driven local backend runs, copy `scripts/inctrak/config.example.yaml` to `scripts/inctrak/config.local.yaml`, then use the VS Code launch flow documented in [docs/inctrak_local_vscode.md](docs/inctrak_local_vscode.md). For Cloudflare Pages proxy setup, see [docs/cloudflare-pages-gateway.md](docs/cloudflare-pages-gateway.md).
+
+For control-plane provisioning metadata, use [inctrak.db/control_plane.sql](inctrak.db/control_plane.sql) as the bootstrap source for the shared control-plane PostgreSQL database.
 
 For tenant database provisioning, use [inctrak.db/template-bootstrap.sql](inctrak.db/template-bootstrap.sql) as the bootstrap source for the `inctrak_template` PostgreSQL database. The older [inctrak.db/inctrak.sql](inctrak.db/inctrak.sql) file remains a legacy schema reference.
 
