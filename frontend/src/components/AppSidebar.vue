@@ -66,8 +66,7 @@ const publicItems = [
   { name: 'home', label: 'Dashboard', icon: 'pi-home' },
   { name: 'about', label: 'About', icon: 'pi-info-circle' },
   { name: 'contact', label: 'Contact', icon: 'pi-envelope' },
-  { name: 'privacy', label: 'Privacy', icon: 'pi-shield' },
-  { name: 'terms', label: 'Terms', icon: 'pi-file-edit' }
+  { name: 'privacy', label: 'Privacy', icon: 'pi-shield' }
 ]
 
 function isActive(name: string): boolean {

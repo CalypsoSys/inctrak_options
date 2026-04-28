@@ -64,8 +64,7 @@ const quickLinks = computed(() => {
   return [
     { name: 'about', label: 'About' },
     { name: 'contact', label: 'Contact' },
-    { name: 'privacy', label: 'Privacy' },
-    { name: 'terms', label: 'Terms' }
+    { name: 'privacy', label: 'Privacy' }
   ]
 })
 
