@@ -6,6 +6,11 @@ const DEV_TENANT_ID = import.meta.env.VITE_TENANT_ID?.trim()
 const DEV_TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG?.trim()
 const DEV_TENANT_DB_NAME = import.meta.env.VITE_TENANT_DB_NAME?.trim()
 
+function shouldUseTenantHeaderOverrides(): boolean {
+  const host = window.location.hostname.toLowerCase()
+  return host === '127.0.0.1' || host === 'localhost'
+}
+
 export type ApiFailure = {
   success?: boolean
   login?: boolean
@@ -14,17 +19,19 @@ export type ApiFailure = {
 
 type SessionShape = {
   accessToken?: string
+  tenantId?: string | null
+  tenantSlug?: string | null
+  tenantDatabaseName?: string | null
 }
 
-function getSessionAccessToken(): string | null {
+function getSessionRecord(): SessionShape | null {
   const raw = window.localStorage.getItem(SESSION_KEY)
   if (!raw) {
     return null
   }
 
   try {
-    const parsed = JSON.parse(raw) as SessionShape
-    return parsed.accessToken ?? null
+    return JSON.parse(raw) as SessionShape
   } catch {
     return null
   }
@@ -39,18 +46,23 @@ apiClient.interceptors.request.use((config) => {
 
   config.headers = config.headers ?? {}
 
-  const accessToken = getSessionAccessToken()
-  if (accessToken) {
+  const session = getSessionRecord()
+  const accessToken = session?.accessToken ?? null
+  if (accessToken && !config.headers.Authorization) {
     config.headers.Authorization = `Bearer ${accessToken}`
   }
 
-  if (DEV_TENANT_ID && DEV_TENANT_SLUG) {
-    config.headers['X-IncTrak-Tenant-Id'] = DEV_TENANT_ID
-    config.headers['X-IncTrak-Tenant-Slug'] = DEV_TENANT_SLUG
+  const tenantId = shouldUseTenantHeaderOverrides() ? session?.tenantId?.trim() || DEV_TENANT_ID : null
+  const tenantSlug = shouldUseTenantHeaderOverrides() ? session?.tenantSlug?.trim() || DEV_TENANT_SLUG : null
+  const tenantDatabaseName = shouldUseTenantHeaderOverrides() ? session?.tenantDatabaseName?.trim() || DEV_TENANT_DB_NAME : null
+
+  if (tenantId && tenantSlug && !config.headers['X-IncTrak-Tenant-Id'] && !config.headers['X-IncTrak-Tenant-Slug']) {
+    config.headers['X-IncTrak-Tenant-Id'] = tenantId
+    config.headers['X-IncTrak-Tenant-Slug'] = tenantSlug
   }
 
-  if (DEV_TENANT_DB_NAME) {
-    config.headers['X-IncTrak-Tenant-Db'] = DEV_TENANT_DB_NAME
+  if (tenantDatabaseName && !config.headers['X-IncTrak-Tenant-Db']) {
+    config.headers['X-IncTrak-Tenant-Db'] = tenantDatabaseName
   }
 
   return config

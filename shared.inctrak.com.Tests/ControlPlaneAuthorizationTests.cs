@@ -227,7 +227,58 @@ namespace inctrak.com.Tests
             Assert.Contains("\"Role\":\"admin\"", body);
         }
 
-        private static IWebHostBuilder CreateBuilder(IControlPlaneStore controlPlaneStore = null, ISupabaseTokenValidator tokenValidator = null)
+        [Fact]
+        public async Task Signup_RequiresAuthenticatedSupabaseUser()
+        {
+            using var server = new TestServer(CreateBuilder());
+            using HttpClient client = server.CreateClient();
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/control-plane/signup");
+            request.Content = new StringContent("{\"CompanyName\":\"Calypso Systems\",\"TenantSlug\":\"calypsosys\"}", System.Text.Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Signup_UsesProvisionerForAuthenticatedSupabaseUser()
+        {
+            using var server = new TestServer(CreateBuilder(
+                tokenValidator: new FakeSupabaseTokenValidator
+                {
+                    Identity = new SupabaseIdentity
+                    {
+                        ExternalIdentity = "33333333-3333-3333-3333-333333333333",
+                        EmailAddress = "founder@calypsosys.com"
+                    }
+                },
+                tenantSignupProvisioner: new FakeTenantSignupProvisioner
+                {
+                    Result = new TenantSignupResult
+                    {
+                        TenantId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                        TenantSlug = "calypsosys",
+                        TenantDatabaseName = "inctrak_calypsosys",
+                        Created = true
+                    }
+                }));
+            using HttpClient client = server.CreateClient();
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/control-plane/signup");
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "test-token");
+            request.Content = new StringContent("{\"CompanyName\":\"Calypso Systems\",\"TenantSlug\":\"calypsosys\"}", System.Text.Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"TenantSlug\":\"calypsosys\"", body);
+            Assert.Contains("\"Created\":true", body);
+        }
+
+        private static IWebHostBuilder CreateBuilder(
+            IControlPlaneStore controlPlaneStore = null,
+            ISupabaseTokenValidator tokenValidator = null,
+            ITenantSignupProvisioner tenantSignupProvisioner = null)
         {
             return new WebHostBuilder()
                 .UseEnvironment("Development")
@@ -248,6 +299,11 @@ namespace inctrak.com.Tests
                     if (tokenValidator != null)
                     {
                         services.Replace(ServiceDescriptor.Singleton(tokenValidator));
+                    }
+
+                    if (tenantSignupProvisioner != null)
+                    {
+                        services.Replace(ServiceDescriptor.Singleton(tenantSignupProvisioner));
                     }
                 })
                 .UseStartup<Startup>();
@@ -282,6 +338,16 @@ namespace inctrak.com.Tests
             public Task<SupabaseIdentity> ValidateTokenAsync(string token)
             {
                 return Task.FromResult(Identity ?? new SupabaseIdentity());
+            }
+        }
+
+        private class FakeTenantSignupProvisioner : ITenantSignupProvisioner
+        {
+            public TenantSignupResult Result { get; set; }
+
+            public TenantSignupResult ProvisionInitialTenant(SupabaseIdentity identity, TenantSignupRequest request)
+            {
+                return Result;
             }
         }
     }

@@ -7,6 +7,8 @@ describe('auth-service', () => {
       email: '',
       password: '',
       confirmPassword: '',
+      companyName: '',
+      tenantSlug: '',
       isRegistering: false,
       acceptTerms: false
     })

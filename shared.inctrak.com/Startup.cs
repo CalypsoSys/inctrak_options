@@ -36,6 +36,7 @@ namespace inctrak.com
             services.TryAddSingleton<IControlPlaneStore, NpgsqlControlPlaneStore>();
             services.TryAddSingleton<HmacSupabaseTokenValidator>();
             services.TryAddSingleton<ISupabaseTokenValidator, SupabaseTokenValidator>();
+            services.TryAddSingleton<ITenantSignupProvisioner, TenantSignupProvisioner>();
             services.AddSingleton<ITenantResolver, ControlPlaneTenantResolver>();
             services.AddSingleton<IUserResolver, ControlPlaneUserResolver>();
             services.AddSingleton<IMembershipResolver, ControlPlaneMembershipResolver>();

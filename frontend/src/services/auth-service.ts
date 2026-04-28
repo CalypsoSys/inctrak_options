@@ -5,6 +5,8 @@ export function createLoginForm(): LoginForm {
     email: '',
     password: '',
     confirmPassword: '',
+    companyName: '',
+    tenantSlug: '',
     isRegistering: false,
     acceptTerms: false
   }

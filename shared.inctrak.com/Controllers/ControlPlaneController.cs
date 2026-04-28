@@ -1,3 +1,4 @@
+using System;
 using IncTrak.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +9,12 @@ namespace inctrak.com.Controllers
     public class ControlPlaneController : ControllerBase
     {
         private readonly RequestContextAccessor _requestContextAccessor;
+        private readonly ITenantSignupProvisioner _tenantSignupProvisioner;
 
-        public ControlPlaneController(RequestContextAccessor requestContextAccessor)
+        public ControlPlaneController(RequestContextAccessor requestContextAccessor, ITenantSignupProvisioner tenantSignupProvisioner)
         {
             _requestContextAccessor = requestContextAccessor;
+            _tenantSignupProvisioner = tenantSignupProvisioner;
         }
 
         [HttpGet("tenant-access")]
@@ -60,6 +63,41 @@ namespace inctrak.com.Controllers
                 success = true,
                 Role = userContext.Role == MembershipRole.TenantAdmin ? "admin" : "optionee"
             });
+        }
+
+        [HttpPost("signup")]
+        public IActionResult Signup([FromBody] TenantSignupRequest request)
+        {
+            SupabaseIdentity identity = _requestContextAccessor.GetSupabaseIdentity(HttpContext);
+            if (identity.IsAuthenticated() == false)
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "You must sign in before provisioning a company workspace."
+                });
+            }
+
+            try
+            {
+                TenantSignupResult result = _tenantSignupProvisioner.ProvisionInitialTenant(identity, request);
+                return Ok(new
+                {
+                    success = true,
+                    TenantId = result.TenantId,
+                    TenantSlug = result.TenantSlug,
+                    TenantDatabaseName = result.TenantDatabaseName,
+                    Created = result.Created
+                });
+            }
+            catch (InvalidOperationException excp)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = excp.Message
+                });
+            }
         }
     }
 }

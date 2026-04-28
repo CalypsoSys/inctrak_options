@@ -18,6 +18,18 @@
           </div>
         </div>
         <div v-if="form.isRegistering">
+          <div class="grid gap-5 md:grid-cols-2">
+            <div>
+              <label class="field-label">Company Name</label>
+              <input v-model="form.companyName" class="field-input" type="text" />
+            </div>
+            <div>
+              <label class="field-label">Company Slug</label>
+              <input v-model="form.tenantSlug" class="field-input" type="text" autocapitalize="off" spellcheck="false" />
+            </div>
+          </div>
+        </div>
+        <div v-if="form.isRegistering">
           <label class="field-label">Confirm Password</label>
           <Password v-model="form.confirmPassword" fluid toggle-mask :feedback="false" />
         </div>
@@ -42,7 +54,7 @@
       <ul class="mt-5 space-y-3 text-sm leading-6 text-[var(--app-muted)]">
         <li>Administrators land in the new admin workspace with stock classes, plans, participants, grants, and schedule tools.</li>
         <li>Participants land in the optionee area with stock summary, option summary, and grant detail views.</li>
-        <li>Registration creates Supabase credentials first; actual app access still depends on an IncTrak tenant membership.</li>
+        <li>Registration now provisions the first company workspace and links the first tenant admin after Supabase auth succeeds.</li>
         <li>Participant access is controlled by linking their email to a participant record in the admin workspace.</li>
       </ul>
     </article>
@@ -57,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import axios from 'axios'
 import { reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
@@ -67,6 +80,7 @@ import { useAsyncState } from '@/composables/useAsyncState'
 import { createLoginForm } from '@/services/auth-service'
 import { fetchAppSession } from '@/services/auth-session'
 import { getApiMessage } from '@/services/api'
+import { provisionTenantSignup } from '@/services/tenant-signup'
 import { signInWithPassword, signUpWithPassword } from '@/services/supabase-auth'
 import { useAuthStore } from '@/stores/auth'
 
@@ -78,8 +92,20 @@ const form = reactive(createLoginForm())
 
 async function submitForm(): Promise<void> {
   const email = form.email.trim()
+  const companyName = form.companyName.trim()
+  const tenantSlug = normalizeTenantSlug(form.tenantSlug)
   if (!email || !form.password.trim()) {
     showMessage('Please enter an email address and password.', false)
+    return
+  }
+
+  if (form.isRegistering && !companyName) {
+    showMessage('Please enter a company name.', false)
+    return
+  }
+
+  if (form.isRegistering && !tenantSlug) {
+    showMessage('Please enter a company slug.', false)
     return
   }
 
@@ -101,11 +127,11 @@ async function submitForm(): Promise<void> {
   isBusy.value = true
   try {
     const session = form.isRegistering
-      ? await signUpWithPassword(email, form.password)
+      ? await signUpWithPassword(email, form.password, companyName, tenantSlug)
       : await signInWithPassword(email, form.password)
 
     if (form.isRegistering && !session.access_token) {
-      showMessage('Account created. Check your email to confirm your account before signing in.', true)
+      showMessage('Account created. Check your email to confirm your account, then sign in to finish provisioning your company workspace.', true)
       form.password = ''
       form.confirmPassword = ''
       return
@@ -116,13 +142,18 @@ async function submitForm(): Promise<void> {
     }
 
     const expiresAt = session.expires_at ?? Math.floor(Date.now() / 1000) + session.expires_in
-    const appSession = await fetchAppSession(session.access_token)
+    const resolvedCompanyName = companyName || session.user?.user_metadata?.company_name?.trim() || ''
+    const resolvedTenantSlug = normalizeTenantSlug(tenantSlug || session.user?.user_metadata?.tenant_slug || '')
+    const { appSession, tenant } = await ensureAppSession(session.access_token, resolvedCompanyName, resolvedTenantSlug)
     authStore.setSession(
       session.access_token,
       session.refresh_token,
       expiresAt,
       appSession.Role,
-      session.user?.email ?? email
+      session.user?.email ?? email,
+      tenant?.TenantId ?? null,
+      tenant?.TenantSlug ?? resolvedTenantSlug ?? null,
+      tenant?.TenantDatabaseName ?? null
     )
 
     showMessage(
@@ -154,5 +185,42 @@ async function submitForm(): Promise<void> {
   } finally {
     isBusy.value = false
   }
+}
+
+async function ensureAppSession(accessToken: string, companyName: string, tenantSlug: string) {
+  try {
+    return {
+      appSession: await fetchAppSession(accessToken),
+      tenant: null
+    }
+  } catch (error) {
+    if (!axios.isAxiosError(error) || !error.response || (error.response.status !== 401 && error.response.status !== 403)) {
+      throw error
+    }
+
+    if (!companyName || !tenantSlug) {
+      throw error
+    }
+
+    const tenant = await provisionTenantSignup(companyName, tenantSlug)
+    return {
+      appSession: await fetchAppSession(accessToken, {
+        tenantId: tenant.TenantId,
+        tenantSlug: tenant.TenantSlug,
+        tenantDatabaseName: tenant.TenantDatabaseName
+      }),
+      tenant
+    }
+  }
+}
+
+function normalizeTenantSlug(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 63)
 }
 </script>

@@ -1,6 +1,7 @@
 using System;
 using IncTrak.Data;
 using Microsoft.AspNetCore.Http;
+using Npgsql;
 using Xunit;
 
 namespace inctrak.com.Tests
@@ -103,6 +104,24 @@ namespace inctrak.com.Tests
 
             Assert.Equal(Guid.Parse("22222222-2222-2222-2222-222222222222"), userContext.UserId);
             Assert.Equal("33333333-3333-3333-3333-333333333333", userContext.ExternalIdentity);
+        }
+
+        [Fact]
+        public void ResolveConnectionString_UsesTenantDatabaseFromAmbientContext()
+        {
+            var httpContext = new DefaultHttpContext();
+            var requestContextAccessor = new RequestContextAccessor();
+            requestContextAccessor.SetTenantContext(httpContext, new TenantContext
+            {
+                TenantId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                TenantSlug = "calypsosys",
+                TenantDatabaseName = "inctrak_calypsosys"
+            });
+
+            string resolved = TenantConnectionStringResolver.Resolve("Host=localhost;Port=5432;Database=inctrak;Username=postgres;Password=test");
+            var builder = new NpgsqlConnectionStringBuilder(resolved);
+
+            Assert.Equal("inctrak_calypsosys", builder.Database);
         }
 
         private class FakeControlPlaneStore : IControlPlaneStore

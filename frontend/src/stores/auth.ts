@@ -11,6 +11,9 @@ type SessionRecord = {
   expiresAt: number
   role: UserRole
   email: string | null
+  tenantId: string | null
+  tenantSlug: string | null
+  tenantDatabaseName: string | null
 }
 
 const SESSION_KEY = 'inctrak.session'
@@ -21,6 +24,9 @@ export const useAuthStore = defineStore('auth', () => {
   const expiresAt = ref<number | null>(null)
   const role = ref<UserRole>(null)
   const email = ref<string | null>(null)
+  const tenantId = ref<string | null>(null)
+  const tenantSlug = ref<string | null>(null)
+  const tenantDatabaseName = ref<string | null>(null)
   const isReady = ref(false)
 
   function loadSession(): void {
@@ -37,6 +43,9 @@ export const useAuthStore = defineStore('auth', () => {
       expiresAt.value = parsed.expiresAt || null
       role.value = parsed.role || null
       email.value = parsed.email || null
+      tenantId.value = parsed.tenantId || null
+      tenantSlug.value = parsed.tenantSlug || null
+      tenantDatabaseName.value = parsed.tenantDatabaseName || null
     } catch {
       clearSession()
     }
@@ -57,7 +66,10 @@ export const useAuthStore = defineStore('auth', () => {
         refreshToken: refreshToken.value,
         expiresAt: expiresAt.value,
         role: role.value,
-        email: email.value
+        email: email.value,
+        tenantId: tenantId.value,
+        tenantSlug: tenantSlug.value,
+        tenantDatabaseName: tenantDatabaseName.value
       } satisfies SessionRecord)
     )
   }
@@ -98,12 +110,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function setSession(nextAccessToken: string, nextRefreshToken: string, nextExpiresAt: number, nextRole: UserRole, nextEmail: string | null): void {
+  function setSession(
+    nextAccessToken: string,
+    nextRefreshToken: string,
+    nextExpiresAt: number,
+    nextRole: UserRole,
+    nextEmail: string | null,
+    nextTenantId: string | null = null,
+    nextTenantSlug: string | null = null,
+    nextTenantDatabaseName: string | null = null
+  ): void {
     accessToken.value = nextAccessToken
     refreshToken.value = nextRefreshToken
     expiresAt.value = nextExpiresAt
     role.value = nextRole
     email.value = nextEmail
+    tenantId.value = nextTenantId
+    tenantSlug.value = nextTenantSlug
+    tenantDatabaseName.value = nextTenantDatabaseName
     persistSession()
   }
 
@@ -113,6 +137,9 @@ export const useAuthStore = defineStore('auth', () => {
     expiresAt.value = null
     role.value = null
     email.value = null
+    tenantId.value = null
+    tenantSlug.value = null
+    tenantDatabaseName.value = null
     window.localStorage.removeItem(SESSION_KEY)
   }
 
@@ -124,6 +151,9 @@ export const useAuthStore = defineStore('auth', () => {
     expiresAt,
     role,
     email,
+    tenantId,
+    tenantSlug,
+    tenantDatabaseName,
     isReady,
     isAuthenticated: computed(() => Boolean(accessToken.value && role.value)),
     isAdmin: computed(() => role.value === 'admin'),

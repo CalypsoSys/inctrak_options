@@ -8,6 +8,8 @@ export type LoginForm = {
   email: string
   password: string
   confirmPassword: string
+  companyName: string
+  tenantSlug: string
   isRegistering: boolean
   acceptTerms: boolean
 }

@@ -7,7 +7,12 @@ export type SupabaseSession = {
   expires_in?: number
   expires_at?: number
   user?: {
+    id?: string
     email?: string
+    user_metadata?: {
+      company_name?: string
+      tenant_slug?: string
+    }
   }
 }
 
@@ -45,8 +50,20 @@ export function signInWithPassword(email: string, password: string): Promise<Sup
   return supabaseRequest('token?grant_type=password', { email, password })
 }
 
-export function signUpWithPassword(email: string, password: string): Promise<SupabaseSession> {
-  return supabaseRequest('signup', { email, password })
+export function signUpWithPassword(
+  email: string,
+  password: string,
+  companyName: string,
+  tenantSlug: string
+): Promise<SupabaseSession> {
+  return supabaseRequest('signup', {
+    email,
+    password,
+    data: {
+      company_name: companyName,
+      tenant_slug: tenantSlug
+    }
+  })
 }
 
 export function refreshSupabaseSession(refreshToken: string): Promise<SupabaseSession> {

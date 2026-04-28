@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using System.Threading;
 
 namespace IncTrak.Data
 {
@@ -7,6 +8,7 @@ namespace IncTrak.Data
         private static readonly object TenantContextKey = new object();
         private static readonly object UserContextKey = new object();
         private static readonly object SupabaseIdentityKey = new object();
+        private static readonly AsyncLocal<TenantContext> AmbientTenantContext = new AsyncLocal<TenantContext>();
 
         public TenantContext GetTenantContext(HttpContext httpContext)
         {
@@ -33,6 +35,7 @@ namespace IncTrak.Data
         public void SetTenantContext(HttpContext httpContext, TenantContext tenantContext)
         {
             httpContext.Items[TenantContextKey] = tenantContext;
+            AmbientTenantContext.Value = tenantContext;
         }
 
         public void SetUserContext(HttpContext httpContext, UserContext userContext)
@@ -54,6 +57,11 @@ namespace IncTrak.Data
         public void SetSupabaseIdentity(HttpContext httpContext, SupabaseIdentity identity)
         {
             httpContext.Items[SupabaseIdentityKey] = identity;
+        }
+
+        public static TenantContext GetAmbientTenantContext()
+        {
+            return AmbientTenantContext.Value ?? new TenantContext();
         }
     }
 }
