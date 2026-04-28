@@ -41,6 +41,9 @@
           <label v-if="form.isRegistering" class="flex items-center gap-2 rounded-2xl border border-[var(--app-border)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--app-muted)]">
             <input v-model="form.acceptTerms" type="checkbox" />
             Accept terms
+            <RouterLink class="ml-auto font-bold text-[var(--app-accent)] underline decoration-transparent transition hover:decoration-current" :to="{ name: 'terms' }" target="_blank" rel="noopener noreferrer">
+              View Terms
+            </RouterLink>
           </label>
         </div>
         <div class="flex flex-wrap gap-3">
@@ -202,7 +205,7 @@ async function ensureAppSession(accessToken: string, companyName: string, tenant
       throw error
     }
 
-    const tenant = await provisionTenantSignup(companyName, tenantSlug)
+    const tenant = await provisionTenantSignup(companyName, tenantSlug, accessToken)
     return {
       appSession: await fetchAppSession(accessToken, {
         tenantId: tenant.TenantId,

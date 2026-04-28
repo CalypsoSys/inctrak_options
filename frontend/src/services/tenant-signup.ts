@@ -9,9 +9,21 @@ export type TenantSignupResponse = {
   Created?: boolean
 }
 
-export function provisionTenantSignup(companyName: string, tenantSlug: string): Promise<TenantSignupResponse> {
-  return apiPost<TenantSignupResponse>('/api/control-plane/signup', {
-    CompanyName: companyName,
-    TenantSlug: tenantSlug
-  })
+export function provisionTenantSignup(
+  companyName: string,
+  tenantSlug: string,
+  accessToken: string
+): Promise<TenantSignupResponse> {
+  return apiPost<TenantSignupResponse>(
+    '/api/control-plane/signup',
+    {
+      CompanyName: companyName,
+      TenantSlug: tenantSlug
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
+  )
 }

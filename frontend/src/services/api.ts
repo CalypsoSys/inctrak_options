@@ -101,8 +101,8 @@ export function apiGet<T>(url: string): Promise<T> {
   return request<T>({ method: 'GET', url })
 }
 
-export function apiPost<T>(url: string, data?: unknown): Promise<T> {
-  return request<T>({ method: 'POST', url, data })
+export function apiPost<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  return request<T>({ method: 'POST', url, data, ...config })
 }
 
 export function apiDelete<T>(url: string): Promise<T> {

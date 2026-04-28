@@ -7,6 +7,7 @@ import HomePage from '@/pages/HomePage.vue'
 import AboutPage from '@/pages/AboutPage.vue'
 import ContactPage from '@/pages/ContactPage.vue'
 import PrivacyPage from '@/pages/PrivacyPage.vue'
+import TermsPage from '@/pages/TermsPage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
 import StockClassesPage from '@/pages/StockClassesPage.vue'
 import StockHoldersPage from '@/pages/StockHoldersPage.vue'
@@ -40,6 +41,7 @@ const router = createRouter({
         { path: 'about', name: 'about', component: AboutPage, meta: { title: 'About' } },
         { path: 'support/contact', name: 'contact', component: ContactPage, meta: { title: 'Contact' } },
         { path: 'legal/privacy', name: 'privacy', component: PrivacyPage, meta: { title: 'Privacy Policy' } },
+        { path: 'legal/terms', name: 'terms', component: TermsPage, meta: { title: 'Terms of Service' } },
         { path: 'auth/login', name: 'login', component: LoginPage, meta: { title: 'Login', publicOnly: true } },
         { path: 'admin/stock-classes/:id?', name: 'stock-classes', component: StockClassesPage, meta: { title: 'Stock Classes', requiresAuth: true, requiresAdmin: true } },
         { path: 'admin/stock-holders/:id?', name: 'stock-holders', component: StockHoldersPage, meta: { title: 'Stock Holders', requiresAuth: true, requiresAdmin: true } },
