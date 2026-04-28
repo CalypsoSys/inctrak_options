@@ -188,6 +188,7 @@ ClientBin/
 *.publishsettings
 node_modules/
 frontend/dist/
+frontend-vesting/dist/
 .codex
 orleans.codegen.cs
 .vscode/shared.inctrak-api.env
