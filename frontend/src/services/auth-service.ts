@@ -1,20 +1,14 @@
-import { apiGet, apiPost } from '@/services/api'
+import { apiPost } from '@/services/api'
 import type { ApiResponse, LoginForm, LoginResponse } from '@/services/types'
 
 export function createLoginForm(): LoginForm {
   return {
-    USER_NAME: '',
-    PASSWORD: '',
-    PASSWORD2: '',
-    EMAIL_ADDRESS: '',
-    GROUP_NAME: '',
-    IS_REGISTERING: false,
-    ACCEPT_TERMS: false
+    email: '',
+    password: '',
+    confirmPassword: '',
+    isRegistering: false,
+    acceptTerms: false
   }
-}
-
-export function fetchLoginDefaults(): Promise<LoginForm> {
-  return apiGet<LoginForm>('/api/login/get_creds/')
 }
 
 export function activateAccount(key: string): Promise<ApiResponse> {

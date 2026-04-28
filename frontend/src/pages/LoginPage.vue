@@ -10,39 +10,29 @@
         <div class="grid gap-5 md:grid-cols-2">
           <div>
             <label class="field-label">Email Address</label>
-            <input v-model="form.USER_NAME" class="field-input" type="text" />
+            <input v-model="form.email" class="field-input" type="email" />
           </div>
           <div>
             <label class="field-label">Password</label>
-            <Password v-model="form.PASSWORD" fluid toggle-mask :feedback="false" />
+            <Password v-model="form.password" fluid toggle-mask :feedback="false" />
           </div>
         </div>
-        <div v-if="form.IS_REGISTERING" class="grid gap-5 md:grid-cols-2">
-          <div>
-            <label class="field-label">Email Address</label>
-            <input v-model="form.EMAIL_ADDRESS" class="field-input" type="email" />
-          </div>
-          <div>
-            <label class="field-label">Company / Group Name</label>
-            <input v-model="form.GROUP_NAME" class="field-input" type="text" />
-          </div>
-        </div>
-        <div v-if="form.IS_REGISTERING">
+        <div v-if="form.isRegistering">
           <label class="field-label">Confirm Password</label>
-          <Password v-model="form.PASSWORD2" fluid toggle-mask :feedback="false" />
+          <Password v-model="form.confirmPassword" fluid toggle-mask :feedback="false" />
         </div>
         <div class="grid gap-4 md:grid-cols-2">
           <label class="flex items-center gap-2 rounded-2xl border border-[var(--app-border)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--app-muted)]">
-            <input v-model="form.IS_REGISTERING" type="checkbox" />
+            <input v-model="form.isRegistering" type="checkbox" />
             Register new account
           </label>
-          <label class="flex items-center gap-2 rounded-2xl border border-[var(--app-border)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--app-muted)]">
-            <input v-model="form.ACCEPT_TERMS" type="checkbox" />
+          <label v-if="form.isRegistering" class="flex items-center gap-2 rounded-2xl border border-[var(--app-border)] bg-white/60 px-4 py-3 text-sm font-semibold text-[var(--app-muted)]">
+            <input v-model="form.acceptTerms" type="checkbox" />
             Accept terms
           </label>
         </div>
         <div class="flex flex-wrap gap-3">
-          <Button type="submit" :loading="isBusy" :label="form.IS_REGISTERING ? 'Create Account' : 'Login'" />
+          <Button type="submit" :loading="isBusy" :label="form.isRegistering ? 'Create Account' : 'Login'" />
           <RouterLink :to="{ name: 'reset-password-request' }">
             <Button label="Reset Password" severity="secondary" variant="outlined" />
           </RouterLink>
@@ -69,14 +59,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue'
+import { reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Password from 'primevue/password'
 import AppDialog from '@/components/AppDialog.vue'
 import PageIntro from '@/components/PageIntro.vue'
 import { useAsyncState } from '@/composables/useAsyncState'
-import { createLoginForm, fetchLoginDefaults } from '@/services/auth-service'
+import { createLoginForm } from '@/services/auth-service'
 import { fetchAppSession } from '@/services/auth-session'
 import { getApiMessage } from '@/services/api'
 import { signInWithPassword, signUpWithPassword } from '@/services/supabase-auth'
@@ -88,27 +78,44 @@ const authStore = useAuthStore()
 const { isBusy, dialogVisible, isSuccess, message, showMessage } = useAsyncState()
 const form = reactive(createLoginForm())
 
-onMounted(async () => {
-  Object.assign(form, await fetchLoginDefaults())
-})
-
 async function submitForm(): Promise<void> {
-  const email = form.USER_NAME.trim()
-  if (!email || !form.PASSWORD.trim()) {
+  const email = form.email.trim()
+  if (!email || !form.password.trim()) {
     showMessage('Please enter an email address and password.', false)
     return
   }
 
-  if (form.IS_REGISTERING && !form.ACCEPT_TERMS) {
+  if (form.isRegistering && !form.confirmPassword.trim()) {
+    showMessage('Please confirm your password.', false)
+    return
+  }
+
+  if (form.isRegistering && form.password !== form.confirmPassword) {
+    showMessage('Passwords do not match.', false)
+    return
+  }
+
+  if (form.isRegistering && !form.acceptTerms) {
     showMessage('Please accept the terms and conditions.', false)
     return
   }
 
   isBusy.value = true
   try {
-    const session = form.IS_REGISTERING
-      ? await signUpWithPassword(email, form.PASSWORD)
-      : await signInWithPassword(email, form.PASSWORD)
+    const session = form.isRegistering
+      ? await signUpWithPassword(email, form.password)
+      : await signInWithPassword(email, form.password)
+
+    if (form.isRegistering && !session.access_token) {
+      showMessage('Account created. Check your email to confirm your account before signing in.', true)
+      form.password = ''
+      form.confirmPassword = ''
+      return
+    }
+
+    if (!session.access_token || !session.refresh_token || !session.expires_in) {
+      throw new Error('Supabase did not return a usable session.')
+    }
 
     const expiresAt = session.expires_at ?? Math.floor(Date.now() / 1000) + session.expires_in
     const appSession = await fetchAppSession(session.access_token)
@@ -121,7 +128,7 @@ async function submitForm(): Promise<void> {
     )
 
     showMessage(
-      form.IS_REGISTERING
+      form.isRegistering
         ? 'Account created and signed in.'
         : 'Login successful.',
       true
@@ -140,7 +147,7 @@ async function submitForm(): Promise<void> {
     showMessage(
       getApiMessage(
         error,
-        form.IS_REGISTERING
+        form.isRegistering
           ? 'Unable to create the Supabase account.'
           : 'Unable to complete the Supabase login request.'
       ),

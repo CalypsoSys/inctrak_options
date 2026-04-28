@@ -2,9 +2,9 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.trim()
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim()
 
 export type SupabaseSession = {
-  access_token: string
-  refresh_token: string
-  expires_in: number
+  access_token?: string
+  refresh_token?: string
+  expires_in?: number
   expires_at?: number
   user?: {
     email?: string

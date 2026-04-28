@@ -1,40 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { acceptTerms, createLoginForm, fetchLoginDefaults } from '@/services/auth-service'
+import { acceptTerms, createLoginForm } from '@/services/auth-service'
 
-const { apiGetMock, apiPostMock } = vi.hoisted(() => ({
-  apiGetMock: vi.fn(),
+const { apiPostMock } = vi.hoisted(() => ({
   apiPostMock: vi.fn()
 }))
 
 vi.mock('@/services/api', () => ({
-  apiGet: apiGetMock,
   apiPost: apiPostMock
 }))
 
 describe('auth-service', () => {
   beforeEach(() => {
-    apiGetMock.mockReset()
     apiPostMock.mockReset()
   })
 
-  it('creates a login form without legacy Google state', () => {
+  it('creates a login form without legacy server defaults', () => {
     expect(createLoginForm()).toEqual({
-      USER_NAME: '',
-      PASSWORD: '',
-      PASSWORD2: '',
-      EMAIL_ADDRESS: '',
-      GROUP_NAME: '',
-      IS_REGISTERING: false,
-      ACCEPT_TERMS: false
+      email: '',
+      password: '',
+      confirmPassword: '',
+      isRegistering: false,
+      acceptTerms: false
     })
-  })
-
-  it('fetches login defaults from the API', async () => {
-    apiGetMock.mockResolvedValue({ USER_NAME: '' })
-
-    await fetchLoginDefaults()
-
-    expect(apiGetMock).toHaveBeenCalledWith('/api/login/get_creds/')
   })
 
   it('posts accept-terms requests to the legacy endpoint', async () => {

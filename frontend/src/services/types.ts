@@ -5,13 +5,11 @@ export type ApiResponse = {
 }
 
 export type LoginForm = {
-  USER_NAME: string
-  PASSWORD: string
-  PASSWORD2: string
-  EMAIL_ADDRESS: string
-  GROUP_NAME: string
-  IS_REGISTERING: boolean
-  ACCEPT_TERMS: boolean
+  email: string
+  password: string
+  confirmPassword: string
+  isRegistering: boolean
+  acceptTerms: boolean
 }
 
 export type LoginResponse = ApiResponse & {

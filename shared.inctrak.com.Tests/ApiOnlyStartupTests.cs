@@ -27,9 +27,9 @@ namespace inctrak.com.Tests
         {
             using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
             using HttpClient client = server.CreateClient();
-            using var request = new HttpRequestMessage(HttpMethod.Options, "/api/login/get_creds/");
+            using var request = new HttpRequestMessage(HttpMethod.Options, "/api/login/resetpassword/");
             request.Headers.Add("Origin", "https://inctrak.com");
-            request.Headers.Add("Access-Control-Request-Method", "GET");
+            request.Headers.Add("Access-Control-Request-Method", "POST");
 
             HttpResponseMessage response = await client.SendAsync(request);
 
@@ -53,7 +53,9 @@ namespace inctrak.com.Tests
                 .UseStartup<Startup>());
             using HttpClient client = server.CreateClient();
 
-            HttpResponseMessage response = await client.GetAsync("/api/login/get_creds/");
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/login/resetpassword/");
+            request.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.SendAsync(request);
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         }
@@ -74,8 +76,9 @@ namespace inctrak.com.Tests
                 })
                 .UseStartup<Startup>());
             using HttpClient client = server.CreateClient();
-            using var request = new HttpRequestMessage(HttpMethod.Get, "/api/login/get_creds/");
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/login/resetpassword/");
             request.Headers.Add("X-Test-Gateway", "super-secret");
+            request.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = await client.SendAsync(request);
 
@@ -98,10 +101,12 @@ namespace inctrak.com.Tests
                 })
                 .UseStartup<Startup>());
             using HttpClient client = server.CreateClient();
-            using var firstRequest = new HttpRequestMessage(HttpMethod.Get, "/api/login/get_creds/");
+            using var firstRequest = new HttpRequestMessage(HttpMethod.Post, "/api/login/resetpassword/");
             firstRequest.Headers.Add("CF-Connecting-IP", "203.0.113.10");
-            using var secondRequest = new HttpRequestMessage(HttpMethod.Get, "/api/login/get_creds/");
+            firstRequest.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            using var secondRequest = new HttpRequestMessage(HttpMethod.Post, "/api/login/resetpassword/");
             secondRequest.Headers.Add("CF-Connecting-IP", "203.0.113.10");
+            secondRequest.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
 
             HttpResponseMessage firstResponse = await client.SendAsync(firstRequest);
             HttpResponseMessage secondResponse = await client.SendAsync(secondRequest);
@@ -110,6 +115,31 @@ namespace inctrak.com.Tests
             Assert.Equal(HttpStatusCode.TooManyRequests, secondResponse.StatusCode);
             Assert.True(secondResponse.Headers.Contains("Retry-After"));
             Assert.Contains("60", secondResponse.Headers.GetValues("Retry-After"));
+        }
+
+        [Fact]
+        public async Task ApiOnlyHost_DoesNotExposeLegacyInternalLoginEndpoint()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/login/login_internal/");
+            request.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ApiOnlyHost_DoesNotExposeLegacyGoogleLoginEndpoint()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/api/login/login_google_user/");
+
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }
