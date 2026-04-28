@@ -31,13 +31,17 @@ IncTrak provides an intuitive, always-accessible experience for both administrat
 
 ## Development
 
-The API lives in `shared.inctrak.com/`. The frontend source lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, and the `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
+The API lives in `shared.inctrak.com/`. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, and the public quick-vesting app now lives in `frontend-vesting/` as a separate Vue + Vite frontend. The `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
 
 - `./build.sh` builds and tests the frontend, then builds the API project and its test project from the repo root.
 - `npm install --prefix frontend` installs frontend dependencies.
+- `npm install --prefix frontend-vesting` installs public vesting frontend dependencies.
 - `npm run dev --prefix frontend` starts the Vite dev server.
+- `npm run dev --prefix frontend-vesting` starts the public vesting Vite dev server on `127.0.0.1:5176`.
 - `npm run build --prefix frontend` produces the generated frontend bundle in `frontend/dist/`.
+- `npm run build --prefix frontend-vesting` produces the generated public vesting bundle in `frontend-vesting/dist/`.
 - `npm run test --prefix frontend` runs the frontend unit tests.
+- `npm run test --prefix frontend-vesting` runs the public vesting frontend unit tests.
 - `node --test scripts/tests/static-sites.test.mjs` runs the static-site regression checks.
 - `node --test scripts/tests/control-plane-schema.test.mjs` checks the control-plane bootstrap SQL.
 - `node --test scripts/tests/gitleaks-config.test.mjs` checks the Gitleaks repo configuration.

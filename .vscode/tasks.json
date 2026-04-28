@@ -106,6 +106,55 @@
         }
       },
       "problemMatcher": []
+    },
+    {
+      "label": "frontend-vesting: dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend-vesting",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*VITE.*",
+          "endsPattern": ".*Local:.*"
+        }
+      }
+    },
+    {
+      "label": "frontend-vesting: prepare browser launch",
+      "dependsOn": [
+        "frontend-vesting: dev",
+        "backend: wait for ready"
+      ],
+      "dependsOrder": "parallel"
+    },
+    {
+      "label": "frontend-vesting: build",
+      "type": "shell",
+      "command": "npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend-vesting",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "problemMatcher": []
     }
   ]
 }
