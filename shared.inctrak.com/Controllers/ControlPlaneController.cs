@@ -10,11 +10,13 @@ namespace inctrak.com.Controllers
     {
         private readonly RequestContextAccessor _requestContextAccessor;
         private readonly ITenantSignupProvisioner _tenantSignupProvisioner;
+        private readonly IControlPlaneStore _controlPlaneStore;
 
-        public ControlPlaneController(RequestContextAccessor requestContextAccessor, ITenantSignupProvisioner tenantSignupProvisioner)
+        public ControlPlaneController(RequestContextAccessor requestContextAccessor, ITenantSignupProvisioner tenantSignupProvisioner, IControlPlaneStore controlPlaneStore)
         {
             _requestContextAccessor = requestContextAccessor;
             _tenantSignupProvisioner = tenantSignupProvisioner;
+            _controlPlaneStore = controlPlaneStore;
         }
 
         [HttpGet("tenant-access")]
@@ -98,6 +100,31 @@ namespace inctrak.com.Controllers
                     message = excp.Message
                 });
             }
+        }
+
+        [HttpGet("slug-availability")]
+        public IActionResult SlugAvailability([FromQuery] string tenantSlug)
+        {
+            string normalizedSlug = TenantSignupProvisioner.NormalizeSlugForUi(tenantSlug);
+            if (string.IsNullOrWhiteSpace(normalizedSlug))
+            {
+                return Ok(new
+                {
+                    success = true,
+                    TenantSlug = normalizedSlug,
+                    Available = false,
+                    Message = "Enter a company slug."
+                });
+            }
+
+            bool available = _controlPlaneStore.IsTenantSlugAvailable(normalizedSlug);
+            return Ok(new
+            {
+                success = true,
+                TenantSlug = normalizedSlug,
+                Available = available,
+                Message = available ? "Company slug is available." : "That company slug is already in use or reserved."
+            });
         }
     }
 }

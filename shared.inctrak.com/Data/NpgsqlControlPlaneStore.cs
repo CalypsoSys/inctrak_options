@@ -101,5 +101,42 @@ limit 1;";
             object value = command.ExecuteScalar();
             return MembershipRoleParser.Parse(value?.ToString());
         }
+
+        public bool IsTenantSlugAvailable(string tenantSlug)
+        {
+            if (string.IsNullOrWhiteSpace(_settings.GetControlPlaneConnection()) || string.IsNullOrWhiteSpace(tenantSlug))
+            {
+                return false;
+            }
+
+            string normalizedSlug = tenantSlug.Trim();
+            using var connection = new NpgsqlConnection(_settings.GetControlPlaneConnection());
+            connection.Open();
+
+            using (var reservedCommand = connection.CreateCommand())
+            {
+                reservedCommand.CommandText = @"
+select 1
+from cp_reserved_slugs
+where lower(slug_value) = lower(@tenant_slug)
+limit 1;";
+                reservedCommand.Parameters.AddWithValue("tenant_slug", normalizedSlug);
+
+                if (reservedCommand.ExecuteScalar() != null)
+                {
+                    return false;
+                }
+            }
+
+            using var tenantCommand = connection.CreateCommand();
+            tenantCommand.CommandText = @"
+select 1
+from cp_tenants
+where lower(tenant_slug) = lower(@tenant_slug)
+limit 1;";
+            tenantCommand.Parameters.AddWithValue("tenant_slug", normalizedSlug);
+
+            return tenantCommand.ExecuteScalar() == null;
+        }
     }
 }

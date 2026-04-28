@@ -143,6 +143,11 @@ namespace inctrak.com.Tests
             {
                 return MembershipRole.None;
             }
+
+            public bool IsTenantSlugAvailable(string tenantSlug)
+            {
+                return true;
+            }
         }
     }
 }

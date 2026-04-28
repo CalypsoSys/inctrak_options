@@ -29,7 +29,7 @@ namespace IncTrak.Data
             }
 
             string companyName = request?.CompanyName?.Trim();
-            string normalizedSlug = NormalizeSlug(request?.TenantSlug);
+            string normalizedSlug = NormalizeSlugForUi(request?.TenantSlug);
             if (string.IsNullOrWhiteSpace(companyName))
             {
                 throw new InvalidOperationException("Company name is required.");
@@ -401,7 +401,7 @@ from created_group;";
             throw new FileNotFoundException("Unable to locate inctrak.db/inctrak.sql for tenant provisioning.");
         }
 
-        private static string NormalizeSlug(string value)
+        public static string NormalizeSlugForUi(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
             {

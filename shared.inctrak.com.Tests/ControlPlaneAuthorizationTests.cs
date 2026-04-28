@@ -275,6 +275,22 @@ namespace inctrak.com.Tests
             Assert.Contains("\"Created\":true", body);
         }
 
+        [Fact]
+        public async Task SlugAvailability_ReturnsUnavailableForReservedOrExistingSlug()
+        {
+            using var server = new TestServer(CreateBuilder(controlPlaneStore: new FakeControlPlaneStore
+            {
+                SlugAvailable = false
+            }));
+            using HttpClient client = server.CreateClient();
+
+            HttpResponseMessage response = await client.GetAsync("/api/control-plane/slug-availability?tenantSlug=signup");
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"Available\":false", body);
+        }
+
         private static IWebHostBuilder CreateBuilder(
             IControlPlaneStore controlPlaneStore = null,
             ISupabaseTokenValidator tokenValidator = null,
@@ -314,6 +330,7 @@ namespace inctrak.com.Tests
             public ControlPlaneTenantRecord Tenant { get; set; }
             public ControlPlaneUserRecord User { get; set; }
             public MembershipRole MembershipRole { get; set; }
+            public bool SlugAvailable { get; set; } = true;
 
             public ControlPlaneTenantRecord FindTenantByHostName(string hostName)
             {
@@ -325,11 +342,16 @@ namespace inctrak.com.Tests
                 return User;
             }
 
-            public MembershipRole FindMembershipRole(string tenantId, string userId)
-            {
-                return MembershipRole;
-            }
+        public MembershipRole FindMembershipRole(string tenantId, string userId)
+        {
+            return MembershipRole;
         }
+
+        public bool IsTenantSlugAvailable(string tenantSlug)
+        {
+            return SlugAvailable;
+        }
+    }
 
         private class FakeSupabaseTokenValidator : ISupabaseTokenValidator
         {

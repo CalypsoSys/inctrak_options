@@ -25,7 +25,10 @@
             </div>
             <div>
               <label class="field-label">Company Slug</label>
-              <input v-model="form.tenantSlug" class="field-input" type="text" autocapitalize="off" spellcheck="false" />
+              <input v-model="form.tenantSlug" class="field-input" type="text" autocapitalize="off" spellcheck="false" @input="slugWasManuallyEdited = true" />
+              <p v-if="slugStatusMessage" class="mt-2 text-sm font-semibold" :class="slugAvailable === true ? 'text-emerald-700' : slugAvailable === false ? 'text-rose-600' : 'text-[var(--app-muted)]'">
+                {{ slugStatusMessage }}
+              </p>
             </div>
           </div>
         </div>
@@ -48,11 +51,11 @@
           <Button
             type="submit"
             :loading="isBusy"
-            :disabled="form.isRegistering && !form.acceptTerms"
+            :disabled="form.isRegistering && (!form.acceptTerms || slugAvailable !== true)"
             :label="form.isRegistering ? 'Create Account' : 'Login'"
           />
-          <p v-if="form.isRegistering && !form.acceptTerms" class="self-center text-sm font-semibold text-[var(--app-muted)]">
-            Review and accept the Terms of Service before creating your account.
+          <p v-if="form.isRegistering && submitBlockMessage" class="self-center text-sm font-semibold text-[var(--app-muted)]">
+            {{ submitBlockMessage }}
           </p>
         </div>
       </form>
@@ -198,7 +201,7 @@
 
 <script setup lang="ts">
 import axios from 'axios'
-import { nextTick, reactive, ref } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -209,6 +212,7 @@ import { useAsyncState } from '@/composables/useAsyncState'
 import { createLoginForm } from '@/services/auth-service'
 import { fetchAppSession } from '@/services/auth-session'
 import { getApiMessage } from '@/services/api'
+import { fetchTenantSlugAvailability, normalizeTenantSlug } from '@/services/tenant-slug'
 import { provisionTenantSignup } from '@/services/tenant-signup'
 import { signInWithPassword, signUpWithPassword } from '@/services/supabase-auth'
 import { useAuthStore } from '@/stores/auth'
@@ -221,6 +225,26 @@ const form = reactive(createLoginForm())
 const termsVisible = ref(false)
 const canAcceptTerms = ref(false)
 const termsScrollContainer = ref<HTMLElement | null>(null)
+const slugAvailable = ref<boolean | null>(null)
+const slugStatusMessage = ref('')
+const slugWasManuallyEdited = ref(false)
+let slugAvailabilityTimer: ReturnType<typeof setTimeout> | null = null
+
+const submitBlockMessage = computed(() => {
+  if (!form.isRegistering) {
+    return ''
+  }
+
+  if (!form.acceptTerms) {
+    return 'Review and accept the Terms of Service before creating your account.'
+  }
+
+  if (slugAvailable.value !== true) {
+    return slugStatusMessage.value || 'Choose an available company slug before creating your account.'
+  }
+
+  return ''
+})
 
 async function submitForm(): Promise<void> {
   const email = form.email.trim()
@@ -346,16 +370,6 @@ async function ensureAppSession(accessToken: string, companyName: string, tenant
   }
 }
 
-function normalizeTenantSlug(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, '-')
-    .replace(/-{2,}/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 63)
-}
-
 function openTermsDialog(): void {
   termsVisible.value = true
   canAcceptTerms.value = false
@@ -384,4 +398,70 @@ function acceptTerms(): void {
   form.acceptTerms = true
   termsVisible.value = false
 }
+
+watch(
+  () => form.companyName,
+  (value) => {
+    if (!form.isRegistering || slugWasManuallyEdited.value) {
+      return
+    }
+
+    form.tenantSlug = normalizeTenantSlug(value)
+  }
+)
+
+watch(
+  () => form.isRegistering,
+  (isRegistering) => {
+    if (!isRegistering) {
+      slugAvailable.value = null
+      slugStatusMessage.value = ''
+      slugWasManuallyEdited.value = false
+      return
+    }
+
+    if (!slugWasManuallyEdited.value) {
+      form.tenantSlug = normalizeTenantSlug(form.companyName)
+    }
+  }
+)
+
+watch(
+  () => form.tenantSlug,
+  (value) => {
+    if (!form.isRegistering) {
+      return
+    }
+
+    const normalized = normalizeTenantSlug(value)
+    if (value !== normalized) {
+      form.tenantSlug = normalized
+      return
+    }
+
+    if (slugAvailabilityTimer) {
+      clearTimeout(slugAvailabilityTimer)
+    }
+
+    if (!normalized) {
+      slugAvailable.value = null
+      slugStatusMessage.value = 'Enter a company slug.'
+      return
+    }
+
+    slugAvailable.value = null
+    slugStatusMessage.value = 'Checking company slug availability...'
+    slugAvailabilityTimer = setTimeout(async () => {
+      try {
+        const response = await fetchTenantSlugAvailability(normalized)
+        form.tenantSlug = response.TenantSlug ?? normalized
+        slugAvailable.value = response.Available === true
+        slugStatusMessage.value = response.Message ?? ''
+      } catch {
+        slugAvailable.value = false
+        slugStatusMessage.value = 'Unable to verify the company slug right now.'
+      }
+    }, 250)
+  }
+)
 </script>
