@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createLoginForm, submitLogin } from '@/services/auth-service'
+import { acceptTerms, createLoginForm, fetchLoginDefaults } from '@/services/auth-service'
 
 const { apiGetMock, apiPostMock } = vi.hoisted(() => ({
   apiGetMock: vi.fn(),
@@ -29,32 +29,22 @@ describe('auth-service', () => {
     })
   })
 
-  it('posts login requests to the internal login endpoint', async () => {
-    apiPostMock.mockResolvedValue({ success: true })
+  it('fetches login defaults from the API', async () => {
+    apiGetMock.mockResolvedValue({ USER_NAME: '' })
 
-    await submitLogin({
-      ...createLoginForm(),
-      USER_NAME: 'founder',
-      PASSWORD: 'secret'
-    })
+    await fetchLoginDefaults()
 
-    expect(apiPostMock).toHaveBeenCalledWith('/api/login/login_internal/', expect.any(Object))
+    expect(apiGetMock).toHaveBeenCalledWith('/api/login/get_creds/')
   })
 
-  it('posts registration requests to the internal registration endpoint', async () => {
+  it('posts accept-terms requests to the legacy endpoint', async () => {
     apiPostMock.mockResolvedValue({ success: true })
 
-    await submitLogin({
-      ...createLoginForm(),
-      USER_NAME: 'founder',
-      PASSWORD: 'secret',
-      PASSWORD2: 'secret',
-      EMAIL_ADDRESS: 'founder@calypsosys.com',
-      GROUP_NAME: 'Calypso Systems',
-      IS_REGISTERING: true,
-      ACCEPT_TERMS: true
-    })
+    await acceptTerms('terms-key', true)
 
-    expect(apiPostMock).toHaveBeenCalledWith('/api/login/register_internal/', expect.any(Object))
+    expect(apiPostMock).toHaveBeenCalledWith('/api/login/accept_terms/', {
+      AcceptTermsKey: 'terms-key',
+      AcceptTerms: true
+    })
   })
 })

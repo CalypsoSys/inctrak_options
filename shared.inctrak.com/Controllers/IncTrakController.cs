@@ -83,7 +83,9 @@ namespace IncTrak.Controllers
             try
             {
                 uuidKey = RequestAuthReader.GetUuid(Request);
-                if (passedUuid != Guid.Empty.ToString() && uuidKey != passedUuid)
+                if (passedUuid != Guid.Empty.ToString() &&
+                    uuidKey != Guid.Empty.ToString() &&
+                    uuidKey != passedUuid)
                 {
                     if (noNull)
                         return new LoginRights(passedUuid, false, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty);
@@ -94,6 +96,11 @@ namespace IncTrak.Controllers
                 if (context != null)
                 {
                     Users user = AccessController.GetLoginUserKey(context, uuidKey);
+                    if (user == null)
+                    {
+                        user = ResolveSupabaseLoginUser(context);
+                    }
+
                     if (user != null)
                     {
                         if (user.Administrator)
@@ -112,6 +119,38 @@ namespace IncTrak.Controllers
                 return new LoginRights(uuidKey, false, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty);
             else
                 return null;
+        }
+
+        protected Users ResolveSupabaseLoginUser(inctrakContext context)
+        {
+            if (context == null || HttpContext == null)
+            {
+                return null;
+            }
+
+            RequestContextAccessor requestContextAccessor = HttpContext.RequestServices.GetService(typeof(RequestContextAccessor)) as RequestContextAccessor;
+            if (requestContextAccessor == null)
+            {
+                return null;
+            }
+
+            SupabaseIdentity identity = requestContextAccessor.GetSupabaseIdentity(HttpContext);
+            if (identity.IsAuthenticated() == false || string.IsNullOrWhiteSpace(identity.EmailAddress))
+            {
+                return null;
+            }
+
+            TenantContext tenantContext = requestContextAccessor.GetTenantContext(HttpContext);
+            string tenantSlug = tenantContext?.TenantSlug;
+            string normalizedEmail = identity.EmailAddress.Trim().ToLowerInvariant();
+
+            IQueryable<Users> query = context.Users.Where(u => u.EmailAddress.ToLower() == normalizedEmail);
+            if (string.IsNullOrWhiteSpace(tenantSlug) == false)
+            {
+                query = query.Where(u => u.GroupFkNavigation.GroupKey == tenantSlug);
+            }
+
+            return query.OrderByDescending(u => u.Administrator).FirstOrDefault();
         }
 
         protected const int SearchLimit = 50;

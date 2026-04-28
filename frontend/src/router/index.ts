@@ -72,8 +72,9 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore()
+  await authStore.initialize()
 
   if (to.meta.publicOnly && authStore.isAuthenticated) {
     return authStore.isAdmin ? { name: 'stock-classes' } : { name: 'participant-stocks' }

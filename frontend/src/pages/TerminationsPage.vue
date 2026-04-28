@@ -92,13 +92,11 @@ import { useAsyncState } from '@/composables/useAsyncState'
 import { deleteTermination, fetchTermination, fetchTerminations, saveTermination } from '@/services/admin-service'
 import { getApiMessage } from '@/services/api'
 import type { TermFromType, Termination } from '@/services/types'
-import { useAuthStore } from '@/stores/auth'
 import { EMPTY_GUID } from '@/utils/constants'
 import { validateTermination } from '@/utils/validators'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const { isBusy, dialogVisible, isSuccess, message, showMessage } = useAsyncState()
 
 const items = ref<Termination[]>([])
@@ -144,7 +142,7 @@ async function loadItem(id = ''): Promise<void> {
     return
   }
 
-  const response = await fetchTermination(id, authStore.uuid!)
+  const response = await fetchTermination(id)
   termFromTypes.value = response.TermFromType
   Object.assign(form, response.Termination)
   await router.replace({ name: 'termination-rules', params: { id } })
@@ -161,7 +159,7 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveTermination({
       Key: currentId.value || EMPTY_GUID,
-      UUID: authStore.uuid!,
+      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Termination rule saved.', response.success !== false)
@@ -181,7 +179,7 @@ async function removeItem(): Promise<void> {
 
   isBusy.value = true
   try {
-    const response = await deleteTermination(currentId.value, authStore.uuid!)
+    const response = await deleteTermination(currentId.value)
     showMessage(response.message ?? 'Termination rule removed.', response.success !== false)
     items.value = response.Terminations
     await loadItem(EMPTY_GUID)

@@ -93,14 +93,12 @@ import { useAsyncState } from '@/composables/useAsyncState'
 import { deleteStockHolder, fetchStockHolder, saveStockHolder, searchParticipantLookup, searchStockHolders } from '@/services/admin-service'
 import { getApiMessage } from '@/services/api'
 import type { ParticipantSummary, StockClass, StockHolder } from '@/services/types'
-import { useAuthStore } from '@/stores/auth'
 import { EMPTY_GUID } from '@/utils/constants'
 import { formatNumber, toDateInputValue } from '@/utils/formatters'
 import { validateStockHolder } from '@/utils/validators'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const { isBusy, dialogVisible, isSuccess, message, showMessage } = useAsyncState()
 
 const searchText = ref('')
@@ -155,7 +153,7 @@ async function loadItem(id = ''): Promise<void> {
     return
   }
 
-  const response = await fetchStockHolder(id, authStore.uuid!)
+  const response = await fetchStockHolder(id)
   stockClasses.value = response.StockClasses
   selectedParticipant.value = response.Participant
   Object.assign(form, response.StockHolder, {
@@ -175,7 +173,7 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveStockHolder({
       Key: currentId.value || EMPTY_GUID,
-      UUID: authStore.uuid!,
+      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Stock holder saved.', response.success !== false)
@@ -195,7 +193,7 @@ async function removeItem(): Promise<void> {
 
   isBusy.value = true
   try {
-    const response = await deleteStockHolder(currentId.value, authStore.uuid!)
+    const response = await deleteStockHolder(currentId.value)
     showMessage(response.message ?? 'Stock holder removed.', response.success !== false)
     items.value = response.StockHolders
     await loadItem(EMPTY_GUID)

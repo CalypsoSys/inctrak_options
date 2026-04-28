@@ -56,12 +56,10 @@ import PageIntro from '@/components/PageIntro.vue'
 import VestingScheduleTable from '@/components/VestingScheduleTable.vue'
 import { fetchParticipantGrant, fetchParticipantGrants } from '@/services/participant-service'
 import type { Grant, VestScheduleEntry } from '@/services/types'
-import { useAuthStore } from '@/stores/auth'
 import { formatDate, formatNumber } from '@/utils/formatters'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 
 const items = ref<Grant[]>([])
 const selectedGrant = ref<Grant | null>(null)
@@ -76,7 +74,7 @@ onMounted(async () => {
 })
 
 async function loadItem(id: string): Promise<void> {
-  const response = await fetchParticipantGrant(id, authStore.uuid!)
+  const response = await fetchParticipantGrant(id)
   selectedGrant.value = response.Grant
   vestSchedule.value = response.VestSchedule
   await router.replace({ name: 'participant-grants', params: { id } })

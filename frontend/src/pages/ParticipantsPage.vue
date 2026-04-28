@@ -103,14 +103,12 @@ import { useAsyncState } from '@/composables/useAsyncState'
 import { deleteParticipant, fetchParticipant, saveParticipant, searchParticipants } from '@/services/admin-service'
 import { getApiMessage } from '@/services/api'
 import type { ParticipantDetail, ParticipantSummary, ParticipantType } from '@/services/types'
-import { useAuthStore } from '@/stores/auth'
 import { EMPTY_GUID } from '@/utils/constants'
 import { formatNumber } from '@/utils/formatters'
 import { validateParticipant } from '@/utils/validators'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const { isBusy, dialogVisible, isSuccess, message, showMessage } = useAsyncState()
 
 const searchText = ref('')
@@ -162,7 +160,7 @@ async function loadItem(id = ''): Promise<void> {
     return
   }
 
-  const response = await fetchParticipant(id, authStore.uuid!)
+  const response = await fetchParticipant(id)
   participantTypes.value = response.PartTypes
   Object.assign(form, response.Participant)
   await router.replace({ name: 'participants', params: { id } })
@@ -179,7 +177,7 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveParticipant({
       Key: currentId.value || EMPTY_GUID,
-      UUID: authStore.uuid!,
+      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Participant saved.', response.success !== false)
@@ -199,7 +197,7 @@ async function removeItem(): Promise<void> {
 
   isBusy.value = true
   try {
-    const response = await deleteParticipant(currentId.value, authStore.uuid!)
+    const response = await deleteParticipant(currentId.value)
     showMessage(response.message ?? 'Participant removed.', response.success !== false)
     items.value = response.Participants
     await loadItem(EMPTY_GUID)

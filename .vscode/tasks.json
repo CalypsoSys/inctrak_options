@@ -43,9 +43,15 @@
     {
       "label": "frontend: dev",
       "type": "shell",
-      "command": "npm run dev",
+      "command": "VITE_SUPABASE_URL=\"$INCTRAK_SUPABASE_URL\" VITE_SUPABASE_PUBLISHABLE_KEY=\"$INCTRAK_SUPABASE_PUBLISHABLE_KEY\" VITE_TENANT_ID=\"$INCTRAK_TENANT_ID\" VITE_TENANT_SLUG=\"$INCTRAK_TENANT_SLUG\" VITE_TENANT_DB_NAME=\"$INCTRAK_TENANT_DB_NAME\" npm run dev",
       "options": {
-        "cwd": "${workspaceFolder}/frontend"
+        "cwd": "${workspaceFolder}/frontend",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
       },
       "isBackground": true,
       "problemMatcher": {
@@ -85,6 +91,21 @@
         "backend: wait for ready"
       ],
       "dependsOrder": "parallel"
+    },
+    {
+      "label": "frontend: build",
+      "type": "shell",
+      "command": "VITE_SUPABASE_URL=\"$INCTRAK_SUPABASE_URL\" VITE_SUPABASE_PUBLISHABLE_KEY=\"$INCTRAK_SUPABASE_PUBLISHABLE_KEY\" VITE_TENANT_ID=\"$INCTRAK_TENANT_ID\" VITE_TENANT_SLUG=\"$INCTRAK_TENANT_SLUG\" VITE_TENANT_DB_NAME=\"$INCTRAK_TENANT_DB_NAME\" npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "problemMatcher": []
     }
   ]
 }

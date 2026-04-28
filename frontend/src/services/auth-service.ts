@@ -17,12 +17,6 @@ export function fetchLoginDefaults(): Promise<LoginForm> {
   return apiGet<LoginForm>('/api/login/get_creds/')
 }
 
-export function submitLogin(form: LoginForm): Promise<LoginResponse> {
-  const endpoint = form.IS_REGISTERING ? 'register_internal/' : 'login_internal/'
-
-  return apiPost<LoginResponse>(`/api/login/${endpoint}`, form)
-}
-
 export function activateAccount(key: string): Promise<ApiResponse> {
   return apiPost<ApiResponse>('/api/login/activateaccount/', { ActivateKey: key })
 }

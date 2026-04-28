@@ -4,12 +4,12 @@
       <PageIntro
         eyebrow="Access"
         title="Login or register"
-        description="Use the current IncTrak login and registration flow while tenant-aware Supabase auth is being wired in."
+        description="Sign in with Supabase-backed credentials. App access is granted after your tenant membership and role are resolved."
       />
       <form class="mt-8 space-y-5" @submit.prevent="submitForm">
         <div class="grid gap-5 md:grid-cols-2">
           <div>
-            <label class="field-label">Username or Email</label>
+            <label class="field-label">Email Address</label>
             <input v-model="form.USER_NAME" class="field-input" type="text" />
           </div>
           <div>
@@ -55,7 +55,7 @@
       <ul class="mt-5 space-y-3 text-sm leading-6 text-[var(--app-muted)]">
         <li>Administrators land in the new admin workspace with stock classes, plans, participants, grants, and schedule tools.</li>
         <li>Participants land in the optionee area with stock summary, option summary, and grant detail views.</li>
-        <li>Email activation, reset, and legacy callback redirects still land on the renamed route model while auth is being modernized.</li>
+        <li>Registration creates Supabase credentials first; actual app access still depends on an IncTrak tenant membership.</li>
       </ul>
     </article>
 
@@ -76,8 +76,10 @@ import Password from 'primevue/password'
 import AppDialog from '@/components/AppDialog.vue'
 import PageIntro from '@/components/PageIntro.vue'
 import { useAsyncState } from '@/composables/useAsyncState'
-import { createLoginForm, fetchLoginDefaults, submitLogin } from '@/services/auth-service'
+import { createLoginForm, fetchLoginDefaults } from '@/services/auth-service'
+import { fetchAppSession } from '@/services/auth-session'
 import { getApiMessage } from '@/services/api'
+import { signInWithPassword, signUpWithPassword } from '@/services/supabase-auth'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
@@ -88,24 +90,12 @@ const form = reactive(createLoginForm())
 
 onMounted(async () => {
   Object.assign(form, await fetchLoginDefaults())
-
-  if (route.query.redirect === 'true') {
-    const uuid = typeof route.query.uuid === 'string' ? route.query.uuid : ''
-    const role = typeof route.query.role === 'string' ? route.query.role : null
-    const success = route.query.success === 'true'
-    const nextMessage = typeof route.query.message === 'string' ? route.query.message : 'Login response received.'
-
-    if (success && uuid && (role === 'admin' || role === 'optionee')) {
-      authStore.setSession(uuid, role)
-    }
-
-    showMessage(nextMessage, success)
-  }
 })
 
 async function submitForm(): Promise<void> {
-  if (!form.USER_NAME.trim() || !form.PASSWORD.trim()) {
-    showMessage('Please enter a username or email and password.', false)
+  const email = form.USER_NAME.trim()
+  if (!email || !form.PASSWORD.trim()) {
+    showMessage('Please enter an email address and password.', false)
     return
   }
 
@@ -116,20 +106,46 @@ async function submitForm(): Promise<void> {
 
   isBusy.value = true
   try {
-    const response = await submitLogin(form)
-    showMessage(response.message ?? 'Login response received.', response.success !== false)
-    if (response.success && response.uuid && response.Role) {
-      authStore.setSession(response.uuid, response.Role)
+    const session = form.IS_REGISTERING
+      ? await signUpWithPassword(email, form.PASSWORD)
+      : await signInWithPassword(email, form.PASSWORD)
+
+    const expiresAt = session.expires_at ?? Math.floor(Date.now() / 1000) + session.expires_in
+    const appSession = await fetchAppSession(session.access_token)
+    authStore.setSession(
+      session.access_token,
+      session.refresh_token,
+      expiresAt,
+      appSession.Role,
+      session.user?.email ?? email
+    )
+
+    showMessage(
+      form.IS_REGISTERING
+        ? 'Account created and signed in.'
+        : 'Login successful.',
+      true
+    )
+
+    if (appSession.Role) {
       await router.push(
         route.query.next && typeof route.query.next === 'string'
           ? route.query.next
-          : response.Role === 'admin'
+          : appSession.Role === 'admin'
             ? { name: 'stock-classes' }
             : { name: 'participant-stocks' }
       )
     }
   } catch (error) {
-    showMessage(getApiMessage(error, 'Unable to complete the login request.'), false)
+    showMessage(
+      getApiMessage(
+        error,
+        form.IS_REGISTERING
+          ? 'Unable to create the Supabase account.'
+          : 'Unable to complete the Supabase login request.'
+      ),
+      false
+    )
   } finally {
     isBusy.value = false
   }

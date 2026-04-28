@@ -48,5 +48,18 @@ namespace inctrak.com.Controllers
                 Role = userContext.Role.ToString()
             });
         }
+
+        [HttpGet("app-session")]
+        [RequireMembershipRole(MembershipRole.TenantParticipant)]
+        public IActionResult AppSession()
+        {
+            UserContext userContext = _requestContextAccessor.GetUserContext(HttpContext);
+
+            return Ok(new
+            {
+                success = true,
+                Role = userContext.Role == MembershipRole.TenantAdmin ? "admin" : "optionee"
+            });
+        }
     }
 }

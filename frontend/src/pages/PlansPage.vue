@@ -74,14 +74,12 @@ import { useAsyncState } from '@/composables/useAsyncState'
 import { deletePlan, fetchPlan, fetchPlans, savePlan } from '@/services/admin-service'
 import { getApiMessage } from '@/services/api'
 import type { Plan, StockClass } from '@/services/types'
-import { useAuthStore } from '@/stores/auth'
 import { EMPTY_GUID } from '@/utils/constants'
 import { formatNumber } from '@/utils/formatters'
 import { validatePlan } from '@/utils/validators'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const { isBusy, dialogVisible, isSuccess, message, showMessage } = useAsyncState()
 
 const items = ref<Plan[]>([])
@@ -112,7 +110,7 @@ async function loadItem(id = ''): Promise<void> {
     return
   }
 
-  const response = await fetchPlan(id, authStore.uuid!)
+  const response = await fetchPlan(id)
   stockClasses.value = response.StockClasses
   Object.assign(form, response.Plan)
   await router.replace({ name: 'plans', params: { id } })
@@ -129,7 +127,7 @@ async function saveItem(): Promise<void> {
   try {
     const response = await savePlan({
       Key: currentId.value || EMPTY_GUID,
-      UUID: authStore.uuid!,
+      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Plan saved.', response.success !== false)
@@ -149,7 +147,7 @@ async function removeItem(): Promise<void> {
 
   isBusy.value = true
   try {
-    const response = await deletePlan(currentId.value, authStore.uuid!)
+    const response = await deletePlan(currentId.value)
     showMessage(response.message ?? 'Plan removed.', response.success !== false)
     items.value = response.Plans
     await loadItem(EMPTY_GUID)

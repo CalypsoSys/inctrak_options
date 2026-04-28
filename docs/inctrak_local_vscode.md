@@ -68,8 +68,23 @@ npm run dev
 
 By default Vite proxies `/api/*` to `http://localhost:5000`.
 
+For the current auth flow, export these shell variables before launching the frontend. You do not need a separate frontend `.env` file when using the VS Code launch/tasks flow:
+
+```bash
+export INCTRAK_SUPABASE_URL=https://your-project-ref.supabase.co
+export INCTRAK_SUPABASE_PUBLISHABLE_KEY=sb_publishable_replace_me
+export INCTRAK_TENANT_ID=11111111-1111-1111-1111-111111111111
+export INCTRAK_TENANT_SLUG=calypsosys
+export INCTRAK_TENANT_DB_NAME=inctrak_calypsosys
+```
+
+The VS Code frontend task maps those `INCTRAK_*` variables into the `VITE_*` names Vite exposes to browser code.
+
+Those tenant values let the SPA tell the local API which tenant to resolve when you are still running on `127.0.0.1:5174` instead of a tenant-specific local hostname.
+
 Override the backend target if needed:
 
 ```bash
 VITE_API_PROXY_TARGET=http://localhost:5000 npm run dev
 ```
+yes ple

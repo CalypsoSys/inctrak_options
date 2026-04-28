@@ -2,6 +2,9 @@ import axios, { AxiosError, type AxiosRequestConfig } from 'axios'
 import { buildApiUrl } from '@/services/runtime-config'
 
 const SESSION_KEY = 'inctrak.session'
+const DEV_TENANT_ID = import.meta.env.VITE_TENANT_ID?.trim()
+const DEV_TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG?.trim()
+const DEV_TENANT_DB_NAME = import.meta.env.VITE_TENANT_DB_NAME?.trim()
 
 export type ApiFailure = {
   success?: boolean
@@ -10,10 +13,10 @@ export type ApiFailure = {
 }
 
 type SessionShape = {
-  uuid?: string
+  accessToken?: string
 }
 
-function getSessionUuid(): string | null {
+function getSessionAccessToken(): string | null {
   const raw = window.localStorage.getItem(SESSION_KEY)
   if (!raw) {
     return null
@@ -21,7 +24,7 @@ function getSessionUuid(): string | null {
 
   try {
     const parsed = JSON.parse(raw) as SessionShape
-    return parsed.uuid ?? null
+    return parsed.accessToken ?? null
   } catch {
     return null
   }
@@ -36,9 +39,18 @@ apiClient.interceptors.request.use((config) => {
 
   config.headers = config.headers ?? {}
 
-  const uuid = getSessionUuid()
-  if (uuid) {
-    config.headers['X-IncTrak-UUID'] = uuid
+  const accessToken = getSessionAccessToken()
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`
+  }
+
+  if (DEV_TENANT_ID && DEV_TENANT_SLUG) {
+    config.headers['X-IncTrak-Tenant-Id'] = DEV_TENANT_ID
+    config.headers['X-IncTrak-Tenant-Slug'] = DEV_TENANT_SLUG
+  }
+
+  if (DEV_TENANT_DB_NAME) {
+    config.headers['X-IncTrak-Tenant-Db'] = DEV_TENANT_DB_NAME
   }
 
   return config

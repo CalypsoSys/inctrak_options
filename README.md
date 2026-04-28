@@ -48,6 +48,19 @@ The API lives in `shared.inctrak.com/`. The frontend source lives in `frontend/`
 
 For local SPA work, run the Vite dev server from `frontend/`. The SPA now calls relative `/api/*` paths, and Vite proxies those requests to `VITE_API_PROXY_TARGET`, which defaults to `http://localhost:5000`.
 
+For Supabase-backed frontend auth, the local frontend run should reuse your existing shell environment. You do not need a separate committed frontend `.env` file:
+
+- `INCTRAK_SUPABASE_URL`
+- `INCTRAK_SUPABASE_PUBLISHABLE_KEY`
+
+For local tenant resolution on plain `127.0.0.1`, optionally also export:
+
+- `INCTRAK_TENANT_ID`
+- `INCTRAK_TENANT_SLUG`
+- `INCTRAK_TENANT_DB_NAME`
+
+The VS Code frontend task maps those `INCTRAK_*` values into the `VITE_*` names that the SPA can consume.
+
 For env-driven local backend runs, copy `scripts/inctrak/config.example.yaml` to `scripts/inctrak/config.local.yaml`, then use the VS Code launch flow documented in [docs/inctrak_local_vscode.md](docs/inctrak_local_vscode.md). For Cloudflare Pages proxy setup, see [docs/cloudflare-pages-gateway.md](docs/cloudflare-pages-gateway.md).
 
 For control-plane provisioning metadata, use [inctrak.db/control_plane.sql](inctrak.db/control_plane.sql) as the bootstrap source for the shared control-plane PostgreSQL database.

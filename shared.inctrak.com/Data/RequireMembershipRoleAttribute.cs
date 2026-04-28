@@ -33,7 +33,11 @@ namespace IncTrak.Data
             if (HasRequiredRole(resolvedRole) == false)
             {
                 context.Result = new StatusCodeResult(403);
+                return;
             }
+
+            userContext.Role = resolvedRole;
+            requestContextAccessor?.SetUserContext(context.HttpContext, userContext);
         }
 
         private bool HasRequiredRole(MembershipRole resolvedRole)

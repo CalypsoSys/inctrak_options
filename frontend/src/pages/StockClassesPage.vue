@@ -63,14 +63,12 @@ import { useAsyncState } from '@/composables/useAsyncState'
 import { deleteStockClass, fetchStockClass, fetchStockClasses, saveStockClass } from '@/services/admin-service'
 import { getApiMessage } from '@/services/api'
 import type { StockClass } from '@/services/types'
-import { useAuthStore } from '@/stores/auth'
 import { EMPTY_GUID } from '@/utils/constants'
 import { formatNumber } from '@/utils/formatters'
 import { validateStockClass } from '@/utils/validators'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const { isBusy, dialogVisible, isSuccess, message, showMessage } = useAsyncState()
 
 const items = ref<StockClass[]>([])
@@ -101,7 +99,7 @@ async function loadItem(id = ''): Promise<void> {
     return
   }
 
-  const response = await fetchStockClass(id, authStore.uuid!)
+  const response = await fetchStockClass(id)
   Object.assign(form, response.StockClass)
   await router.replace({ name: 'stock-classes', params: { id } })
 }
@@ -117,7 +115,7 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveStockClass({
       Key: currentId.value || EMPTY_GUID,
-      UUID: authStore.uuid!,
+      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Stock class saved.', response.success !== false)
@@ -137,7 +135,7 @@ async function removeItem(): Promise<void> {
 
   isBusy.value = true
   try {
-    const response = await deleteStockClass(currentId.value, authStore.uuid!)
+    const response = await deleteStockClass(currentId.value)
     showMessage(response.message ?? 'Stock class removed.', response.success !== false)
     items.value = response.StockClasses
     await loadItem()

@@ -68,14 +68,12 @@ import { useAsyncState } from '@/composables/useAsyncState'
 import { deleteSchedule, fetchSchedule, fetchSchedules, saveSchedule } from '@/services/admin-service'
 import { getApiMessage } from '@/services/api'
 import type { AmountType, Period, PeriodType, Schedule } from '@/services/types'
-import { useAuthStore } from '@/stores/auth'
 import { EMPTY_GUID } from '@/utils/constants'
 import { formatNumber } from '@/utils/formatters'
 import { validateSchedule } from '@/utils/validators'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const { isBusy, dialogVisible, isSuccess, message, showMessage } = useAsyncState()
 
 const items = ref<Schedule[]>([])
@@ -115,7 +113,7 @@ async function loadItem(id = ''): Promise<void> {
     return
   }
 
-  const response = await fetchSchedule(id, authStore.uuid!)
+  const response = await fetchSchedule(id)
   Object.assign(form, response.Schedule)
   periods.value = response.Periods
   periodTypes.value = response.PeriodTypes
@@ -150,7 +148,7 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveSchedule({
       Key: currentId.value || EMPTY_GUID,
-      UUID: authStore.uuid!,
+      UUID: EMPTY_GUID,
       Data: { ...form },
       Children: periods.value.map((period, index) => ({ ...period, ORDER: index }))
     })
@@ -171,7 +169,7 @@ async function removeItem(): Promise<void> {
 
   isBusy.value = true
   try {
-    const response = await deleteSchedule(currentId.value, authStore.uuid!)
+    const response = await deleteSchedule(currentId.value)
     showMessage(response.message ?? 'Schedule removed.', response.success !== false)
     items.value = response.Schedules
     await loadItem(EMPTY_GUID)

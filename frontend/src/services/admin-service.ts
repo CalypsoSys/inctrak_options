@@ -1,4 +1,5 @@
 import { apiDelete, apiGet, apiPost } from '@/services/api'
+import { EMPTY_GUID } from '@/utils/constants'
 import type {
   ApiResponse,
   EntitySaveEnvelope,
@@ -63,64 +64,64 @@ export function fetchStockClasses(): Promise<StockClass[]> {
   return apiGet<StockClass[]>('/api/company/stockclasses/')
 }
 
-export function fetchStockClass(id: string, uuid: string): Promise<StockClassDetailResponse> {
-  return apiGet<StockClassDetailResponse>(`/api/company/stockclass/${id}/${uuid}`)
+export function fetchStockClass(id: string): Promise<StockClassDetailResponse> {
+  return apiGet<StockClassDetailResponse>(`/api/company/stockclass/${id}/${EMPTY_GUID}`)
 }
 
 export function saveStockClass(payload: EntitySaveEnvelope<StockClass>): Promise<ApiResponse & { key: string }> {
   return apiPost<ApiResponse & { key: string }>('/api/company/stockclass/', payload)
 }
 
-export function deleteStockClass(id: string, uuid: string): Promise<ApiResponse & { StockClasses: StockClass[] }> {
-  return apiDelete<ApiResponse & { StockClasses: StockClass[] }>(`/api/company/stockclass/${id}/${uuid}`)
+export function deleteStockClass(id: string): Promise<ApiResponse & { StockClasses: StockClass[] }> {
+  return apiDelete<ApiResponse & { StockClasses: StockClass[] }>(`/api/company/stockclass/${id}/${EMPTY_GUID}`)
 }
 
 export function fetchPlans(): Promise<Plan[]> {
   return apiGet<Plan[]>('/api/company/plans/')
 }
 
-export function fetchPlan(id: string, uuid: string): Promise<PlanDetailResponse> {
-  return apiGet<PlanDetailResponse>(`/api/company/plan/${id}/${uuid}`)
+export function fetchPlan(id: string): Promise<PlanDetailResponse> {
+  return apiGet<PlanDetailResponse>(`/api/company/plan/${id}/${EMPTY_GUID}`)
 }
 
 export function savePlan(payload: EntitySaveEnvelope<Plan>): Promise<ApiResponse & { key: string }> {
   return apiPost<ApiResponse & { key: string }>('/api/company/plan/', payload)
 }
 
-export function deletePlan(id: string, uuid: string): Promise<ApiResponse & { Plans: Plan[] }> {
-  return apiDelete<ApiResponse & { Plans: Plan[] }>(`/api/company/plan/${id}/${uuid}`)
+export function deletePlan(id: string): Promise<ApiResponse & { Plans: Plan[] }> {
+  return apiDelete<ApiResponse & { Plans: Plan[] }>(`/api/company/plan/${id}/${EMPTY_GUID}`)
 }
 
 export function fetchSchedules(): Promise<Schedule[]> {
   return apiGet<Schedule[]>('/api/company/schedules/')
 }
 
-export function fetchSchedule(id: string, uuid: string): Promise<ScheduleDetailResponse> {
-  return apiGet<ScheduleDetailResponse>(`/api/company/schedule/${id}/${uuid}`)
+export function fetchSchedule(id: string): Promise<ScheduleDetailResponse> {
+  return apiGet<ScheduleDetailResponse>(`/api/company/schedule/${id}/${EMPTY_GUID}`)
 }
 
 export function saveSchedule(payload: EntitySaveWithChildrenEnvelope<Schedule, Period>): Promise<ApiResponse & { key: string }> {
   return apiPost<ApiResponse & { key: string }>('/api/company/schedule/', payload)
 }
 
-export function deleteSchedule(id: string, uuid: string): Promise<ApiResponse & { Schedules: Schedule[] }> {
-  return apiDelete<ApiResponse & { Schedules: Schedule[] }>(`/api/company/schedule/${id}/${uuid}`)
+export function deleteSchedule(id: string): Promise<ApiResponse & { Schedules: Schedule[] }> {
+  return apiDelete<ApiResponse & { Schedules: Schedule[] }>(`/api/company/schedule/${id}/${EMPTY_GUID}`)
 }
 
 export function fetchTerminations(): Promise<Termination[]> {
   return apiGet<Termination[]>('/api/company/terminations/')
 }
 
-export function fetchTermination(id: string, uuid: string): Promise<TerminationDetailResponse> {
-  return apiGet<TerminationDetailResponse>(`/api/company/termination/${id}/${uuid}`)
+export function fetchTermination(id: string): Promise<TerminationDetailResponse> {
+  return apiGet<TerminationDetailResponse>(`/api/company/termination/${id}/${EMPTY_GUID}`)
 }
 
 export function saveTermination(payload: EntitySaveEnvelope<Termination>): Promise<ApiResponse & { key: string }> {
   return apiPost<ApiResponse & { key: string }>('/api/company/termination/', payload)
 }
 
-export function deleteTermination(id: string, uuid: string): Promise<ApiResponse & { Terminations: Termination[] }> {
-  return apiDelete<ApiResponse & { Terminations: Termination[] }>(`/api/company/termination/${id}/${uuid}`)
+export function deleteTermination(id: string): Promise<ApiResponse & { Terminations: Termination[] }> {
+  return apiDelete<ApiResponse & { Terminations: Termination[] }>(`/api/company/termination/${id}/${EMPTY_GUID}`)
 }
 
 export function searchParticipants(search: string, searchType: SearchType): Promise<ParticipantSummary[]> {
@@ -131,46 +132,46 @@ export function searchParticipantLookup(search: string): Promise<ParticipantSumm
   return apiGet<ParticipantSummary[]>(`/api/company/participants/${encodeURIComponent(search)}/InLine/`)
 }
 
-export function fetchParticipant(id: string, uuid: string): Promise<ParticipantDetailResponse> {
-  return apiGet<ParticipantDetailResponse>(`/api/company/participant/${id}/${uuid}`)
+export function fetchParticipant(id: string): Promise<ParticipantDetailResponse> {
+  return apiGet<ParticipantDetailResponse>(`/api/company/participant/${id}/${EMPTY_GUID}`)
 }
 
 export function saveParticipant(payload: EntitySaveEnvelope<ParticipantDetail>): Promise<ApiResponse & { key: string }> {
   return apiPost<ApiResponse & { key: string }>('/api/company/participant/', payload)
 }
 
-export function deleteParticipant(id: string, uuid: string): Promise<ApiResponse & { Participants: ParticipantSummary[] }> {
-  return apiDelete<ApiResponse & { Participants: ParticipantSummary[] }>(`/api/company/participant/${id}/${uuid}`)
+export function deleteParticipant(id: string): Promise<ApiResponse & { Participants: ParticipantSummary[] }> {
+  return apiDelete<ApiResponse & { Participants: ParticipantSummary[] }>(`/api/company/participant/${id}/${EMPTY_GUID}`)
 }
 
 export function searchGrants(search: string, searchType: SearchType): Promise<Grant[]> {
   return apiGet<Grant[]>(`/api/company/grants/${encodeURIComponent(search)}/${searchType}/`)
 }
 
-export function fetchGrant(id: string, uuid: string): Promise<GrantDetailResponse> {
-  return apiGet<GrantDetailResponse>(`/api/company/grant/${id}/${uuid}`)
+export function fetchGrant(id: string): Promise<GrantDetailResponse> {
+  return apiGet<GrantDetailResponse>(`/api/company/grant/${id}/${EMPTY_GUID}`)
 }
 
 export function saveGrant(payload: EntitySaveEnvelope<Grant>): Promise<ApiResponse & { key: string }> {
   return apiPost<ApiResponse & { key: string }>('/api/company/grant/', payload)
 }
 
-export function deleteGrant(id: string, uuid: string): Promise<ApiResponse & { Grants: Grant[] }> {
-  return apiDelete<ApiResponse & { Grants: Grant[] }>(`/api/company/grant/${id}/${uuid}`)
+export function deleteGrant(id: string): Promise<ApiResponse & { Grants: Grant[] }> {
+  return apiDelete<ApiResponse & { Grants: Grant[] }>(`/api/company/grant/${id}/${EMPTY_GUID}`)
 }
 
 export function searchStockHolders(search: string, searchType: SearchType): Promise<StockHolder[]> {
   return apiGet<StockHolder[]>(`/api/company/stockholders/${encodeURIComponent(search)}/${searchType}/`)
 }
 
-export function fetchStockHolder(id: string, uuid: string): Promise<StockHolderDetailResponse> {
-  return apiGet<StockHolderDetailResponse>(`/api/company/stockholder/${id}/${uuid}`)
+export function fetchStockHolder(id: string): Promise<StockHolderDetailResponse> {
+  return apiGet<StockHolderDetailResponse>(`/api/company/stockholder/${id}/${EMPTY_GUID}`)
 }
 
 export function saveStockHolder(payload: EntitySaveEnvelope<StockHolder>): Promise<ApiResponse & { key: string }> {
   return apiPost<ApiResponse & { key: string }>('/api/company/stockholder/', payload)
 }
 
-export function deleteStockHolder(id: string, uuid: string): Promise<ApiResponse & { StockHolders: StockHolder[] }> {
-  return apiDelete<ApiResponse & { StockHolders: StockHolder[] }>(`/api/company/stockholder/${id}/${uuid}`)
+export function deleteStockHolder(id: string): Promise<ApiResponse & { StockHolders: StockHolder[] }> {
+  return apiDelete<ApiResponse & { StockHolders: StockHolder[] }>(`/api/company/stockholder/${id}/${EMPTY_GUID}`)
 }
