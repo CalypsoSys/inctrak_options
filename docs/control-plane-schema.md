@@ -72,7 +72,7 @@ Practical recommendation:
 
 For local seeding convenience, the repo now includes:
 
-- [inctrak.db/control_plane.seed.example.sql](../inctrak.db/control_plane.seed.example.sql)
+- [inctrak.db/control_plane.local_seed.example.sql](../inctrak.db/control_plane.local_seed.example.sql)
 
 That example seed file includes idempotent SQL for:
 
@@ -160,7 +160,7 @@ Suggested status values:
 Notes:
 
 - `tenant_slug` drives `<slug>.inctrak.com`
-- `tenant_db_name` is null until provisioning succeeds
+- `tenant_db_name` is null until provisioning succeeds and should ultimately be created by cloning a real PostgreSQL template database such as `inctrak_template`
 
 ### `cp_tenant_domains`
 
@@ -319,7 +319,7 @@ Flow:
 - `cp_tenant_domains`
 - `cp_memberships` for first `tenant_admin`
 - `cp_provisioning_jobs`
-5. async provisioner creates tenant DB from `inctrak_template`
+5. async provisioner creates tenant DB from a real `inctrak_template` PostgreSQL database
 6. tenant moves to `Active`
 7. user is redirected to `https://<slug>.inctrak.com`
 
@@ -436,6 +436,7 @@ Suggested future `AppSettings` keys:
   - Postgres connection string for the shared control-plane database
 - `TenantTemplateDatabaseName`
   - expected template DB name, for example `inctrak_template`
+  - this should refer to a real PostgreSQL template database, not just a SQL file on disk
 - `TenantDatabasePrefix`
   - prefix for provisioned tenant DBs, for example `inctrak_`
 - `SupabaseUrl`

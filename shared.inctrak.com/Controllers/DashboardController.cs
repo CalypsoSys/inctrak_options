@@ -16,6 +16,20 @@ namespace IncTrak.Controllers
     [ApiController]
     public class DashboardController : IncTrakController
     {
+        private static readonly PERIOD_TYPES_UI[] QuickPeriodTypes = new[]
+        {
+            new PERIOD_TYPES_UI(new Models.PeriodTypes { PeriodTypePk = 1, Name = "Years" }),
+            new PERIOD_TYPES_UI(new Models.PeriodTypes { PeriodTypePk = 2, Name = "Months" }),
+            new PERIOD_TYPES_UI(new Models.PeriodTypes { PeriodTypePk = 3, Name = "Weeks" }),
+            new PERIOD_TYPES_UI(new Models.PeriodTypes { PeriodTypePk = 4, Name = "Days" })
+        };
+
+        private static readonly AMOUNT_TYPES_UI[] QuickAmountTypes = new[]
+        {
+            new AMOUNT_TYPES_UI(new Models.AmountTypes { AmountTypePk = 1, Name = "Shares" }),
+            new AMOUNT_TYPES_UI(new Models.AmountTypes { AmountTypePk = 2, Name = "Percentage" })
+        };
+
         public DashboardController(IOptions<AppSettings> config) : base(config)
         {
         }
@@ -182,15 +196,14 @@ namespace IncTrak.Controllers
         {
             try
             {
-                using (inctrakContext context = new OptionsContext(_options.Value))
+                return new
                 {
-                    var periodTypes = (from pt in context.PeriodTypes
-                                       select new PERIOD_TYPES_UI() { PeriodType = pt }).ToArray();
-                    var amountTypes = (from at in context.AmountTypes
-                                       select new AMOUNT_TYPES_UI() { AmountType = at }).ToArray();
-
-                    return new { success = true, Grant = new GRANT_UI(Guid.Empty), Periods = new PERIOD_UI[1] { new PERIOD_UI(Guid.Empty) }, PeriodTypes = periodTypes, AmountTypes = amountTypes };
-                }
+                    success = true,
+                    Grant = new GRANT_UI(Guid.Empty),
+                    Periods = new PERIOD_UI[1] { new PERIOD_UI(Guid.Empty) },
+                    PeriodTypes = QuickPeriodTypes,
+                    AmountTypes = QuickAmountTypes
+                };
             }
             catch (Exception excp)
             {
@@ -229,31 +242,26 @@ namespace IncTrak.Controllers
         {
             try
             {
-                using (inctrakContext context = new OptionsContext(_options.Value))
+                var periodTypes = QuickPeriodTypes;
+                var amountTypes = QuickAmountTypes;
+                Grants grant = saveSchedule.Data.GetGrant(Guid.Empty);
+                grant.VestingScheduleFkNavigation = new Schedules();
+                StringBuilder message = new StringBuilder();
+                message.AppendFormat("D:{0} S:{1}\r\n", saveSchedule.Data.VESTING_START, saveSchedule.Data.SHARES);
+                foreach (var prd in saveSchedule.Children)
                 {
-                    var periodTypes = (from pt in context.PeriodTypes
-                                       select new PERIOD_TYPES_UI() { PeriodType = pt }).ToArray();
-                    var amountTypes = (from at in context.AmountTypes
-                                       select new AMOUNT_TYPES_UI() { AmountType = at }).ToArray();
-                    Grants grant = saveSchedule.Data.GetGrant(Guid.Empty);
-                    grant.VestingScheduleFkNavigation = new Schedules();
-                    StringBuilder message = new StringBuilder();
-                    message.AppendFormat("D:{0} S:{1}\r\n", saveSchedule.Data.VESTING_START, saveSchedule.Data.SHARES);
-                    foreach (var prd in saveSchedule.Children)
-                    {
-                        Periods period = prd.GetPeriod(Guid.Empty, Guid.Empty);
-                        period.PeriodTypeFkNavigation = periodTypes.Where(p => p.PERIOD_TYPE_PK == period.PeriodTypeFk).First().GetPeriodType();
-                        period.AmountTypeFkNavigation = amountTypes.Where(a => a.AMOUNT_TYPE_PK == period.AmountTypeFk).First().GetAmountType();
-                        grant.VestingScheduleFkNavigation.Periods.Add(period);
+                    Periods period = prd.GetPeriod(Guid.Empty, Guid.Empty);
+                    period.PeriodTypeFkNavigation = periodTypes.Where(p => p.PERIOD_TYPE_PK == period.PeriodTypeFk).First().GetPeriodType();
+                    period.AmountTypeFkNavigation = amountTypes.Where(a => a.AMOUNT_TYPE_PK == period.AmountTypeFk).First().GetAmountType();
+                    grant.VestingScheduleFkNavigation.Periods.Add(period);
 
-                        message.AppendFormat("O:{0} A:{1} E:{2} I:{3} PA:{4} AT:{5} PT:{6}\r\n", period.Order, period.Amount, period.EvenOverN, period.Increments, period.PeriodAmount, period.AmountTypeFkNavigation, period.PeriodTypeFkNavigation);
-                    }
-
-                    var vestingSchedule = ScheduleCalc.GetVestedShares(grant);
-
-                    LogQuick(message.ToString());
-                    return Ok(new { success = true, message = "Quick saved.", Grant = saveSchedule.Data, Periods = saveSchedule.Children, PeriodTypes = periodTypes, AmountTypes = amountTypes, VestSchedule = vestingSchedule });
+                    message.AppendFormat("O:{0} A:{1} E:{2} I:{3} PA:{4} AT:{5} PT:{6}\r\n", period.Order, period.Amount, period.EvenOverN, period.Increments, period.PeriodAmount, period.AmountTypeFkNavigation, period.PeriodTypeFkNavigation);
                 }
+
+                var vestingSchedule = ScheduleCalc.GetVestedShares(grant);
+
+                LogQuick(message.ToString());
+                return Ok(new { success = true, message = "Quick saved.", Grant = saveSchedule.Data, Periods = saveSchedule.Children, PeriodTypes = periodTypes, AmountTypes = amountTypes, VestSchedule = vestingSchedule });
             }
             catch (Exception excp)
             {

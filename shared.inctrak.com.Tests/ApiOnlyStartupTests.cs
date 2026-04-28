@@ -150,5 +150,20 @@ namespace inctrak.com.Tests
 
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
+
+        [Fact]
+        public async Task ApiOnlyHost_QuickData_DoesNotRequireTenantDatabase()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+
+            HttpResponseMessage response = await client.GetAsync("/api/optionee/quick/");
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"success\":true", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("PeriodTypes", body);
+            Assert.Contains("AmountTypes", body);
+        }
     }
 }

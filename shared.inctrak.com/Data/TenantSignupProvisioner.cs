@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
@@ -13,12 +11,10 @@ namespace IncTrak.Data
         private static readonly Regex HyphenCollapseRegex = new Regex("-{2,}", RegexOptions.Compiled);
 
         private readonly AppSettings _settings;
-        private readonly IHostEnvironment _hostEnvironment;
 
-        public TenantSignupProvisioner(IOptions<AppSettings> options, IHostEnvironment hostEnvironment)
+        public TenantSignupProvisioner(IOptions<AppSettings> options)
         {
             _settings = options.Value;
-            _hostEnvironment = hostEnvironment;
         }
 
         public TenantSignupResult ProvisionInitialTenant(SupabaseIdentity identity, TenantSignupRequest request)
@@ -64,8 +60,7 @@ namespace IncTrak.Data
             EnsureTenantSlugDoesNotExist(connection, normalizedSlug);
             EnsureDatabaseNameDoesNotExist(tenantDatabaseName);
 
-            CreateTenantDatabase(tenantDatabaseName);
-            ApplyTenantBootstrap(tenantDatabaseName);
+            CreateTenantDatabaseFromTemplate(tenantDatabaseName);
 
             Guid tenantId;
             using (var transaction = connection.BeginTransaction())
@@ -191,22 +186,25 @@ limit 1;";
             }
         }
 
-        private void CreateTenantDatabase(string tenantDatabaseName)
+        private void CreateTenantDatabaseFromTemplate(string tenantDatabaseName)
         {
             using var adminConnection = CreateTenantAdminConnection();
             adminConnection.Open();
-            using var command = adminConnection.CreateCommand();
-            command.CommandText = $"create database {QuoteIdentifier(tenantDatabaseName)};";
-            command.ExecuteNonQuery();
-        }
+            string templateDatabaseName = GetTemplateDatabaseName();
 
-        private void ApplyTenantBootstrap(string tenantDatabaseName)
-        {
-            string bootstrapSql = File.ReadAllText(ResolveTenantBootstrapPath());
-            using var tenantConnection = CreateTenantConnection(tenantDatabaseName);
-            tenantConnection.Open();
-            using var command = tenantConnection.CreateCommand();
-            command.CommandText = bootstrapSql;
+            using (var templateCommand = adminConnection.CreateCommand())
+            {
+                templateCommand.CommandText = "select 1 from pg_database where datname = @template_database_name limit 1;";
+                templateCommand.Parameters.AddWithValue("template_database_name", templateDatabaseName);
+
+                if (templateCommand.ExecuteScalar() == null)
+                {
+                    throw new InvalidOperationException($"The tenant template database '{templateDatabaseName}' does not exist. Create it from inctrak.db/inctrak.sql before provisioning tenants.");
+                }
+            }
+
+            using var command = adminConnection.CreateCommand();
+            command.CommandText = $"create database {QuoteIdentifier(tenantDatabaseName)} with template {QuoteIdentifier(templateDatabaseName)};";
             command.ExecuteNonQuery();
         }
 
@@ -370,35 +368,15 @@ from created_group;";
             return new NpgsqlConnection(builder.ConnectionString);
         }
 
-        private NpgsqlConnection CreateTenantConnection(string tenantDatabaseName)
+        private string GetTemplateDatabaseName()
         {
-            var builder = new NpgsqlConnectionStringBuilder(_settings.GetIncTrakConnection())
+            string templateDatabaseName = _settings.GetTenantTemplateDatabaseName();
+            if (string.IsNullOrWhiteSpace(templateDatabaseName))
             {
-                Database = tenantDatabaseName
-            };
-
-            return new NpgsqlConnection(builder.ConnectionString);
-        }
-
-        private string ResolveTenantBootstrapPath()
-        {
-            string[] candidates =
-            {
-                Path.Combine(_hostEnvironment.ContentRootPath ?? string.Empty, "..", "inctrak.db", "inctrak.sql"),
-                Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "inctrak.db", "inctrak.sql"),
-                Path.Combine(Directory.GetCurrentDirectory(), "inctrak.db", "inctrak.sql")
-            };
-
-            foreach (string candidate in candidates)
-            {
-                string fullPath = Path.GetFullPath(candidate);
-                if (File.Exists(fullPath))
-                {
-                    return fullPath;
-                }
+                return "inctrak_template";
             }
 
-            throw new FileNotFoundException("Unable to locate inctrak.db/inctrak.sql for tenant provisioning.");
+            return templateDatabaseName.Trim();
         }
 
         public static string NormalizeSlugForUi(string value)

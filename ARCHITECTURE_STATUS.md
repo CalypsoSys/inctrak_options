@@ -26,7 +26,7 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Tenant routing | Use `signup.inctrak.com`, `vesting.inctrak.com`, and `*.inctrak.com` | Planned | Worker should resolve hostnames and forward trusted tenant context. |
 | Tenant site model | Use one tenant site per company rather than separate admin and participant hostnames | Planned | Admins and participants should both use `<tenant>.inctrak.com`, with role-based routing and authorization. |
 | Tenant isolation | Use separate tenant databases rather than Postgres RLS initially | Planned | Safer fit for the current legacy/transition codebase. |
-| Tenant database creation | Use PostgreSQL template cloning | Partial | `inctrak.db/inctrak.sql` is now the single bootstrap source for tenant databases and any local `inctrak_template`. |
+| Tenant database creation | Use PostgreSQL template cloning | Partial | `inctrak.db/inctrak.sql` is the bootstrap source for building `inctrak_template`, and runtime provisioning now expects to clone from a real template DB. |
 | Authentication | Prefer Supabase Auth over continuing custom auth | Partial | Supabase bearer-token validation is now wired in the backend, with JWKS/public-key verification as the preferred path. |
 | Public vesting tool | Keep quick vesting on a dedicated public hostname | Planned | Target hostname is `vesting.inctrak.com`. |
 
@@ -44,8 +44,8 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Tenant role routing | Same tenant hostname supports both admins and participants with different default routes | Partial | Request-scoped tenant/user context and a protected probe endpoint now exist, but real hostname-driven routing and app landing behavior are still pending. |
 | Tenant authorization boundary | Participant/end-user accounts never gain admin access or admin API capability | Partial | Backend role-gated probe endpoints now enforce tenant admin versus participant access, but existing legacy app endpoints are not migrated yet. |
 | Control-plane database | Stores tenants, slugs, memberships, provisioning jobs, and domains | Partial | `inctrak.db/control_plane.sql` now exists and the backend can resolve through a control-plane store, but production provisioning and broad runtime usage are still pending. |
-| Tenant template database | `inctrak_template` used to clone new tenant databases | Partial | Bootstrap SQL exists in `inctrak.db/inctrak.sql`; template creation and provisioning automation do not yet exist. |
-| Tenant provisioning pipeline | Create DB, seed tenant, create first admin, mark tenant ready | Not implemented | Needs async job flow and operational state tracking. |
+| Tenant template database | `inctrak_template` used to clone new tenant databases | Partial | Bootstrap SQL exists in `inctrak.db/inctrak.sql`, and runtime provisioning now clones from a real template DB, but template refresh tooling is still manual. |
+| Tenant provisioning pipeline | Create DB, seed tenant, create first admin, mark tenant ready | Partial | Current signup can clone a tenant DB from `inctrak_template` and seed the first admin, but async jobs and production-grade operational flow are still pending. |
 | Managed auth | Supabase handles auth providers and sessions | Partial | Backend bearer-token validation is now in place, but the frontend login flow and real user provisioning are still pending. |
 | Tenant-aware authorization | App maps authenticated users to tenants and roles from control-plane data | Partial | Trusted-header overrides remain, and the backend now supports Supabase-backed user resolution through the control-plane store. |
 | Legacy auth retirement | Old password reset/activation/social flows are removed | Partial | Legacy mail sending has been neutralized, but old auth logic is still present. |
@@ -101,7 +101,7 @@ Current assets:
 
 Still needed:
 
-- a helper script to create or refresh `inctrak_template`
+- a helper script to create or refresh `inctrak_template` from `inctrak.db/inctrak.sql`
 - a provisioning worker/job runner
 - a template versioning strategy tied to migrations
 

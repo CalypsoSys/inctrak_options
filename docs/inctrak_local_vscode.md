@@ -20,6 +20,11 @@ scripts/inctrak/config.example.yaml
 `config.local.yaml` is gitignored. Fill in real values directly or export the referenced environment variables before
 launch.
 
+For tenant signup and provisioning, make sure your local Postgres instance already has a real template database matching
+`AppSettings.TenantTemplateDatabaseName` in `config.local.yaml`, typically `inctrak_template`. Create or refresh that
+template by applying [inctrak.db/inctrak.sql](../inctrak.db/inctrak.sql) to a database once, then use that database as
+the clone source for tenant provisioning.
+
 ## How VS Code launch works
 
 The local launch entries in `.vscode/launch.json` use the `backend: prepare local launch` task.
