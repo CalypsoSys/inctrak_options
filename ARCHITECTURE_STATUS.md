@@ -26,7 +26,7 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Tenant routing | Use `signup.inctrak.com`, `vesting.inctrak.com`, and `*.inctrak.com` | Planned | Worker should resolve hostnames and forward trusted tenant context. |
 | Tenant site model | Use one tenant site per company rather than separate admin and participant hostnames | Planned | Admins and participants should both use `<tenant>.inctrak.com`, with role-based routing and authorization. |
 | Tenant isolation | Use separate tenant databases rather than Postgres RLS initially | Planned | Safer fit for the current legacy/transition codebase. |
-| Tenant database creation | Use PostgreSQL template cloning | Partial | `inctrak.db/template-bootstrap.sql` now exists as the bootstrap source for `inctrak_template`. |
+| Tenant database creation | Use PostgreSQL template cloning | Partial | `inctrak.db/inctrak.sql` is now the single bootstrap source for tenant databases and any local `inctrak_template`. |
 | Authentication | Prefer Supabase Auth over continuing custom auth | Partial | Supabase bearer-token validation is now wired in the backend, with JWKS/public-key verification as the preferred path. |
 | Public vesting tool | Keep quick vesting on a dedicated public hostname | Planned | Target hostname is `vesting.inctrak.com`. |
 
@@ -44,7 +44,7 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Tenant role routing | Same tenant hostname supports both admins and participants with different default routes | Partial | Request-scoped tenant/user context and a protected probe endpoint now exist, but real hostname-driven routing and app landing behavior are still pending. |
 | Tenant authorization boundary | Participant/end-user accounts never gain admin access or admin API capability | Partial | Backend role-gated probe endpoints now enforce tenant admin versus participant access, but existing legacy app endpoints are not migrated yet. |
 | Control-plane database | Stores tenants, slugs, memberships, provisioning jobs, and domains | Partial | `inctrak.db/control_plane.sql` now exists and the backend can resolve through a control-plane store, but production provisioning and broad runtime usage are still pending. |
-| Tenant template database | `inctrak_template` used to clone new tenant databases | Partial | Bootstrap SQL exists; template creation and provisioning automation do not yet exist. |
+| Tenant template database | `inctrak_template` used to clone new tenant databases | Partial | Bootstrap SQL exists in `inctrak.db/inctrak.sql`; template creation and provisioning automation do not yet exist. |
 | Tenant provisioning pipeline | Create DB, seed tenant, create first admin, mark tenant ready | Not implemented | Needs async job flow and operational state tracking. |
 | Managed auth | Supabase handles auth providers and sessions | Partial | Backend bearer-token validation is now in place, but the frontend login flow and real user provisioning are still pending. |
 | Tenant-aware authorization | App maps authenticated users to tenants and roles from control-plane data | Partial | Trusted-header overrides remain, and the backend now supports Supabase-backed user resolution through the control-plane store. |
@@ -96,10 +96,8 @@ Current recommendation:
 
 Current assets:
 
-- [inctrak.db/template-bootstrap.sql](inctrak.db/template-bootstrap.sql)
-  - bootstrap source for creating the template database
 - [inctrak.db/inctrak.sql](inctrak.db/inctrak.sql)
-  - legacy schema reference
+  - canonical bootstrap source for tenant databases and any `inctrak_template` clone source
 
 Still needed:
 
@@ -137,7 +135,7 @@ Recommended next phases:
 2. Design the control-plane schema for tenants, slugs, domains, memberships, roles, and provisioning jobs.
 3. Define the admin versus participant authorization model and enforce it in backend APIs.
 4. Add backend tenant context resolution and tenant-aware connection factories.
-5. Add a helper to create `inctrak_template` from `inctrak.db/template-bootstrap.sql`.
+5. Add a helper to create `inctrak_template` from `inctrak.db/inctrak.sql`.
 6. Build the signup flow and tenant slug reservation path.
 7. Split quick vesting into a dedicated public frontend mode for `vesting.inctrak.com`.
 8. Introduce Worker-based hostname routing for `signup`, `vesting`, and `*.inctrak.com`.
@@ -157,7 +155,7 @@ These pieces already support the future architecture:
 - control-plane store-backed tenant, user, and membership resolution now exists in the backend
 - Supabase bearer-token auth now exists in the backend, with JWKS/public-key verification as the preferred path
 - tenant admin versus participant enforcement now has a protected backend probe path with tests
-- template bootstrap SQL now exists for tenant DB cloning
+- tenant bootstrap SQL now exists in `inctrak.db/inctrak.sql` for tenant DB cloning
 
 ## Open Risks
 

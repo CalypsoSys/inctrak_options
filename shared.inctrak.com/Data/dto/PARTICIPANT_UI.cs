@@ -21,7 +21,6 @@ namespace IncTrak.data
         public string USER_NAME { get; set; }
         public string EMAIL_ADDRESS { get; set; }
         public string USER_ACTION { get; set; }
-        public bool SEND_EMAIL { get; set; }
 
         public Participants SetFromParticipant
         {
@@ -73,12 +72,10 @@ namespace IncTrak.data
         public PARTICIPANT_UI()
             : base(Guid.Empty)
         {
-            SEND_EMAIL = true;
         }
 
         public PARTICIPANT_UI(Guid groupKeyCheck) : base(groupKeyCheck)
         {
-            SEND_EMAIL = true;
         }
 
         public PARTICIPANT_UI(Guid groupKeyCheck, Participants db) : this(groupKeyCheck)

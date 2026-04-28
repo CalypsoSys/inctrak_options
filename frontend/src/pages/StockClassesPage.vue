@@ -115,7 +115,6 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveStockClass({
       Key: currentId.value || EMPTY_GUID,
-      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Stock class saved.', response.success !== false)

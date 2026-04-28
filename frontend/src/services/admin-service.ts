@@ -1,5 +1,4 @@
 import { apiDelete, apiGet, apiPost } from '@/services/api'
-import { EMPTY_GUID } from '@/utils/constants'
 import type {
   ApiResponse,
   EntitySaveEnvelope,
@@ -65,7 +64,7 @@ export function fetchStockClasses(): Promise<StockClass[]> {
 }
 
 export function fetchStockClass(id: string): Promise<StockClassDetailResponse> {
-  return apiGet<StockClassDetailResponse>(`/api/company/stockclass/${id}/${EMPTY_GUID}`)
+  return apiGet<StockClassDetailResponse>(`/api/company/stockclass/${id}`)
 }
 
 export function saveStockClass(payload: EntitySaveEnvelope<StockClass>): Promise<ApiResponse & { key: string }> {
@@ -73,7 +72,7 @@ export function saveStockClass(payload: EntitySaveEnvelope<StockClass>): Promise
 }
 
 export function deleteStockClass(id: string): Promise<ApiResponse & { StockClasses: StockClass[] }> {
-  return apiDelete<ApiResponse & { StockClasses: StockClass[] }>(`/api/company/stockclass/${id}/${EMPTY_GUID}`)
+  return apiDelete<ApiResponse & { StockClasses: StockClass[] }>(`/api/company/stockclass/${id}`)
 }
 
 export function fetchPlans(): Promise<Plan[]> {
@@ -81,7 +80,7 @@ export function fetchPlans(): Promise<Plan[]> {
 }
 
 export function fetchPlan(id: string): Promise<PlanDetailResponse> {
-  return apiGet<PlanDetailResponse>(`/api/company/plan/${id}/${EMPTY_GUID}`)
+  return apiGet<PlanDetailResponse>(`/api/company/plan/${id}`)
 }
 
 export function savePlan(payload: EntitySaveEnvelope<Plan>): Promise<ApiResponse & { key: string }> {
@@ -89,7 +88,7 @@ export function savePlan(payload: EntitySaveEnvelope<Plan>): Promise<ApiResponse
 }
 
 export function deletePlan(id: string): Promise<ApiResponse & { Plans: Plan[] }> {
-  return apiDelete<ApiResponse & { Plans: Plan[] }>(`/api/company/plan/${id}/${EMPTY_GUID}`)
+  return apiDelete<ApiResponse & { Plans: Plan[] }>(`/api/company/plan/${id}`)
 }
 
 export function fetchSchedules(): Promise<Schedule[]> {
@@ -97,7 +96,7 @@ export function fetchSchedules(): Promise<Schedule[]> {
 }
 
 export function fetchSchedule(id: string): Promise<ScheduleDetailResponse> {
-  return apiGet<ScheduleDetailResponse>(`/api/company/schedule/${id}/${EMPTY_GUID}`)
+  return apiGet<ScheduleDetailResponse>(`/api/company/schedule/${id}`)
 }
 
 export function saveSchedule(payload: EntitySaveWithChildrenEnvelope<Schedule, Period>): Promise<ApiResponse & { key: string }> {
@@ -105,7 +104,7 @@ export function saveSchedule(payload: EntitySaveWithChildrenEnvelope<Schedule, P
 }
 
 export function deleteSchedule(id: string): Promise<ApiResponse & { Schedules: Schedule[] }> {
-  return apiDelete<ApiResponse & { Schedules: Schedule[] }>(`/api/company/schedule/${id}/${EMPTY_GUID}`)
+  return apiDelete<ApiResponse & { Schedules: Schedule[] }>(`/api/company/schedule/${id}`)
 }
 
 export function fetchTerminations(): Promise<Termination[]> {
@@ -113,7 +112,7 @@ export function fetchTerminations(): Promise<Termination[]> {
 }
 
 export function fetchTermination(id: string): Promise<TerminationDetailResponse> {
-  return apiGet<TerminationDetailResponse>(`/api/company/termination/${id}/${EMPTY_GUID}`)
+  return apiGet<TerminationDetailResponse>(`/api/company/termination/${id}`)
 }
 
 export function saveTermination(payload: EntitySaveEnvelope<Termination>): Promise<ApiResponse & { key: string }> {
@@ -121,7 +120,7 @@ export function saveTermination(payload: EntitySaveEnvelope<Termination>): Promi
 }
 
 export function deleteTermination(id: string): Promise<ApiResponse & { Terminations: Termination[] }> {
-  return apiDelete<ApiResponse & { Terminations: Termination[] }>(`/api/company/termination/${id}/${EMPTY_GUID}`)
+  return apiDelete<ApiResponse & { Terminations: Termination[] }>(`/api/company/termination/${id}`)
 }
 
 export function searchParticipants(search: string, searchType: SearchType): Promise<ParticipantSummary[]> {
@@ -133,7 +132,7 @@ export function searchParticipantLookup(search: string): Promise<ParticipantSumm
 }
 
 export function fetchParticipant(id: string): Promise<ParticipantDetailResponse> {
-  return apiGet<ParticipantDetailResponse>(`/api/company/participant/${id}/${EMPTY_GUID}`)
+  return apiGet<ParticipantDetailResponse>(`/api/company/participant/${id}`)
 }
 
 export function saveParticipant(payload: EntitySaveEnvelope<ParticipantDetail>): Promise<ApiResponse & { key: string }> {
@@ -141,7 +140,7 @@ export function saveParticipant(payload: EntitySaveEnvelope<ParticipantDetail>):
 }
 
 export function deleteParticipant(id: string): Promise<ApiResponse & { Participants: ParticipantSummary[] }> {
-  return apiDelete<ApiResponse & { Participants: ParticipantSummary[] }>(`/api/company/participant/${id}/${EMPTY_GUID}`)
+  return apiDelete<ApiResponse & { Participants: ParticipantSummary[] }>(`/api/company/participant/${id}`)
 }
 
 export function searchGrants(search: string, searchType: SearchType): Promise<Grant[]> {
@@ -149,7 +148,7 @@ export function searchGrants(search: string, searchType: SearchType): Promise<Gr
 }
 
 export function fetchGrant(id: string): Promise<GrantDetailResponse> {
-  return apiGet<GrantDetailResponse>(`/api/company/grant/${id}/${EMPTY_GUID}`)
+  return apiGet<GrantDetailResponse>(`/api/company/grant/${id}`)
 }
 
 export function saveGrant(payload: EntitySaveEnvelope<Grant>): Promise<ApiResponse & { key: string }> {
@@ -157,7 +156,7 @@ export function saveGrant(payload: EntitySaveEnvelope<Grant>): Promise<ApiRespon
 }
 
 export function deleteGrant(id: string): Promise<ApiResponse & { Grants: Grant[] }> {
-  return apiDelete<ApiResponse & { Grants: Grant[] }>(`/api/company/grant/${id}/${EMPTY_GUID}`)
+  return apiDelete<ApiResponse & { Grants: Grant[] }>(`/api/company/grant/${id}`)
 }
 
 export function searchStockHolders(search: string, searchType: SearchType): Promise<StockHolder[]> {
@@ -165,7 +164,7 @@ export function searchStockHolders(search: string, searchType: SearchType): Prom
 }
 
 export function fetchStockHolder(id: string): Promise<StockHolderDetailResponse> {
-  return apiGet<StockHolderDetailResponse>(`/api/company/stockholder/${id}/${EMPTY_GUID}`)
+  return apiGet<StockHolderDetailResponse>(`/api/company/stockholder/${id}`)
 }
 
 export function saveStockHolder(payload: EntitySaveEnvelope<StockHolder>): Promise<ApiResponse & { key: string }> {
@@ -173,5 +172,5 @@ export function saveStockHolder(payload: EntitySaveEnvelope<StockHolder>): Promi
 }
 
 export function deleteStockHolder(id: string): Promise<ApiResponse & { StockHolders: StockHolder[] }> {
-  return apiDelete<ApiResponse & { StockHolders: StockHolder[] }>(`/api/company/stockholder/${id}/${EMPTY_GUID}`)
+  return apiDelete<ApiResponse & { StockHolders: StockHolder[] }>(`/api/company/stockholder/${id}`)
 }

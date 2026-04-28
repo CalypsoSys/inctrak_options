@@ -93,7 +93,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, Guid.Empty.ToString());
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -107,15 +107,15 @@ namespace IncTrak.Controllers
             }
         }
 
-        [Route("api/company/participant/{participantKey}/{uuidKey}")]
-        public object GetParticipant(Guid participantKey, string uuidKey)
+        [Route("api/company/participant/{participantKey}")]
+        public object GetParticipant(Guid participantKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -161,7 +161,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, saveParticipant.UUID);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return Ok(new { success = false, login = true, message = "A security issue as occured, please login." });
                     if (saveParticipant.Key != saveParticipant.Data.PARTICIPANT_PK)
@@ -184,7 +184,6 @@ namespace IncTrak.Controllers
                         saveParticipant.Data.SetToParticipant(participant, rights.GroupKey);
                     }
 
-                    string uuid = null;
                     if (saveParticipant.Data.USER_ACTION == "create_user" || saveParticipant.Data.USER_ACTION == "update_user") {
                         var newUser = (from u in context.Users
                                       where (u.EmailAddress == saveParticipant.Data.EMAIL_ADDRESS || u.UserName == saveParticipant.Data.USER_NAME) &&
@@ -195,7 +194,6 @@ namespace IncTrak.Controllers
 
                         if ( saveParticipant.Data.USER_ACTION == "update_user" )
                         {
-                            participant.UserFkNavigation.GoogleLogon = false;
                             participant.UserFkNavigation.UserName = saveParticipant.Data.USER_NAME;
                             participant.UserFkNavigation.EmailAddress = saveParticipant.Data.EMAIL_ADDRESS;
                         }
@@ -203,19 +201,13 @@ namespace IncTrak.Controllers
                         {
                             Users user = new Users();
                             user.Administrator = false;
-                            user.AcceptTerms = false;
                             user.EmailAddress = saveParticipant.Data.EMAIL_ADDRESS;
-                            user.GoogleLogon = false;
                             user.UserName = saveParticipant.Data.USER_NAME;
-                            user.Activated = true;
-                            user.Password = "placeholder";
                             user.GroupFk = rights.GroupKey;
                             context.Users.Add(user);
 
                             participant.UserFkNavigation = user;
                         }
-                        uuid = AccessController.ParticipantResetUuid(_options, context, participant.UserFkNavigation);
-
                     }
                     else if (saveParticipant.Data.USER_ACTION == "delete_user" && participant.UserFk.HasValue)
                     {
@@ -225,8 +217,6 @@ namespace IncTrak.Controllers
                     }
 
                     context.SaveChanges();
-                    if (uuid != null && saveParticipant.Data.SEND_EMAIL)
-                        AccessController.ParticpantResetEmail(_options, participant.UserFkNavigation, uuid);
                     return Ok(new { success = true, message = "Participant saved.", key=participant.ParticipantPk });
                 }
             }
@@ -238,16 +228,16 @@ namespace IncTrak.Controllers
         }
 
 
-        [Route("api/company/participant/{participantKey}/{uuidKey}")]
+        [Route("api/company/participant/{participantKey}")]
         [HttpDelete]
-        public object DeleteParticipant(Guid participantKey, string uuidKey)
+        public object DeleteParticipant(Guid participantKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 

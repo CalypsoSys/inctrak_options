@@ -32,7 +32,6 @@ export type MessageType = {
 
 export type EntitySaveEnvelope<T> = {
   Key: string
-  UUID: string
   Data: T
 }
 
@@ -62,7 +61,6 @@ export type ParticipantDetail = {
   USER_NAME: string
   EMAIL_ADDRESS: string
   USER_ACTION: string
-  SEND_EMAIL: boolean
 }
 
 export type StockClass = {

@@ -148,7 +148,6 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveSchedule({
       Key: currentId.value || EMPTY_GUID,
-      UUID: EMPTY_GUID,
       Data: { ...form },
       Children: periods.value.map((period, index) => ({ ...period, ORDER: index }))
     })

@@ -28,7 +28,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, Guid.Empty.ToString());
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -99,7 +99,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, Guid.Empty.ToString());
+                    rights = GetLoginUser(context);
                     if (rights == null)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 

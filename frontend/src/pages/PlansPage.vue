@@ -127,7 +127,6 @@ async function saveItem(): Promise<void> {
   try {
     const response = await savePlan({
       Key: currentId.value || EMPTY_GUID,
-      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Plan saved.', response.success !== false)

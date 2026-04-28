@@ -21,7 +21,6 @@ namespace inctrak.com.Tests
                     ErrorLogPath = logPath
                 };
                 var login = new LoginRights(
-                    "user-123",
                     false,
                     Guid.Empty,
                     Guid.Empty,
@@ -36,7 +35,6 @@ namespace inctrak.com.Tests
 
                 string logContents = File.ReadAllText(logPath);
                 Assert.Contains("message=failed to save grant", logContents);
-                Assert.Contains("uuid=user-123", logContents);
                 Assert.Contains("userKey=11111111-1111-1111-1111-111111111111", logContents);
                 Assert.Contains("exception: outer failure", logContents);
                 Assert.Contains("inner_exception_1: inner failure", logContents);

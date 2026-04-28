@@ -62,12 +62,12 @@ namespace inctrak.com.Tests
         public void BuildLogPath_RedactsSensitiveQueryParameters()
         {
             var context = new DefaultHttpContext();
-            context.Request.Path = "/api/login/resetpasswordlink/";
+            context.Request.Path = "/api/company/summary/";
             context.Request.QueryString = new QueryString("?code=abc123&x=1&ResetPasswordKey=secret-value");
 
             string path = AccessLogMiddleware.BuildLogPath(context.Request);
 
-            Assert.Contains("/api/login/resetpasswordlink/?", path);
+            Assert.Contains("/api/company/summary/?", path);
             Assert.Contains("code=[REDACTED]", path);
             Assert.Contains("ResetPasswordKey=[REDACTED]", path);
             Assert.Contains("x=1", path);

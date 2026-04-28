@@ -1,6 +1,6 @@
 <template>
   <section class="space-y-6">
-    <PageIntro eyebrow="Admin" title="Participants" description="Search, create, and manage participants plus linked user access state." />
+    <PageIntro eyebrow="Admin" title="Participants" description="Search, create, and manage participants plus linked app access records." />
     <SearchToolbar
       v-model="searchText"
       :busy="isBusy"
@@ -69,12 +69,6 @@
               </label>
             </div>
           </div>
-          <div class="grid gap-3 md:grid-cols-1">
-            <label class="flex items-center gap-2 text-sm font-semibold text-[var(--app-muted)]">
-              <input v-model="form.SEND_EMAIL" type="checkbox" />
-              Send activation email
-            </label>
-          </div>
         </div>
         <FormActions
           :busy="isBusy"
@@ -117,10 +111,10 @@ const items = ref<ParticipantSummary[]>([])
 const participantTypes = ref<ParticipantType[]>([])
 const currentId = ref('')
 const userActions = [
-  { value: 'create_user', label: 'Create New User' },
-  { value: 'update_user', label: 'Update User' },
-  { value: 'delete_user', label: 'Delete User' },
-  { value: 'none', label: 'No User Action' }
+  { value: 'create_user', label: 'Link New User' },
+  { value: 'update_user', label: 'Update Linked User' },
+  { value: 'delete_user', label: 'Remove Linked User' },
+  { value: 'none', label: 'No User Change' }
 ]
 const form = reactive<ParticipantDetail>({
   PARTICIPANT_PK: EMPTY_GUID,
@@ -128,8 +122,7 @@ const form = reactive<ParticipantDetail>({
   NAME: '',
   USER_NAME: '',
   EMAIL_ADDRESS: '',
-  USER_ACTION: 'create_user',
-  SEND_EMAIL: true
+  USER_ACTION: 'create_user'
 })
 
 onMounted(async () => {
@@ -153,8 +146,7 @@ async function loadItem(id = ''): Promise<void> {
       NAME: '',
       USER_NAME: '',
       EMAIL_ADDRESS: '',
-      USER_ACTION: 'create_user',
-      SEND_EMAIL: true
+      USER_ACTION: 'create_user'
     })
     await router.replace({ name: 'participants' })
     return
@@ -177,7 +169,6 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveParticipant({
       Key: currentId.value || EMPTY_GUID,
-      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Participant saved.', response.success !== false)

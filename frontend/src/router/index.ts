@@ -8,10 +8,6 @@ import AboutPage from '@/pages/AboutPage.vue'
 import ContactPage from '@/pages/ContactPage.vue'
 import PrivacyPage from '@/pages/PrivacyPage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
-import ActivateAccountPage from '@/pages/ActivateAccountPage.vue'
-import ResetPasswordRequestPage from '@/pages/ResetPasswordRequestPage.vue'
-import ResetPasswordPage from '@/pages/ResetPasswordPage.vue'
-import AcceptTermsPage from '@/pages/AcceptTermsPage.vue'
 import StockClassesPage from '@/pages/StockClassesPage.vue'
 import StockHoldersPage from '@/pages/StockHoldersPage.vue'
 import PlansPage from '@/pages/PlansPage.vue'
@@ -45,10 +41,6 @@ const router = createRouter({
         { path: 'support/contact', name: 'contact', component: ContactPage, meta: { title: 'Contact' } },
         { path: 'legal/privacy', name: 'privacy', component: PrivacyPage, meta: { title: 'Privacy Policy' } },
         { path: 'auth/login', name: 'login', component: LoginPage, meta: { title: 'Login', publicOnly: true } },
-        { path: 'auth/activate/:key', name: 'activate-account', component: ActivateAccountPage, meta: { title: 'Activate Account' } },
-        { path: 'auth/reset-password', name: 'reset-password-request', component: ResetPasswordRequestPage, meta: { title: 'Reset Password', publicOnly: true } },
-        { path: 'auth/reset-password/:key', name: 'reset-password', component: ResetPasswordPage, meta: { title: 'Set Password' } },
-        { path: 'auth/accept-terms/:key', name: 'accept-terms', component: AcceptTermsPage, meta: { title: 'Accept Terms' } },
         { path: 'admin/stock-classes/:id?', name: 'stock-classes', component: StockClassesPage, meta: { title: 'Stock Classes', requiresAuth: true, requiresAdmin: true } },
         { path: 'admin/stock-holders/:id?', name: 'stock-holders', component: StockHoldersPage, meta: { title: 'Stock Holders', requiresAuth: true, requiresAdmin: true } },
         { path: 'admin/plans/:id?', name: 'plans', component: PlansPage, meta: { title: 'Plans', requiresAuth: true, requiresAdmin: true } },

@@ -23,23 +23,19 @@ namespace IncTrak.Data
                         messageOut = message;
 
                 }
-                string uuid = "N/A";
                 Guid userKey = Guid.Empty;
                 if (login != null)
                 {
-                    if (login.UUID != null)
-                        uuid = login.UUID;
                     if (login.UserKeyForError != Guid.Empty)
                         userKey = login.UserKeyForError;
                 }
 
                 StringBuilder output = new StringBuilder();
                 output.AppendFormat(
-                    "[{0:yyyy-MM-dd HH:mm:ss zzz}] code={1} message={2} uuid={3} userKey={4}\n",
+                    "[{0:yyyy-MM-dd HH:mm:ss zzz}] code={1} message={2} userKey={3}\n",
                     DateTimeOffset.Now,
                     errorCode,
                     FileLogWriter.SanitizeSingleLine(messageOut),
-                    FileLogWriter.SanitizeSingleLine(uuid),
                     userKey == Guid.Empty ? "-" : userKey.ToString());
 
                 for (int i = 0; excp != null; i++)

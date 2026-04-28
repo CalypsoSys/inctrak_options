@@ -2,10 +2,10 @@ type LegacyPathResolver = (params: Record<string, string>) => string
 
 const legacyRouteMap: Record<string, LegacyPathResolver> = {
   '/login': () => '/auth/login',
-  '/activateaccount/:key': ({ key }) => `/auth/activate/${key}`,
-  '/resetpassword': () => '/auth/reset-password',
-  '/resetpasswordlink/:key': ({ key }) => `/auth/reset-password/${key}`,
-  '/accept_terms/:key': ({ key }) => `/auth/accept-terms/${key}`,
+  '/activateaccount/:key': () => '/auth/login',
+  '/resetpassword': () => '/auth/login',
+  '/resetpasswordlink/:key': () => '/auth/login',
+  '/accept_terms/:key': () => '/auth/login',
   '/privacy_policy': () => '/legal/privacy',
   '/contact': () => '/support/contact',
   '/company_stockclasses/:key': ({ key }) => `/admin/stock-classes/${normalizeLegacyKey(key)}`,
@@ -56,7 +56,7 @@ function matchLegacyPath(path: string): { pattern: string; params: Record<string
   return null
 }
 
-// Preserve older hash-based bookmarks and email links while the route model is renamed.
+// Preserve older hash-based bookmarks while routing retired auth links back to login.
 export function resolveLegacyPath(path: string): string | null {
   const match = matchLegacyPath(path)
   if (!match) {

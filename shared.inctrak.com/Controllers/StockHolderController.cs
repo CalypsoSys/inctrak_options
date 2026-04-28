@@ -86,7 +86,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, Guid.Empty.ToString());
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -100,15 +100,15 @@ namespace IncTrak.Controllers
             }
         }
 
-        [Route("api/company/stockholder/{stockHolderKey}/{uuidKey}")]
-        public object GetStockHolder(Guid stockHolderKey, string uuidKey)
+        [Route("api/company/stockholder/{stockHolderKey}")]
+        public object GetStockHolder(Guid stockHolderKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -158,7 +158,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, saveStockHolder.UUID);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return Ok(new { success = false, login = true, message = "A security issue as occured, please login." } );
                     if (saveStockHolder.Key != saveStockHolder.Data.STOCK_HOLDER_PK)
@@ -192,16 +192,16 @@ namespace IncTrak.Controllers
         }
 
 
-        [Route("api/company/stockholder/{stockHolderKey}/{uuidKey}")]
+        [Route("api/company/stockholder/{stockHolderKey}")]
         [HttpDelete]
-        public object DeleteStockHolder(Guid stockHolderKey, string uuidKey)
+        public object DeleteStockHolder(Guid stockHolderKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 

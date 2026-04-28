@@ -159,7 +159,6 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveTermination({
       Key: currentId.value || EMPTY_GUID,
-      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Termination rule saved.', response.success !== false)

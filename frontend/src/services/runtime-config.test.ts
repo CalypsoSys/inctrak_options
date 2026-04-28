@@ -3,7 +3,7 @@ import { buildApiUrl } from '@/services/runtime-config'
 
 describe('buildApiUrl', () => {
   it('keeps relative api paths relative by default', () => {
-    expect(buildApiUrl('/api/login/resetpassword/')).toBe('/api/login/resetpassword/')
+    expect(buildApiUrl('/api/company/summary/')).toBe('/api/company/summary/')
   })
 
   it('keeps absolute URLs unchanged', () => {

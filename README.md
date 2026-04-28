@@ -41,7 +41,7 @@ The API lives in `shared.inctrak.com/`. The frontend source lives in `frontend/`
 - `node --test scripts/tests/static-sites.test.mjs` runs the static-site regression checks.
 - `node --test scripts/tests/control-plane-schema.test.mjs` checks the control-plane bootstrap SQL.
 - `node --test scripts/tests/gitleaks-config.test.mjs` checks the Gitleaks repo configuration.
-- `node --test scripts/tests/template-bootstrap.test.mjs` checks the tenant template bootstrap SQL.
+- `node --test scripts/tests/template-bootstrap.test.mjs` checks the tenant bootstrap SQL.
 - `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
 - `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
 - `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` runs the API split tests.
@@ -67,7 +67,7 @@ For control-plane provisioning metadata, use [inctrak.db/control_plane.sql](inct
 
 For local control-plane seeding, start from [inctrak.db/control_plane.seed.example.sql](inctrak.db/control_plane.seed.example.sql) and adapt the sample tenant, domain, user, and membership values before applying it with `psql`.
 
-For tenant database provisioning, use [inctrak.db/template-bootstrap.sql](inctrak.db/template-bootstrap.sql) as the bootstrap source for the `inctrak_template` PostgreSQL database. The older [inctrak.db/inctrak.sql](inctrak.db/inctrak.sql) file remains a legacy schema reference.
+For tenant database provisioning, use [inctrak.db/inctrak.sql](inctrak.db/inctrak.sql) as the canonical bootstrap source for tenant PostgreSQL databases and for any `inctrak_template` clone source you maintain locally.
 
 ## Secret Scanning
 

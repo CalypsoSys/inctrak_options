@@ -1,6 +1,5 @@
 import { apiGet } from '@/services/api'
 import type { ApiResponse, Grant, StockHolder, VestScheduleEntry } from '@/services/types'
-import { EMPTY_GUID } from '@/utils/constants'
 
 export type ParticipantGrantDetailResponse = ApiResponse & {
   Grant: Grant
@@ -29,5 +28,5 @@ export function fetchParticipantGrants(): Promise<Grant[]> {
 }
 
 export function fetchParticipantGrant(id: string): Promise<ParticipantGrantDetailResponse> {
-  return apiGet<ParticipantGrantDetailResponse>(`/api/participant/grant/${id}/${EMPTY_GUID}/`)
+  return apiGet<ParticipantGrantDetailResponse>(`/api/participant/grant/${id}/`)
 }

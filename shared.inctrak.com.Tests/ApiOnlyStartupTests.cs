@@ -27,9 +27,9 @@ namespace inctrak.com.Tests
         {
             using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
             using HttpClient client = server.CreateClient();
-            using var request = new HttpRequestMessage(HttpMethod.Options, "/api/login/resetpassword/");
+            using var request = new HttpRequestMessage(HttpMethod.Options, "/api/company/summary/");
             request.Headers.Add("Origin", "https://inctrak.com");
-            request.Headers.Add("Access-Control-Request-Method", "POST");
+            request.Headers.Add("Access-Control-Request-Method", "GET");
 
             HttpResponseMessage response = await client.SendAsync(request);
 
@@ -53,8 +53,7 @@ namespace inctrak.com.Tests
                 .UseStartup<Startup>());
             using HttpClient client = server.CreateClient();
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/login/resetpassword/");
-            request.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/api/company/summary/");
             HttpResponseMessage response = await client.SendAsync(request);
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -76,9 +75,8 @@ namespace inctrak.com.Tests
                 })
                 .UseStartup<Startup>());
             using HttpClient client = server.CreateClient();
-            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/login/resetpassword/");
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/api/company/summary/");
             request.Headers.Add("X-Test-Gateway", "super-secret");
-            request.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = await client.SendAsync(request);
 
@@ -101,12 +99,10 @@ namespace inctrak.com.Tests
                 })
                 .UseStartup<Startup>());
             using HttpClient client = server.CreateClient();
-            using var firstRequest = new HttpRequestMessage(HttpMethod.Post, "/api/login/resetpassword/");
+            using var firstRequest = new HttpRequestMessage(HttpMethod.Get, "/api/company/summary/");
             firstRequest.Headers.Add("CF-Connecting-IP", "203.0.113.10");
-            firstRequest.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-            using var secondRequest = new HttpRequestMessage(HttpMethod.Post, "/api/login/resetpassword/");
+            using var secondRequest = new HttpRequestMessage(HttpMethod.Get, "/api/company/summary/");
             secondRequest.Headers.Add("CF-Connecting-IP", "203.0.113.10");
-            secondRequest.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
 
             HttpResponseMessage firstResponse = await client.SendAsync(firstRequest);
             HttpResponseMessage secondResponse = await client.SendAsync(secondRequest);
@@ -136,6 +132,19 @@ namespace inctrak.com.Tests
             using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
             using HttpClient client = server.CreateClient();
             using var request = new HttpRequestMessage(HttpMethod.Get, "/api/login/login_google_user/");
+
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task ApiOnlyHost_DoesNotExposeLegacyPasswordResetEndpoint()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+            using var request = new HttpRequestMessage(HttpMethod.Post, "/api/login/resetpassword/");
+            request.Content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = await client.SendAsync(request);
 

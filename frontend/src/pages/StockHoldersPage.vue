@@ -173,7 +173,6 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveStockHolder({
       Key: currentId.value || EMPTY_GUID,
-      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Stock holder saved.', response.success !== false)

@@ -33,9 +33,6 @@
         </div>
         <div class="flex flex-wrap gap-3">
           <Button type="submit" :loading="isBusy" :label="form.isRegistering ? 'Create Account' : 'Login'" />
-          <RouterLink :to="{ name: 'reset-password-request' }">
-            <Button label="Reset Password" severity="secondary" variant="outlined" />
-          </RouterLink>
         </div>
       </form>
     </article>
@@ -46,6 +43,7 @@
         <li>Administrators land in the new admin workspace with stock classes, plans, participants, grants, and schedule tools.</li>
         <li>Participants land in the optionee area with stock summary, option summary, and grant detail views.</li>
         <li>Registration creates Supabase credentials first; actual app access still depends on an IncTrak tenant membership.</li>
+        <li>Participant access is controlled by linking their email to a participant record in the admin workspace.</li>
       </ul>
     </article>
 

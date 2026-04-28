@@ -6,8 +6,8 @@ function read(path) {
   return readFileSync(new URL(path, import.meta.url), 'utf8');
 }
 
-test('tenant template bootstrap stays clone-safe for PostgreSQL template databases', () => {
-  const sql = read('../../inctrak.db/template-bootstrap.sql');
+test('tenant bootstrap sql stays clone-safe for PostgreSQL template databases', () => {
+  const sql = read('../../inctrak.db/inctrak.sql');
 
   assert.doesNotMatch(sql, /\bCREATE DATABASE\b/i);
   assert.doesNotMatch(sql, /\\connect\b/i);
@@ -15,7 +15,7 @@ test('tenant template bootstrap stays clone-safe for PostgreSQL template databas
   assert.match(sql, /CREATE EXTENSION IF NOT EXISTS "uuid-ossp";/);
   assert.match(sql, /CREATE TABLE SCHEMA_VERSION\(/);
   assert.match(sql, /INSERT INTO SCHEMA_VERSION \(SCHEMA_VERSION_PK, VERSION_NAME\)/);
-  assert.match(sql, /VALUES \(1, 'template-bootstrap-v1'\);/);
+  assert.match(sql, /VALUES \(1, 'inctrak-bootstrap-v1'\);/);
   assert.match(sql, /CREATE TABLE GROUPS\(/);
   assert.match(sql, /CREATE TABLE USERS\(/);
   assert.match(sql, /CREATE TABLE GRANTS\(/);

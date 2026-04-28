@@ -206,7 +206,6 @@ async function saveItem(): Promise<void> {
   try {
     const response = await saveGrant({
       Key: currentId.value || EMPTY_GUID,
-      UUID: EMPTY_GUID,
       Data: { ...form }
     })
     showMessage(response.message ?? 'Grant saved.', response.success !== false)

@@ -46,7 +46,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, Guid.Empty.ToString());
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -61,15 +61,15 @@ namespace IncTrak.Controllers
             }
         }
 
-        [Route("api/company/schedule/{scheduleKey}/{uuidKey}")]
-        public object GetSchedule(Guid scheduleKey, string uuidKey)
+        [Route("api/company/schedule/{scheduleKey}")]
+        public object GetSchedule(Guid scheduleKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -113,7 +113,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, saveSchedule.UUID);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return Ok(new { success = false, login = true, message = "A security issue as occured, please login." });
 
@@ -164,16 +164,16 @@ namespace IncTrak.Controllers
         }
 
 
-        [Route("api/company/schedule/{scheduleKey}/{uuidKey}")]
+        [Route("api/company/schedule/{scheduleKey}")]
         [HttpDelete]
-        public object DeleteSchedule(Guid scheduleKey, string uuidKey)
+        public object DeleteSchedule(Guid scheduleKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 

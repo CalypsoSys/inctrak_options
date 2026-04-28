@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IncTrak.Data;
 using IncTrak.Models;
-using inctrak.com;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -24,11 +23,6 @@ namespace IncTrak.Controllers
         protected IncTrakController(IOptions<AppSettings> options)
         {
             _options = options;
-        }
-
-        protected string LoginBaseUrl(string redirect)
-        {
-            return GetIncTrakApiUrl("/api/login/{0}/", redirect);
         }
 
         protected string GetIncTrakUrl(string path, params object[] args)
@@ -72,42 +66,21 @@ namespace IncTrak.Controllers
 
         protected LoginRights GetLoginUser()
         {
-            return GetLoginUser(null, Guid.Empty.ToString(), true);
+            return GetLoginUser(null, true);
         }
 
-        protected LoginRights GetLoginUser(inctrakContext context, string passedUuid, bool noNull = false)
+        protected LoginRights GetLoginUser(inctrakContext context, bool noNull = false)
         {
-            Guid groupKey = Guid.Empty;
-            Guid userKey = Guid.Empty;
-            string uuidKey = passedUuid;
             try
             {
-                uuidKey = RequestAuthReader.GetUuid(Request);
-                if (passedUuid != Guid.Empty.ToString() &&
-                    uuidKey != Guid.Empty.ToString() &&
-                    uuidKey != passedUuid)
-                {
-                    if (noNull)
-                        return new LoginRights(passedUuid, false, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty);
-                    else
-                        return null;
-                }
-
                 if (context != null)
                 {
-                    Users user = AccessController.GetLoginUserKey(context, uuidKey);
-                    if (user == null)
-                    {
-                        user = ResolveSupabaseLoginUser(context);
-                    }
-
+                    Users user = ResolveSupabaseLoginUser(context);
                     if (user != null)
                     {
-                        if (user.Administrator)
-                            groupKey = user.GroupFk;
-                        else
-                            userKey = user.UserPk;
-                        return new LoginRights(uuidKey, user.Administrator, groupKey, userKey, user.UserPk, user.GroupFk);
+                        Guid groupKey = user.Administrator ? user.GroupFk : Guid.Empty;
+                        Guid userKey = user.Administrator ? Guid.Empty : user.UserPk;
+                        return new LoginRights(user.Administrator, groupKey, userKey, user.UserPk, user.GroupFk);
                     }
                 }
             }
@@ -116,7 +89,7 @@ namespace IncTrak.Controllers
             }
 
             if (noNull)
-                return new LoginRights(uuidKey, false, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty);
+                return new LoginRights(false, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty);
             else
                 return null;
         }
