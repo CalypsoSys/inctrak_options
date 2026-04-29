@@ -46,7 +46,7 @@
       </article>
     </section>
 
-    <section v-if="quickVestSchedule.length > 0" class="mt-8">
+    <section v-if="quickVestSchedule.length > 0" ref="timelineSection" class="mt-8">
       <VestingScheduleTable :rows="quickVestSchedule" />
     </section>
 
@@ -135,6 +135,7 @@ const dialogSuccess = ref(false)
 const dialogTitle = ref('Vesting')
 const dialogMessage = ref('')
 const helpVisible = ref(false)
+const timelineSection = ref<HTMLElement | null>(null)
 
 const quickGrant = reactive<Grant>({
   GRANT_PK: '',
@@ -183,7 +184,14 @@ async function submitQuickGrant(): Promise<void> {
   try {
     const response = await saveQuickGrant(quickGrant, quickPeriods.value)
     quickVestSchedule.value = response.VestSchedule ?? []
-    showDialog(response.message ?? 'Quick vesting calculated.', response.success !== false)
+    if (response.success === false)
+    {
+      showDialog(response.message ?? 'Unable to calculate the quick vesting schedule.', false)
+    }
+    else
+    {
+      scrollToTimeline()
+    }
   } catch (error) {
     showDialog(getApiMessage(error, 'Unable to calculate the quick vesting schedule.'), false)
   } finally {
@@ -195,5 +203,11 @@ function showDialog(message: string, success: boolean): void {
   dialogMessage.value = message
   dialogSuccess.value = success
   dialogVisible.value = true
+}
+
+function scrollToTimeline(): void {
+  window.requestAnimationFrame(() => {
+    timelineSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
 }
 </script>

@@ -42,14 +42,14 @@
             </select>
             <p class="mt-2 text-xs leading-5 text-[var(--app-muted)]">Use <strong>Shares</strong> for fixed share counts or <strong>Percentage</strong> for percent-based vesting.</p>
           </div>
-          <div>
+          <div v-if="shouldShowAmountPerStep(period.EVEN_OVER_N)">
             <label class="field-label">Amount Per Step</label>
-            <input v-model.number="period.AMOUNT" class="field-input" step="0.000001" type="number" :disabled="period.EVEN_OVER_N === 1" />
+            <input v-model.number="period.AMOUNT" class="field-input" step="0.000001" type="number" />
             <p class="mt-2 text-xs leading-5 text-[var(--app-muted)]">What vests each time this step happens.</p>
           </div>
-          <div>
+          <div v-if="shouldShowNumberOfSteps(period.EVEN_OVER_N)">
             <label class="field-label">Number of Steps</label>
-            <input v-model.number="period.INCREMENTS" class="field-input" min="1" type="number" :disabled="period.EVEN_OVER_N === 2" />
+            <input v-model.number="period.INCREMENTS" class="field-input" min="1" type="number" />
             <p class="mt-2 text-xs leading-5 text-[var(--app-muted)]">How many times this step repeats before the next period starts.</p>
           </div>
         </div>
@@ -73,6 +73,7 @@
 
 <script setup lang="ts">
 import Button from 'primevue/button'
+import { shouldShowAmountPerStep, shouldShowNumberOfSteps } from '@/services/period-editor'
 import type { AmountType, Period, PeriodType } from '@/services/types'
 
 defineProps<{

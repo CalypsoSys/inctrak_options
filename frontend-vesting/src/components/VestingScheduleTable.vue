@@ -16,6 +16,7 @@
           <tr>
             <th>Period</th>
             <th>Vest Date</th>
+            <th>Status</th>
             <th>Percent</th>
             <th>Shares</th>
             <th>Total Percent</th>
@@ -23,9 +24,23 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="entry in filteredRows" :key="`${entry.Order}-${entry.VestDate}`">
+          <tr
+            v-for="entry in filteredRows"
+            :key="`${entry.Order}-${entry.VestDate}`"
+            :class="entry.IsVested ? 'bg-emerald-50/60' : 'bg-amber-50/50'"
+          >
             <td>{{ entry.Order }}</td>
             <td>{{ formatDate(entry.VestDate) }}</td>
+            <td>
+              <span
+                class="inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em]"
+                :class="entry.IsVested
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-amber-100 text-amber-800'"
+              >
+                {{ entry.IsVested ? 'Vested' : 'Unvested' }}
+              </span>
+            </td>
             <td>{{ formatNumber(entry.Percent, 3) }}%</td>
             <td>{{ formatNumber(entry.Shares, 3) }}</td>
             <td>{{ formatNumber(entry.TotalPercent, 3) }}</td>
