@@ -368,6 +368,22 @@ from created_group;";
             return new NpgsqlConnection(builder.ConnectionString);
         }
 
+        private NpgsqlConnection CreateTenantConnection(string tenantDatabaseName)
+        {
+            string baseConnectionString = _settings.GetIncTrakConnection();
+            if (string.IsNullOrWhiteSpace(baseConnectionString))
+            {
+                throw new InvalidOperationException("AppSettings.IncTrakConnection is required for tenant provisioning.");
+            }
+
+            var builder = new NpgsqlConnectionStringBuilder(baseConnectionString)
+            {
+                Database = tenantDatabaseName
+            };
+
+            return new NpgsqlConnection(builder.ConnectionString);
+        }
+
         private string GetTemplateDatabaseName()
         {
             string templateDatabaseName = _settings.GetTenantTemplateDatabaseName();
