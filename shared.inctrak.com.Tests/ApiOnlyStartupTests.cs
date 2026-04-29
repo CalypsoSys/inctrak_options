@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Net.Http.Json;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -164,6 +165,58 @@ namespace inctrak.com.Tests
             Assert.Contains("\"success\":true", body, System.StringComparison.OrdinalIgnoreCase);
             Assert.Contains("PeriodTypes", body);
             Assert.Contains("AmountTypes", body);
+        }
+
+        [Fact]
+        public async Task ApiOnlyHost_CanInterpretStandardQuickVestingPrompt()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/api/optionee/quick/interpret/", new
+            {
+                Prompt = "I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after."
+            });
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"success\":true", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Periods", body);
+            Assert.Contains("Summary", body, System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task ApiOnlyHost_QuickVesting_RejectsZeroSharesWithFriendlyMessage()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/api/optionee/quick/", new
+            {
+                Data = new
+                {
+                    SHARES = 0,
+                    VESTING_START = "2026-01-01"
+                },
+                Children = new[]
+                {
+                    new
+                    {
+                        PERIOD_AMOUNT = 1,
+                        PERIOD_TYPE_FK = 2,
+                        AMOUNT_TYPE_FK = 2,
+                        AMOUNT = 25,
+                        INCREMENTS = 4,
+                        ORDER = 0,
+                        EVEN_OVER_N = 0
+                    }
+                }
+            });
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"success\":false", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Shares Granted", body);
         }
     }
 }

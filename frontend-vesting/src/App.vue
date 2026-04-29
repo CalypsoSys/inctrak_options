@@ -15,6 +15,38 @@
           </template>
         </PageIntro>
 
+        <div class="mt-8 rounded-[2rem] border border-[var(--app-border)] bg-white/70 p-5">
+          <div class="max-w-3xl">
+            <h2 class="text-lg font-bold text-slate-900">Describe the schedule in plain English</h2>
+            <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Start with a common vesting phrase and let IncTrak build the first draft for you.</p>
+          </div>
+          <div class="mt-4 rounded-[1.5rem] border-2 border-[var(--app-accent)]/20 bg-white/85 p-4 shadow-[0_18px_40px_rgba(15,118,110,0.08)]">
+            <label class="field-label">Schedule Description</label>
+            <textarea
+              v-model="promptText"
+              class="field-textarea min-h-52 w-full resize-y"
+              placeholder="Example: I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after."
+            />
+          </div>
+          <div class="mt-4 flex justify-start">
+            <Button label="Generate From Description" icon="pi pi-sparkles" :loading="isInterpreting" @click="generateFromPrompt" />
+          </div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button
+              v-for="example in promptExamples"
+              :key="example"
+              class="rounded-full border border-[var(--app-border)] bg-white px-3 py-2 text-sm font-medium text-[var(--app-muted)] transition hover:border-[var(--app-accent)] hover:text-[var(--app-accent)]"
+              type="button"
+              @click="promptText = example"
+            >
+              {{ example }}
+            </button>
+          </div>
+          <div v-if="interpretSummary" class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm leading-6 text-emerald-900">
+            {{ interpretSummary }}
+          </div>
+        </div>
+
         <div class="mt-8 grid gap-4 md:grid-cols-2">
           <div>
             <label class="field-label">Shares Granted</label>
@@ -108,6 +140,13 @@
           </ul>
         </div>
 
+        <div class="rounded-2xl border border-[var(--app-border)] bg-white/70 p-4">
+          <p class="font-semibold text-slate-900">Natural-language example</p>
+          <p class="mt-2">You can also describe a schedule in plain English, for example:</p>
+          <p class="mt-3 rounded-2xl bg-slate-950/5 px-4 py-3 font-medium text-slate-900">"I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after."</p>
+          <p class="mt-3">That should translate into a 25% cliff after one year, then monthly vesting across the remaining 36 months.</p>
+        </div>
+
         <div class="flex justify-end">
           <Button label="Close" @click="helpVisible = false" />
         </div>
@@ -117,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Message from 'primevue/message'
@@ -126,16 +165,24 @@ import VestingPeriodEditor from '@/components/VestingPeriodEditor.vue'
 import VestingScheduleTable from '@/components/VestingScheduleTable.vue'
 import { getApiMessage } from '@/services/api'
 import { normalizeQuickStartDate } from '@/services/quick-vesting'
-import { fetchQuickGrant, saveQuickGrant } from '@/services/vesting-service'
+import { fetchQuickGrant, interpretQuickPrompt, saveQuickGrant } from '@/services/vesting-service'
 import type { AmountType, Grant, Period, PeriodType, VestScheduleEntry } from '@/services/types'
 
 const isBusy = ref(false)
+const isInterpreting = ref(false)
 const dialogVisible = ref(false)
 const dialogSuccess = ref(false)
 const dialogTitle = ref('Vesting')
 const dialogMessage = ref('')
 const helpVisible = ref(false)
 const timelineSection = ref<HTMLElement | null>(null)
+const promptText = ref('I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after.')
+const interpretSummary = ref('')
+const promptExamples = [
+  'I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after.',
+  'Create a standard four-year monthly vesting schedule.',
+  'Create a three-year quarterly vesting schedule.'
+]
 
 const quickGrant = reactive<Grant>({
   GRANT_PK: '',
@@ -163,6 +210,21 @@ onMounted(async () => {
   quickAmountTypes.value = quickData.AmountTypes
 })
 
+watch(
+  () => [quickGrant.SHARES, quickGrant.VESTING_START],
+  () => {
+    clearTimeline()
+  }
+)
+
+watch(
+  quickPeriods,
+  () => {
+    clearTimeline()
+  },
+  { deep: true }
+)
+
 function addQuickPeriod(): void {
   quickPeriods.value.push({
     PERIOD_AMOUNT: 1,
@@ -179,7 +241,40 @@ function removeQuickPeriod(index: number): void {
   quickPeriods.value.splice(index, 1)
 }
 
+async function generateFromPrompt(): Promise<void> {
+  isInterpreting.value = true
+  try {
+    const response = await interpretQuickPrompt(promptText.value)
+    if (response.success === false)
+    {
+      showDialog(response.message ?? 'Unable to interpret that vesting description yet.', false)
+      return
+    }
+
+    quickPeriods.value = response.Periods
+    quickPeriodTypes.value = response.PeriodTypes
+    quickAmountTypes.value = response.AmountTypes
+    interpretSummary.value = response.summary ?? 'Built a suggested vesting schedule from your description.'
+  } catch (error) {
+    showDialog(getApiMessage(error, 'Unable to interpret that vesting description yet.'), false)
+  } finally {
+    isInterpreting.value = false
+  }
+}
+
 async function submitQuickGrant(): Promise<void> {
+  if (quickGrant.SHARES <= 0)
+  {
+    showDialog('Enter a Shares Granted value greater than zero before calculating vesting.', false)
+    return
+  }
+
+  if (quickPeriods.value.length === 0)
+  {
+    showDialog('Add at least one vesting period before calculating vesting.', false)
+    return
+  }
+
   isBusy.value = true
   try {
     const response = await saveQuickGrant(quickGrant, quickPeriods.value)
@@ -209,5 +304,9 @@ function scrollToTimeline(): void {
   window.requestAnimationFrame(() => {
     timelineSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   })
+}
+
+function clearTimeline(): void {
+  quickVestSchedule.value = []
 }
 </script>

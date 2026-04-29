@@ -32,7 +32,7 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 
 ## Status Matrix
 
-| Area | Target State | Current Status | Notes |
+| Group / Feature / Section | Target State | Current Status | Notes |
 | --- | --- | --- | --- |
 | API-only backend | `shared.inctrak.com` serves API traffic only | Partial | Static web assets are now disabled at the project level; frontend/API split is in place. |
 | Env-first config | Runtime config comes from env, not appsettings secrets | Partial | Gateway, logging, and local VS Code env rendering are already refactored. |
@@ -50,6 +50,13 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Tenant-aware authorization | App maps authenticated users to tenants and roles from control-plane data | Partial | Trusted-header overrides remain, and the backend now supports Supabase-backed user resolution through the control-plane store. |
 | Legacy auth retirement | Old password reset/activation/social flows are removed | Partial | Legacy mail sending has been neutralized, but old auth logic is still present. |
 | Logging and audit | Access/error logging is file-based and production-friendly | Partial | File logging and access logging are in place; structured audit work is still open. |
+| Public vesting UX | `frontend-vesting` is a focused public calculator with clear helper flows | Partial | Dedicated app exists, and schedule entry guidance is improving, but natural-language generation and broader polish are still in progress. |
+| Public vesting schedule presets | Common schedules can be inserted from presets/examples | Planned | Examples exist in UI copy, but one-click preset application is still pending. |
+| Public vesting prompt interpreter | Users can describe a schedule in plain English and get structured periods | Partial | First phase uses deterministic rules/templates; broader language coverage is still pending. |
+| AI abstraction layer | Varying prompt interpreters can plug in behind one backend interface | Partial | A rule-based interpreter interface is the current direction; hosted/local model adapters are still planned. |
+| Local AI via Microsoft.Extensions.AI | Backend can swap in `IChatClient`-style local or hosted model integrations later | Planned | Preferred abstraction for future AI-backed schedule interpretation because it keeps provider choice open. |
+| Local AI via Ollama | Local model inference can be used for schedule interpretation during development or self-hosted installs | Planned | Good fit for quick experimentation and narrow JSON output if we later want a local non-Microsoft runtime. |
+| Local AI via Foundry Local | Microsoft-native local model runtime can power schedule interpretation on supported devices | Planned | Attractive for a future Windows-first local AI path, but not needed for the phase-1 rules-based release. |
 
 ## Authentication Recommendation
 

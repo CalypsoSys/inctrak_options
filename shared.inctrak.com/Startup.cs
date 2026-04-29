@@ -37,6 +37,7 @@ namespace inctrak.com
             services.TryAddSingleton<HmacSupabaseTokenValidator>();
             services.TryAddSingleton<ISupabaseTokenValidator, SupabaseTokenValidator>();
             services.TryAddSingleton<ITenantSignupProvisioner, TenantSignupProvisioner>();
+            services.TryAddSingleton<IVestingPromptInterpreter, RulesVestingPromptInterpreter>();
             services.AddSingleton<ITenantResolver, ControlPlaneTenantResolver>();
             services.AddSingleton<IUserResolver, ControlPlaneUserResolver>();
             services.AddSingleton<IMembershipResolver, ControlPlaneMembershipResolver>();

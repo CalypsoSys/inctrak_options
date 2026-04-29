@@ -30,8 +30,11 @@ namespace IncTrak.Controllers
             new AMOUNT_TYPES_UI(new Models.AmountTypes { AmountTypePk = 2, Name = "Percentage" })
         };
 
-        public DashboardController(IOptions<AppSettings> config) : base(config)
+        private readonly IVestingPromptInterpreter _vestingPromptInterpreter;
+
+        public DashboardController(IOptions<AppSettings> config, IVestingPromptInterpreter vestingPromptInterpreter) : base(config)
         {
+            _vestingPromptInterpreter = vestingPromptInterpreter;
         }
 
         [Route("api/company/summary/")]
@@ -212,6 +215,30 @@ namespace IncTrak.Controllers
             }
         }
 
+        [Route("api/optionee/quick/interpret/")]
+        [HttpPost]
+        public ActionResult InterpretQuickVesting([FromBody] QuickVestingInterpretRequest request)
+        {
+            try
+            {
+                QuickVestingInterpretResult result = _vestingPromptInterpreter.Interpret(request);
+                return Ok(new
+                {
+                    success = result.Success,
+                    message = result.Message,
+                    summary = result.Summary,
+                    Periods = result.Periods,
+                    PeriodTypes = QuickPeriodTypes,
+                    AmountTypes = QuickAmountTypes
+                });
+            }
+            catch (Exception excp)
+            {
+                string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "quick vesting interpret");
+                return Ok(new { success = false, message = message, Periods = Array.Empty<PERIOD_UI>() });
+            }
+        }
+
         private void LogQuick(string message)
         {
             try
@@ -242,6 +269,16 @@ namespace IncTrak.Controllers
         {
             try
             {
+                if (saveSchedule?.Data == null || saveSchedule.Data.SHARES <= 0)
+                {
+                    return Ok(new { success = false, message = "Enter a Shares Granted value greater than zero before calculating vesting." });
+                }
+
+                if (saveSchedule.Children == null || saveSchedule.Children.Any() == false)
+                {
+                    return Ok(new { success = false, message = "Add at least one vesting period before calculating vesting." });
+                }
+
                 var periodTypes = QuickPeriodTypes;
                 var amountTypes = QuickAmountTypes;
                 Grants grant = saveSchedule.Data.GetGrant(Guid.Empty);

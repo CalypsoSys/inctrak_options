@@ -3,6 +3,13 @@ export type ApiResponse = {
   message?: string
 }
 
+export type QuickInterpretResponse = ApiResponse & {
+  summary?: string
+  Periods: Period[]
+  PeriodTypes: PeriodType[]
+  AmountTypes: AmountType[]
+}
+
 export type PeriodType = {
   PERIOD_TYPE_PK: number
   NAME: string
