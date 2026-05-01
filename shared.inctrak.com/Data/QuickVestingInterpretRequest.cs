@@ -4,5 +4,6 @@ namespace IncTrak.Data
     {
         public string Prompt { get; set; }
         public bool StrictAi { get; set; }
+        public string PreferredProvider { get; set; }
     }
 }

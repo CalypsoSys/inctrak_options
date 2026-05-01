@@ -42,5 +42,27 @@ namespace inctrak.com.Tests
             Assert.Equal(VestingFrequency.Quarterly, facts.Frequency);
             Assert.Equal(36, facts.DurationMonths);
         }
+
+        [Fact]
+        public void ExtractFacts_RecognizesGrantedSharesOnSpecificDate()
+        {
+            var extractor = new VestingRuleExtractor();
+
+            VestingRuleFacts facts = extractor.ExtractFacts("create a vesting schedule 5 years, equal per year, first 2 years vest, then monthly after for 3 years. granted 50000 shares on 1/1/2023");
+
+            Assert.Equal(50000, facts.TotalUnits);
+            Assert.Equal(new System.DateOnly(2023, 1, 1), facts.GrantDate);
+        }
+
+        [Fact]
+        public void ExtractFacts_RecognizesUnitsOnGrantedDateWording()
+        {
+            var extractor = new VestingRuleExtractor();
+
+            VestingRuleFacts facts = extractor.ExtractFacts("Create a three-year quarterly vesting schedule. 100000 shares on granted 1/1/2022");
+
+            Assert.Equal(100000, facts.TotalUnits);
+            Assert.Equal(new System.DateOnly(2022, 1, 1), facts.GrantDate);
+        }
     }
 }

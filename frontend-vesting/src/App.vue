@@ -31,6 +31,26 @@
           <div class="mt-4 flex justify-start">
             <Button label="Generate From Description" icon="pi pi-sparkles" :loading="isInterpreting" @click="generateFromPrompt(false)" />
             <Button
+              v-if="showTryAlternate"
+              class="ml-3"
+              label="Try Alternate"
+              icon="pi pi-refresh"
+              severity="contrast"
+              variant="outlined"
+              :loading="isInterpreting"
+              @click="applyAlternateInterpretation"
+            />
+            <Button
+              v-if="showStillNotRight"
+              class="ml-3"
+              label="Still not right"
+              icon="pi pi-times-circle"
+              severity="contrast"
+              variant="outlined"
+              :loading="isInterpreting"
+              @click="revealAiChoice = true"
+            />
+            <Button
               v-if="showUseAiInstead"
               class="ml-3"
               label="Use AI Instead"
@@ -191,6 +211,8 @@ const promptText = ref('I want a standard four-year time-based vesting schedule 
 const interpretSummary = ref('')
 const interpretProvider = ref('')
 const interpretRequiresAi = ref(false)
+const interpretAlternateProvider = ref('')
+const revealAiChoice = ref(false)
 const promptExamples = [
   'I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after.',
   'Create a standard four-year monthly vesting schedule.',
@@ -230,6 +252,14 @@ watch(
   }
 )
 
+watch(promptText, () => {
+  interpretSummary.value = ''
+  interpretProvider.value = ''
+  interpretAlternateProvider.value = ''
+  interpretRequiresAi.value = false
+  revealAiChoice.value = false
+})
+
 watch(
   quickPeriods,
   () => {
@@ -255,9 +285,13 @@ function removeQuickPeriod(index: number): void {
 }
 
 async function generateFromPromptWithMode(strictAi: boolean): Promise<void> {
+  return generateFromPromptCore(strictAi)
+}
+
+async function generateFromPromptCore(strictAi: boolean, preferredProvider?: string): Promise<void> {
   isInterpreting.value = true
   try {
-    const response = await interpretQuickPrompt(promptText.value, strictAi)
+    const response = await interpretQuickPrompt(promptText.value, strictAi, preferredProvider)
     if (response.success === false)
     {
       showDialog(response.message ?? 'Unable to interpret that vesting description yet.', false)
@@ -269,14 +303,19 @@ async function generateFromPromptWithMode(strictAi: boolean): Promise<void> {
     quickPeriodTypes.value = response.PeriodTypes
     quickAmountTypes.value = response.AmountTypes
     interpretProvider.value = response.provider ?? ''
+    interpretAlternateProvider.value = response.alternateProvider ?? ''
     interpretRequiresAi.value = response.requiresAi === true && strictAi === false
+    revealAiChoice.value = strictAi
     const providerLabel = getInterpretProviderLabel(response.provider)
     const confidenceLabel = typeof response.confidence === 'number'
       ? `Confidence: ${Math.round(response.confidence * 100)}%.`
       : ''
-    const aiSuggestion = interpretRequiresAi.value ? ' Not what you expected? Try AI interpretation.' : ''
     const summary = response.summary ?? 'Built a suggested vesting schedule from your description.'
-    interpretSummary.value = [providerLabel, confidenceLabel, summary].filter(Boolean).join(' ') + aiSuggestion
+    interpretSummary.value = [providerLabel, confidenceLabel, summary].filter(Boolean).join(' ')
+
+    if (canAutoCalculate()) {
+      await submitQuickGrant()
+    }
   } catch (error) {
     showDialog(getApiMessage(error, 'Unable to interpret that vesting description yet.'), false)
   } finally {
@@ -286,6 +325,14 @@ async function generateFromPromptWithMode(strictAi: boolean): Promise<void> {
 
 function generateFromPrompt(strictAi = false): Promise<void> {
   return generateFromPromptWithMode(strictAi)
+}
+
+function applyAlternateInterpretation(): Promise<void> {
+  if (interpretAlternateProvider.value === '') {
+    return Promise.resolve()
+  }
+
+  return generateFromPromptCore(false, interpretAlternateProvider.value)
 }
 
 async function submitQuickGrant(): Promise<void> {
@@ -336,8 +383,23 @@ function clearTimeline(): void {
   quickVestSchedule.value = []
 }
 
-const showUseAiInstead = computed(() => {
+function canAutoCalculate(): boolean {
+  return quickGrant.SHARES > 0 &&
+    quickGrant.VESTING_START !== '' &&
+    quickPeriods.value.length > 0
+}
+
+const showTryAlternate = computed(() => interpretAlternateProvider.value !== '')
+
+const showStillNotRight = computed(() => {
   return interpretProvider.value !== '' &&
+    interpretProvider.value !== 'llamasharp' &&
+    interpretProvider.value !== 'local-http'
+})
+
+const showUseAiInstead = computed(() => {
+  return revealAiChoice.value &&
+    interpretProvider.value !== '' &&
     interpretProvider.value !== 'llamasharp' &&
     interpretProvider.value !== 'local-http'
 })

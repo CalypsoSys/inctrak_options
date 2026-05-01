@@ -8,6 +8,7 @@ namespace IncTrak.Data
         public string Message { get; set; }
         public string Summary { get; set; }
         public string Provider { get; set; }
+        public string AlternateProvider { get; set; }
         public decimal Confidence { get; set; }
         public bool RequiresAi { get; set; }
         public decimal? SharesGranted { get; set; }

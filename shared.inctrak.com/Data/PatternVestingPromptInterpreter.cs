@@ -5,10 +5,12 @@ namespace IncTrak.Data
 {
     public class PatternVestingPromptInterpreter : IVestingPromptInterpreterProvider
     {
+        private readonly VestingRuleExtractor _ruleExtractor;
         private readonly IVestingDefinitionValidator _validator;
 
-        public PatternVestingPromptInterpreter(IVestingDefinitionValidator validator)
+        public PatternVestingPromptInterpreter(VestingRuleExtractor ruleExtractor, IVestingDefinitionValidator validator)
         {
+            _ruleExtractor = ruleExtractor;
             _validator = validator;
         }
 
@@ -39,6 +41,7 @@ namespace IncTrak.Data
 
             if (VestingDefinitionPatterns.TryParse(prompt, out VestingDefinition definition, out _))
             {
+                ApplyFacts(definition, _ruleExtractor.ExtractFacts(prompt));
                 var parseResult = new VestingParseResult
                 {
                     OriginalText = prompt,
@@ -54,6 +57,19 @@ namespace IncTrak.Data
                 Message = "No standard vesting pattern matched that description.",
                 Periods = Array.Empty<PERIOD_UI>()
             };
+        }
+
+        private static void ApplyFacts(VestingDefinition definition, VestingRuleFacts facts)
+        {
+            if (facts.TotalUnits.HasValue)
+            {
+                definition.TotalUnits = facts.TotalUnits;
+            }
+
+            if (facts.GrantDate.HasValue)
+            {
+                definition.GrantDate = facts.GrantDate;
+            }
         }
     }
 }

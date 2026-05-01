@@ -228,6 +228,7 @@ namespace IncTrak.Controllers
                     message = result.Message,
                     summary = result.Summary,
                     provider = result.Provider,
+                    alternateProvider = result.AlternateProvider,
                     confidence = result.Confidence,
                     requiresAi = result.RequiresAi,
                     kind = result.Kind,

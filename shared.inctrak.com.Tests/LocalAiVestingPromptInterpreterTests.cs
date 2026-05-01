@@ -93,7 +93,7 @@ namespace inctrak.com.Tests
             var validator = CreateValidator();
             var localExtractor = CreateExtractor();
             var parser = new HybridNlpVestingDefinitionParser(ruleExtractor, validator);
-            var pattern = new PatternVestingPromptInterpreter(validator);
+            var pattern = new PatternVestingPromptInterpreter(ruleExtractor, validator);
             var llama = new LlamaSharpVestingPromptInterpreter(Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
             var local = new LocalAiVestingPromptInterpreter(new StubHttpClientFactory("{}"), Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
             var rules = new RulesVestingPromptInterpreter(parser, ruleExtractor, validator);
@@ -118,7 +118,7 @@ namespace inctrak.com.Tests
             var validator = CreateValidator();
             var localExtractor = CreateExtractor();
             var parser = new HybridNlpVestingDefinitionParser(ruleExtractor, validator);
-            var pattern = new PatternVestingPromptInterpreter(validator);
+            var pattern = new PatternVestingPromptInterpreter(ruleExtractor, validator);
             var llama = new LlamaSharpVestingPromptInterpreter(Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
             var local = new LocalAiVestingPromptInterpreter(new StubHttpClientFactory("{}"), Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
             var rules = new RulesVestingPromptInterpreter(parser, ruleExtractor, validator);
@@ -133,7 +133,7 @@ namespace inctrak.com.Tests
 
             Assert.False(result.Success);
             Assert.Equal("strict-ai", result.Provider);
-            Assert.Contains("no AI interpreter is configured", result.Message);
+            Assert.Contains("AI interpreters could not build", result.Message);
         }
 
         [Fact]
@@ -143,7 +143,7 @@ namespace inctrak.com.Tests
             var validator = CreateValidator();
             var localExtractor = CreateExtractor();
             var parser = new HybridNlpVestingDefinitionParser(ruleExtractor, validator);
-            var pattern = new PatternVestingPromptInterpreter(validator);
+            var pattern = new PatternVestingPromptInterpreter(ruleExtractor, validator);
             var llama = new LlamaSharpVestingPromptInterpreter(Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
             var local = new LocalAiVestingPromptInterpreter(
                 new StubHttpClientFactory(@"
@@ -176,6 +176,85 @@ namespace inctrak.com.Tests
             Assert.True(result.Success);
             Assert.Equal("parser", result.Provider);
             Assert.False(result.RequiresAi);
+        }
+
+        [Fact]
+        public void HybridInterpreter_PatternResultKeepsGrantedSharesAndGrantDate()
+        {
+            var ruleExtractor = CreateRuleExtractor();
+            var validator = CreateValidator();
+            var localExtractor = CreateExtractor();
+            var parser = new HybridNlpVestingDefinitionParser(ruleExtractor, validator);
+            var pattern = new PatternVestingPromptInterpreter(ruleExtractor, validator);
+            var rules = new RulesVestingPromptInterpreter(parser, ruleExtractor, validator);
+            IVestingPromptInterpreterProvider[] providers = { pattern, rules };
+            var interpreter = new HybridVestingPromptInterpreter(providers);
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "create a vesting schedule 5 years, equal per year, first 2 years vest, then monthly after for 3 years. granted 50000 shares on 1/1/2023"
+            });
+
+            Assert.True(result.Success);
+            Assert.Equal("pattern", result.Provider);
+            Assert.Equal(50000m, result.SharesGranted);
+            Assert.Equal("2023-01-01", result.VestingStart);
+        }
+
+        [Fact]
+        public void HybridInterpreter_ExposesAlternateBuiltInProviderWhenResultsDiffer()
+        {
+            IVestingPromptInterpreterProvider[] providers =
+            {
+                new StubPromptInterpreterProvider("pattern", 100, false, new QuickVestingInterpretResult
+                {
+                    Success = true,
+                    Provider = "pattern",
+                    Confidence = 0.98m,
+                    Periods = new[] { new IncTrak.data.PERIOD_UI(Guid.Empty) { PERIOD_AMOUNT = 1, PERIOD_TYPE_FK = 1, AMOUNT_TYPE_FK = 2, AMOUNT = 25m, INCREMENTS = 1 } }
+                }),
+                new StubPromptInterpreterProvider("parser", 200, false, new QuickVestingInterpretResult
+                {
+                    Success = true,
+                    Provider = "parser",
+                    Confidence = 0.90m,
+                    Periods = new[] { new IncTrak.data.PERIOD_UI(Guid.Empty) { PERIOD_AMOUNT = 1, PERIOD_TYPE_FK = 2, AMOUNT_TYPE_FK = 2, AMOUNT = 2.083333m, INCREMENTS = 48 } }
+                })
+            };
+            var interpreter = new HybridVestingPromptInterpreter(providers);
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "some prompt"
+            });
+
+            Assert.True(result.Success);
+            Assert.Equal("pattern", result.Provider);
+            Assert.Equal("parser", result.AlternateProvider);
+        }
+
+        [Fact]
+        public void HybridInterpreter_CanApplyPreferredAlternateBuiltInProvider()
+        {
+            var ruleExtractor = CreateRuleExtractor();
+            var validator = CreateValidator();
+            var localExtractor = CreateExtractor();
+            var parser = new HybridNlpVestingDefinitionParser(ruleExtractor, validator);
+            var pattern = new PatternVestingPromptInterpreter(ruleExtractor, validator);
+            var rules = new RulesVestingPromptInterpreter(parser, ruleExtractor, validator);
+            IVestingPromptInterpreterProvider[] providers = { pattern, rules };
+            var interpreter = new HybridVestingPromptInterpreter(providers);
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "create a vesting schedule 5 years, equal per year, first 2 years vest, then monthly after for 3 years. granted 50000 shares on 1/1/2023",
+                PreferredProvider = "parser"
+            });
+
+            Assert.True(result.Success);
+            Assert.Equal("parser", result.Provider);
+            Assert.Equal(50000m, result.SharesGranted);
+            Assert.Equal("2023-01-01", result.VestingStart);
         }
 
         private sealed class StubHttpClientFactory : IHttpClientFactory
@@ -211,6 +290,35 @@ namespace inctrak.com.Tests
                 {
                     Content = new StringContent(_responseBody, Encoding.UTF8, "application/json")
                 });
+            }
+        }
+
+        private sealed class StubPromptInterpreterProvider : IVestingPromptInterpreterProvider
+        {
+            private readonly QuickVestingInterpretResult _result;
+
+            public StubPromptInterpreterProvider(string name, int priority, bool isAiProvider, QuickVestingInterpretResult result)
+            {
+                Name = name;
+                Priority = priority;
+                IsAiProvider = isAiProvider;
+                _result = result;
+            }
+
+            public string Name { get; }
+
+            public int Priority { get; }
+
+            public bool IsAiProvider { get; }
+
+            public bool IsConfigured()
+            {
+                return true;
+            }
+
+            public QuickVestingInterpretResult TryInterpret(QuickVestingInterpretRequest request)
+            {
+                return _result;
             }
         }
     }

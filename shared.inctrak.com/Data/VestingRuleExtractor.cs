@@ -12,7 +12,9 @@ namespace IncTrak.Data
         private static readonly Regex DurationRegex = new Regex(@"\b(?<value>\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)[- ]+years?\b|\b(?<months>\d+)[- ]+months?\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex CliffRegex = new Regex(@"\b(?<value>\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)[- ]+(?:year|month)s?[- ]+cliff\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex CliffPercentRegex = new Regex(@"\b(?<value>\d+(?:\.\d+)?)\s*(?:%|percent)\s+(?:after|at)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex GrantDateRegex = new Regex(@"\b(?:grant date|starting|start|vesting start|beginning)\s+(?:on\s+)?(?<date>(?:[A-Za-z]{3,9}\s+\d{1,2}(?:st|nd|rd|th)?(?:,\s*|\s+)\d{4})|(?:\d{4}-\d{2}-\d{2})|(?:\d{1,2}/\d{1,2}/\d{4}))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex GrantDateRegex = new Regex(@"\b(?:grant date|start date|vest start date|vest start|vesting start|starting|start|beginning)\s+(?:on\s+)?(?<date>(?:[A-Za-z]{3,9}\s+\d{1,2}(?:st|nd|rd|th)?(?:,\s*|\s+)\d{4})|(?:\d{4}-\d{2}-\d{2})|(?:\d{1,2}/\d{1,2}/\d{4}))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex GrantedOnDateRegex = new Regex(@"\bgranted\b(?:\s+\d[\d,]*\s+(?:options|shares|rsus?|units?))?\s+on\s+(?<date>(?:[A-Za-z]{3,9}\s+\d{1,2}(?:st|nd|rd|th)?(?:,\s*|\s+)\d{4})|(?:\d{4}-\d{2}-\d{2})|(?:\d{1,2}/\d{1,2}/\d{4}))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex UnitsOnGrantedDateRegex = new Regex(@"\b\d[\d,]*\s+(?:options|shares|rsus?|units?)\s+on\s+granted\s+(?<date>(?:[A-Za-z]{3,9}\s+\d{1,2}(?:st|nd|rd|th)?(?:,\s*|\s+)\d{4})|(?:\d{4}-\d{2}-\d{2})|(?:\d{1,2}/\d{1,2}/\d{4}))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public IReadOnlyList<string> ExtractHints(string input)
         {
@@ -106,6 +108,15 @@ namespace IncTrak.Data
             }
 
             Match dateMatch = GrantDateRegex.Match(normalized);
+            if (dateMatch.Success == false)
+            {
+                dateMatch = GrantedOnDateRegex.Match(normalized);
+            }
+            if (dateMatch.Success == false)
+            {
+                dateMatch = UnitsOnGrantedDateRegex.Match(normalized);
+            }
+
             if (dateMatch.Success && TryParseDate(dateMatch.Groups["date"].Value, out DateOnly parsedDate))
             {
                 facts.GrantDate = parsedDate;

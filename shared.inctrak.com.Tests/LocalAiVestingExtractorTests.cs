@@ -37,5 +37,20 @@ namespace inctrak.com.Tests
             Assert.Equal(VestingScheduleKind.MilestoneBased, result.Definition.Kind);
             Assert.Contains("milestoneDates", result.Definition.MissingFields);
         }
+
+        [Fact]
+        public void ParseResponse_PreservesGrantedSharesAndGrantDateFromHints()
+        {
+            var extractor = new LocalAiVestingExtractor();
+
+            VestingParseResult result = extractor.ParseResponse(
+                "create a vesting schedule 5 years, equal per year, first 2 years vest, then monthly after for 3 years. granted 50000 shares on 1/1/2023",
+                new List<string> { "totalUnits=50000", "grantDate=2023-01-01" },
+                "{\"kind\":\"PeriodicNoCliff\",\"grantDate\":null,\"totalUnits\":null,\"durationMonths\":60,\"cliffMonths\":null,\"cliffPercent\":null,\"postCliffFrequency\":\"Monthly\",\"segments\":[{\"periodAmount\":1,\"frequency\":\"Annual\",\"increments\":2,\"amountPercent\":20,\"amountUnits\":null,\"description\":\"Equal yearly vesting\"},{\"periodAmount\":1,\"frequency\":\"Monthly\",\"increments\":36,\"amountPercent\":1.666667,\"amountUnits\":null,\"description\":\"Monthly vesting after the annual segment\"}],\"explicitTranches\":[],\"assumptions\":[],\"missingFields\":[],\"warnings\":[]}");
+
+            Assert.True(result.UsedAi);
+            Assert.Equal(50000, result.Definition.TotalUnits);
+            Assert.Equal(new System.DateOnly(2023, 1, 1), result.Definition.GrantDate);
+        }
     }
 }

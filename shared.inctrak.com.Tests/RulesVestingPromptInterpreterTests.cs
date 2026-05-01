@@ -69,6 +69,36 @@ namespace inctrak.com.Tests
         }
 
         [Fact]
+        public void Interpret_FillsSharesAndVestingStartForGrantedOnPrompt()
+        {
+            var interpreter = CreateInterpreter();
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "create a vesting schedule 5 years, equal per year, first 2 years vest, then monthly after for 3 years. granted 50000 shares on 1/1/2023"
+            });
+
+            Assert.True(result.Success);
+            Assert.Equal(50000m, result.SharesGranted);
+            Assert.Equal("2023-01-01", result.VestingStart);
+        }
+
+        [Fact]
+        public void Interpret_FillsVestingStartForVestStartDateWording()
+        {
+            var interpreter = CreateInterpreter();
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "Create a three-year quarterly vesting schedule with vest start date 1/1/2022 and 100000 shares."
+            });
+
+            Assert.True(result.Success);
+            Assert.Equal(100000m, result.SharesGranted);
+            Assert.Equal("2022-01-01", result.VestingStart);
+        }
+
+        [Fact]
         public void Interpret_DoesNotRequireAiWhenMonthlyStandardScheduleIsAlreadySpecific()
         {
             var interpreter = CreateInterpreter();

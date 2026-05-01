@@ -130,15 +130,33 @@ namespace IncTrak.Data
 
         private static void ApplyHintNormalization(string input, IReadOnlyList<string> hints, VestingDefinition definition)
         {
-            bool mentionsTotalUnits = hints?.Any(hint => hint.StartsWith("totalUnits=", StringComparison.Ordinal)) == true;
-            bool mentionsGrantDate = hints?.Any(hint => hint.StartsWith("grantDate=", StringComparison.Ordinal)) == true;
+            string totalUnitsHint = hints?.FirstOrDefault(hint => hint.StartsWith("totalUnits=", StringComparison.Ordinal));
+            string grantDateHint = hints?.FirstOrDefault(hint => hint.StartsWith("grantDate=", StringComparison.Ordinal));
+            bool mentionsTotalUnits = string.IsNullOrWhiteSpace(totalUnitsHint) == false;
+            bool mentionsGrantDate = string.IsNullOrWhiteSpace(grantDateHint) == false;
 
-            if (mentionsTotalUnits == false)
+            if (mentionsTotalUnits)
+            {
+                if (definition.TotalUnits.HasValue == false &&
+                    int.TryParse(totalUnitsHint.Substring("totalUnits=".Length), out int totalUnits))
+                {
+                    definition.TotalUnits = totalUnits;
+                }
+            }
+            else
             {
                 definition.TotalUnits = null;
             }
 
-            if (mentionsGrantDate == false)
+            if (mentionsGrantDate)
+            {
+                if (definition.GrantDate.HasValue == false &&
+                    VestingRuleExtractor.TryParseDate(grantDateHint.Substring("grantDate=".Length), out DateOnly grantDate))
+                {
+                    definition.GrantDate = grantDate;
+                }
+            }
+            else
             {
                 definition.GrantDate = null;
             }

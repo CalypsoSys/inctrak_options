@@ -38,5 +38,17 @@ namespace inctrak.com.Tests
             Assert.Contains(result.Definition.Warnings, warning => warning.Contains("ambiguous"));
             Assert.Contains("postCliffFrequency", result.Definition.MissingFields);
         }
+
+        [Fact]
+        public async System.Threading.Tasks.Task ParseAsync_PreservesGrantedSharesAndGrantDateForPatternPrompt()
+        {
+            VestingParseResult result = await CreateParser()
+                .ParseAsync("create a vesting schedule 5 years, equal per year, first 2 years vest, then monthly after for 3 years. granted 50000 shares on 1/1/2023");
+
+            Assert.Equal(VestingScheduleKind.PeriodicNoCliff, result.Definition.Kind);
+            Assert.Equal(50000, result.Definition.TotalUnits);
+            Assert.Equal(new System.DateOnly(2023, 1, 1), result.Definition.GrantDate);
+            Assert.Equal(2, result.Definition.Segments.Count);
+        }
     }
 }
