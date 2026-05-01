@@ -6,6 +6,8 @@ namespace IncTrak.Data
 
         int Priority { get; }
 
+        bool IsAiProvider { get; }
+
         bool IsConfigured();
 
         QuickVestingInterpretResult TryInterpret(QuickVestingInterpretRequest request);

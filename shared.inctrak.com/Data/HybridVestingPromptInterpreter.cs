@@ -21,10 +21,11 @@ namespace IncTrak.Data
             bool strictAi = request?.StrictAi == true;
             QuickVestingInterpretResult lastAiFailure = null;
             bool sawAiProvider = false;
+            QuickVestingInterpretResult builtInResult = null;
 
             foreach (IVestingPromptInterpreterProvider provider in _providers)
             {
-                if (strictAi && string.Equals(provider.Name, "rules", StringComparison.OrdinalIgnoreCase))
+                if (strictAi && provider.IsAiProvider == false)
                 {
                     continue;
                 }
@@ -34,7 +35,7 @@ namespace IncTrak.Data
                     continue;
                 }
 
-                if (string.Equals(provider.Name, "rules", StringComparison.OrdinalIgnoreCase) == false)
+                if (provider.IsAiProvider)
                 {
                     sawAiProvider = true;
                 }
@@ -47,10 +48,26 @@ namespace IncTrak.Data
 
                 if (result.Success)
                 {
+                    if (strictAi)
+                    {
+                        return result;
+                    }
+
+                    if (provider.IsAiProvider == false)
+                    {
+                        builtInResult = result;
+                        if (result.RequiresAi == false)
+                        {
+                            return result;
+                        }
+
+                        continue;
+                    }
+
                     return result;
                 }
 
-                if (strictAi && string.Equals(provider.Name, "rules", StringComparison.OrdinalIgnoreCase) == false)
+                if (provider.IsAiProvider)
                 {
                     lastAiFailure = result;
                 }
@@ -73,6 +90,11 @@ namespace IncTrak.Data
                         Periods = Array.Empty<PERIOD_UI>()
                     };
                 }
+            }
+
+            if (builtInResult != null)
+            {
+                return builtInResult;
             }
 
             return new QuickVestingInterpretResult

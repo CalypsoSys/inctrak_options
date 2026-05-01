@@ -29,6 +29,14 @@ the clone source for tenant provisioning.
 
 The public vesting app can use an embedded local GGUF model through `LLamaSharp`.
 
+Current interpretation order is:
+
+1. fast pattern-based interpretation
+2. built-in vesting language parser
+3. local AI only when the built-ins need help or when the UI explicitly asks for AI
+
+That keeps common vesting prompts cheap and fast, while still letting the embedded model handle fuzzier language.
+
 Recommended first model:
 
 - `Qwen2.5-1.5B-Instruct Q4_K_M`
@@ -57,6 +65,10 @@ Notes:
 - Restart the backend after changing any local-AI setting.
 
 If strict AI mode says no AI interpreter is configured, the backend is not seeing a usable `LocalAiModelPath` yet.
+
+Normal vesting generation does not require AI. In the current V2 flow, the backend first builds a typed `VestingDefinition`,
+validates it, normalizes it, and only then converts it into the quick-vesting period editor shape. The local model is used
+for intent extraction, not for final vesting math or final dated vesting rows.
 
 Helpful GPU sanity check while testing:
 

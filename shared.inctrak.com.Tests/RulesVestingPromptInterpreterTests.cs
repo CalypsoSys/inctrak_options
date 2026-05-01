@@ -5,10 +5,18 @@ namespace inctrak.com.Tests
 {
     public class RulesVestingPromptInterpreterTests
     {
+        private static RulesVestingPromptInterpreter CreateInterpreter()
+        {
+            var validator = new VestingDefinitionValidator();
+            var extractor = new VestingRuleExtractor();
+            var parser = new HybridNlpVestingDefinitionParser(extractor, validator);
+            return new RulesVestingPromptInterpreter(parser, extractor, validator);
+        }
+
         [Fact]
         public void Interpret_BuildsStandardFourYearCliffMonthlySchedule()
         {
-            var interpreter = new RulesVestingPromptInterpreter();
+            var interpreter = CreateInterpreter();
 
             QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
             {
@@ -30,7 +38,7 @@ namespace inctrak.com.Tests
         [Fact]
         public void Interpret_BuildsThreeYearQuarterlySchedule()
         {
-            var interpreter = new RulesVestingPromptInterpreter();
+            var interpreter = CreateInterpreter();
 
             QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
             {
@@ -48,7 +56,7 @@ namespace inctrak.com.Tests
         [Fact]
         public void Interpret_FillsSharesAndVestingStartWhenPromptIncludesThem()
         {
-            var interpreter = new RulesVestingPromptInterpreter();
+            var interpreter = CreateInterpreter();
 
             QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
             {
@@ -61,9 +69,24 @@ namespace inctrak.com.Tests
         }
 
         [Fact]
+        public void Interpret_DoesNotRequireAiWhenMonthlyStandardScheduleIsAlreadySpecific()
+        {
+            var interpreter = CreateInterpreter();
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "Create a standard four-year monthly vesting schedule."
+            });
+
+            Assert.True(result.Success);
+            Assert.False(result.RequiresAi);
+            Assert.Equal("parser", result.Provider);
+        }
+
+        [Fact]
         public void Interpret_ReturnsHelpfulErrorWhenDurationMissing()
         {
-            var interpreter = new RulesVestingPromptInterpreter();
+            var interpreter = CreateInterpreter();
 
             QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
             {

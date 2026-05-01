@@ -6,6 +6,8 @@ export type ApiResponse = {
 export type QuickInterpretResponse = ApiResponse & {
   summary?: string
   provider?: string
+  confidence?: number
+  requiresAi?: boolean
   sharesGranted?: number
   vestingStart?: string
   Periods: Period[]

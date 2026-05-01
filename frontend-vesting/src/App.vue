@@ -29,7 +29,17 @@
             />
           </div>
           <div class="mt-4 flex justify-start">
-            <Button label="Generate From Description" icon="pi pi-sparkles" :loading="isInterpreting" @click="generateFromPrompt" />
+            <Button label="Generate From Description" icon="pi pi-sparkles" :loading="isInterpreting" @click="generateFromPrompt(false)" />
+            <Button
+              v-if="showUseAiInstead"
+              class="ml-3"
+              label="Use AI Instead"
+              icon="pi pi-bolt"
+              severity="contrast"
+              variant="outlined"
+              :loading="isInterpreting"
+              @click="generateFromPrompt(true)"
+            />
           </div>
           <div class="mt-4 flex flex-wrap gap-2">
             <button
@@ -156,7 +166,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import Message from 'primevue/message'
@@ -179,6 +189,8 @@ const helpVisible = ref(false)
 const timelineSection = ref<HTMLElement | null>(null)
 const promptText = ref('I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after.')
 const interpretSummary = ref('')
+const interpretProvider = ref('')
+const interpretRequiresAi = ref(false)
 const promptExamples = [
   'I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after.',
   'Create a standard four-year monthly vesting schedule.',
@@ -242,10 +254,10 @@ function removeQuickPeriod(index: number): void {
   quickPeriods.value.splice(index, 1)
 }
 
-async function generateFromPrompt(): Promise<void> {
+async function generateFromPromptWithMode(strictAi: boolean): Promise<void> {
   isInterpreting.value = true
   try {
-    const response = await interpretQuickPrompt(promptText.value)
+    const response = await interpretQuickPrompt(promptText.value, strictAi)
     if (response.success === false)
     {
       showDialog(response.message ?? 'Unable to interpret that vesting description yet.', false)
@@ -256,14 +268,24 @@ async function generateFromPrompt(): Promise<void> {
     Object.assign(quickGrant, buildPromptGrantPatch(response))
     quickPeriodTypes.value = response.PeriodTypes
     quickAmountTypes.value = response.AmountTypes
-    const providerLabel = response.provider ? `Provider: ${response.provider}.` : ''
+    interpretProvider.value = response.provider ?? ''
+    interpretRequiresAi.value = response.requiresAi === true && strictAi === false
+    const providerLabel = getInterpretProviderLabel(response.provider)
+    const confidenceLabel = typeof response.confidence === 'number'
+      ? `Confidence: ${Math.round(response.confidence * 100)}%.`
+      : ''
+    const aiSuggestion = interpretRequiresAi.value ? ' Not what you expected? Try AI interpretation.' : ''
     const summary = response.summary ?? 'Built a suggested vesting schedule from your description.'
-    interpretSummary.value = providerLabel ? `${providerLabel} ${summary}` : summary
+    interpretSummary.value = [providerLabel, confidenceLabel, summary].filter(Boolean).join(' ') + aiSuggestion
   } catch (error) {
     showDialog(getApiMessage(error, 'Unable to interpret that vesting description yet.'), false)
   } finally {
     isInterpreting.value = false
   }
+}
+
+function generateFromPrompt(strictAi = false): Promise<void> {
+  return generateFromPromptWithMode(strictAi)
 }
 
 async function submitQuickGrant(): Promise<void> {
@@ -312,5 +334,26 @@ function scrollToTimeline(): void {
 
 function clearTimeline(): void {
   quickVestSchedule.value = []
+}
+
+const showUseAiInstead = computed(() => {
+  return interpretProvider.value !== '' &&
+    interpretProvider.value !== 'llamasharp' &&
+    interpretProvider.value !== 'local-http'
+})
+
+function getInterpretProviderLabel(provider?: string): string {
+  switch (provider) {
+    case 'pattern':
+      return 'Matched a standard vesting phrase.'
+    case 'parser':
+      return 'Used the built-in vesting language parser.'
+    case 'llamasharp':
+      return 'Used the local AI model.'
+    case 'local-http':
+      return 'Used the local AI endpoint.'
+    default:
+      return provider ? `Provider: ${provider}.` : ''
+  }
 }
 </script>

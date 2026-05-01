@@ -22,7 +22,7 @@ namespace IncTrak.Data
             result.SharesGranted = ParseSharesGranted(normalizedPrompt);
             result.VestingStart = ParseVestingStart(normalizedPrompt);
 
-            if (TryBuildStandardFourYearCliffMonthly(normalizedPrompt, out PERIOD_UI[] standardPeriods, out string standardSummary))
+            if (TryBuildKnownPattern(normalizedPrompt, out PERIOD_UI[] standardPeriods, out string standardSummary))
             {
                 result.Periods = standardPeriods;
                 result.Summary = standardSummary;
@@ -30,15 +30,24 @@ namespace IncTrak.Data
                 return result;
             }
 
-            if (TryBuildEqualPerYearThenMonthly(normalizedPrompt, out PERIOD_UI[] equalPerYearPeriods, out string equalPerYearSummary))
+            return result;
+        }
+
+        public static bool TryBuildKnownPattern(string prompt, out PERIOD_UI[] periods, out string summary)
+        {
+            if (TryBuildStandardFourYearCliffMonthly(prompt, out periods, out summary))
             {
-                result.Periods = equalPerYearPeriods;
-                result.Summary = equalPerYearSummary;
-                result.Message = "Built a suggested vesting schedule from your description.";
-                return result;
+                return true;
             }
 
-            return result;
+            if (TryBuildEqualPerYearThenMonthly(prompt, out periods, out summary))
+            {
+                return true;
+            }
+
+            periods = null;
+            summary = null;
+            return false;
         }
 
         private static bool TryBuildStandardFourYearCliffMonthly(string prompt, out PERIOD_UI[] periods, out string summary)

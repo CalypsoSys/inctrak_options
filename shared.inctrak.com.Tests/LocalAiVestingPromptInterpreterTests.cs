@@ -12,6 +12,10 @@ namespace inctrak.com.Tests
 {
     public class LocalAiVestingPromptInterpreterTests
     {
+        private static VestingRuleExtractor CreateRuleExtractor() => new VestingRuleExtractor();
+        private static VestingDefinitionValidator CreateValidator() => new VestingDefinitionValidator();
+        private static LocalAiVestingExtractor CreateExtractor() => new LocalAiVestingExtractor();
+
         [Fact]
         public void TryInterpret_ParsesOpenAiCompatibleLocalResponse()
         {
@@ -25,13 +29,13 @@ namespace inctrak.com.Tests
   ""choices"": [
     {
       ""message"": {
-        ""content"": ""{\""summary\"":\""Yearly for two years, then monthly for three years.\"",\""sharesGranted\"":4800,\""vestingStart\"":\""2026-01-01\"",\""periods\"":[{\""periodAmount\"":1,\""periodType\"":\""Years\"",\""amountType\"":\""Percentage\"",\""amount\"":20,\""increments\"":2,\""evenOverN\"":0},{\""periodAmount\"":1,\""periodType\"":\""Months\"",\""amountType\"":\""Percentage\"",\""amount\"":1.666667,\""increments\"":36,\""evenOverN\"":0}]}""
+        ""content"": ""{\""kind\"":\""PeriodicNoCliff\"",\""grantDate\"":null,\""totalUnits\"":null,\""durationMonths\"":60,\""cliffMonths\"":0,\""cliffPercent\"":0,\""postCliffFrequency\"":\""Monthly\"",\""segments\"":[{\""periodAmount\"":1,\""frequency\"":\""Annual\"",\""increments\"":2,\""amountPercent\"":20,\""amountUnits\"":null,\""description\"":\""Equal yearly vesting\""}, {\""periodAmount\"":1,\""frequency\"":\""Monthly\"",\""increments\"":36,\""amountPercent\"":1.666667,\""amountUnits\"":null,\""description\"":\""Monthly vesting after annual segment\""}],\""explicitTranches\"":[],\""assumptions\"":[],\""missingFields\"":[],\""warnings\"":[]}"" 
       }
     }
   ]
 }");
 
-            var interpreter = new LocalAiVestingPromptInterpreter(httpClientFactory, settings);
+            var interpreter = new LocalAiVestingPromptInterpreter(httpClientFactory, settings, CreateRuleExtractor(), CreateExtractor(), CreateValidator());
 
             QuickVestingInterpretResult result = interpreter.TryInterpret(new QuickVestingInterpretRequest
             {
@@ -62,13 +66,13 @@ namespace inctrak.com.Tests
   ""choices"": [
     {
       ""message"": {
-        ""content"": ""{\""summary\"":\""Yearly for two years, then monthly for three years.\"",\""periods\"":[{\""periodAmount\"":\""1\"",\""periodType\"":\""Years\"",\""amountType\"":\""Percentage\"",\""amount\"":\""20\"",\""increments\"":\""2\"",\""evenOverN\"":\""0\""} ,{\""periodAmount\"":\""1\"",\""periodType\"":\""Months\"",\""amountType\"":\""Percentage\"",\""amount\"":\""1.666667\"",\""increments\"":\""36\"",\""evenOverN\"":\""0\""}]}""
+        ""content"": ""{\""kind\"":\""PeriodicNoCliff\"",\""grantDate\"":null,\""totalUnits\"":null,\""durationMonths\"":\""60\"",\""cliffMonths\"":\""0\"",\""cliffPercent\"":\""0\"",\""postCliffFrequency\"":\""Monthly\"",\""segments\"":[{\""periodAmount\"":\""1\"",\""frequency\"":\""Annual\"",\""increments\"":\""2\"",\""amountPercent\"":\""20\"",\""amountUnits\"":null,\""description\"":\""Equal yearly vesting\""}, {\""periodAmount\"":\""1\"",\""frequency\"":\""Monthly\"",\""increments\"":\""36\"",\""amountPercent\"":\""1.666667\"",\""amountUnits\"":null,\""description\"":\""Monthly vesting after annual segment\""}],\""explicitTranches\"":[],\""assumptions\"":[],\""missingFields\"":[],\""warnings\"":[]}"" 
       }
     }
   ]
 }");
 
-            var interpreter = new LocalAiVestingPromptInterpreter(httpClientFactory, settings);
+            var interpreter = new LocalAiVestingPromptInterpreter(httpClientFactory, settings, CreateRuleExtractor(), CreateExtractor(), CreateValidator());
 
             QuickVestingInterpretResult result = interpreter.TryInterpret(new QuickVestingInterpretRequest
             {
@@ -85,10 +89,15 @@ namespace inctrak.com.Tests
         [Fact]
         public void HybridInterpreter_FallsBackToRules_WhenLocalAiNotConfigured()
         {
-            var llama = new LlamaSharpVestingPromptInterpreter(Options.Create(new AppSettings()));
-            var local = new LocalAiVestingPromptInterpreter(new StubHttpClientFactory("{}"), Options.Create(new AppSettings()));
-            var rules = new RulesVestingPromptInterpreter();
-            IVestingPromptInterpreterProvider[] providers = { llama, local, rules };
+            var ruleExtractor = CreateRuleExtractor();
+            var validator = CreateValidator();
+            var localExtractor = CreateExtractor();
+            var parser = new HybridNlpVestingDefinitionParser(ruleExtractor, validator);
+            var pattern = new PatternVestingPromptInterpreter(validator);
+            var llama = new LlamaSharpVestingPromptInterpreter(Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
+            var local = new LocalAiVestingPromptInterpreter(new StubHttpClientFactory("{}"), Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
+            var rules = new RulesVestingPromptInterpreter(parser, ruleExtractor, validator);
+            IVestingPromptInterpreterProvider[] providers = { pattern, llama, local, rules };
             var interpreter = new HybridVestingPromptInterpreter(providers);
 
             QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
@@ -99,16 +108,21 @@ namespace inctrak.com.Tests
             Assert.True(result.Success);
             Assert.Single(result.Periods);
             Assert.Equal(12, result.Periods[0].INCREMENTS);
-            Assert.Equal("rules", result.Provider);
+            Assert.Equal("parser", result.Provider);
         }
 
         [Fact]
         public void HybridInterpreter_StrictAi_DoesNotFallBackToRules()
         {
-            var llama = new LlamaSharpVestingPromptInterpreter(Options.Create(new AppSettings()));
-            var local = new LocalAiVestingPromptInterpreter(new StubHttpClientFactory("{}"), Options.Create(new AppSettings()));
-            var rules = new RulesVestingPromptInterpreter();
-            IVestingPromptInterpreterProvider[] providers = { llama, local, rules };
+            var ruleExtractor = CreateRuleExtractor();
+            var validator = CreateValidator();
+            var localExtractor = CreateExtractor();
+            var parser = new HybridNlpVestingDefinitionParser(ruleExtractor, validator);
+            var pattern = new PatternVestingPromptInterpreter(validator);
+            var llama = new LlamaSharpVestingPromptInterpreter(Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
+            var local = new LocalAiVestingPromptInterpreter(new StubHttpClientFactory("{}"), Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
+            var rules = new RulesVestingPromptInterpreter(parser, ruleExtractor, validator);
+            IVestingPromptInterpreterProvider[] providers = { pattern, llama, local, rules };
             var interpreter = new HybridVestingPromptInterpreter(providers);
 
             QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
@@ -120,6 +134,48 @@ namespace inctrak.com.Tests
             Assert.False(result.Success);
             Assert.Equal("strict-ai", result.Provider);
             Assert.Contains("no AI interpreter is configured", result.Message);
+        }
+
+        [Fact]
+        public void HybridInterpreter_PrefersBuiltInParserBeforeConfiguredAi()
+        {
+            var ruleExtractor = CreateRuleExtractor();
+            var validator = CreateValidator();
+            var localExtractor = CreateExtractor();
+            var parser = new HybridNlpVestingDefinitionParser(ruleExtractor, validator);
+            var pattern = new PatternVestingPromptInterpreter(validator);
+            var llama = new LlamaSharpVestingPromptInterpreter(Options.Create(new AppSettings()), ruleExtractor, localExtractor, validator);
+            var local = new LocalAiVestingPromptInterpreter(
+                new StubHttpClientFactory(@"
+{
+  ""choices"": [
+    {
+      ""message"": {
+        ""content"": ""{\""kind\"":\""PeriodicNoCliff\"",\""grantDate\"":null,\""totalUnits\"":null,\""durationMonths\"":48,\""cliffMonths\"":0,\""cliffPercent\"":0,\""postCliffFrequency\"":\""Monthly\"",\""segments\"":[{\""periodAmount\"":1,\""frequency\"":\""Monthly\"",\""increments\"":48,\""amountPercent\"":2.083333,\""amountUnits\"":null,\""description\"":\""Monthly vesting\""}],\""explicitTranches\"":[],\""assumptions\"":[],\""missingFields\"":[],\""warnings\"":[]}"" 
+      }
+    }
+  ]
+}"),
+                Options.Create(new AppSettings
+                {
+                    LocalAiEndpoint = "http://localhost:11434/v1/chat/completions",
+                    LocalAiModel = "llama3.2"
+                }),
+                ruleExtractor,
+                localExtractor,
+                validator);
+            var rules = new RulesVestingPromptInterpreter(parser, ruleExtractor, validator);
+            IVestingPromptInterpreterProvider[] providers = { pattern, llama, local, rules };
+            var interpreter = new HybridVestingPromptInterpreter(providers);
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "Create a standard four-year monthly vesting schedule."
+            });
+
+            Assert.True(result.Success);
+            Assert.Equal("parser", result.Provider);
+            Assert.False(result.RequiresAi);
         }
 
         private sealed class StubHttpClientFactory : IHttpClientFactory
