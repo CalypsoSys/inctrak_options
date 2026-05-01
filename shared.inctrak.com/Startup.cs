@@ -29,6 +29,7 @@ namespace inctrak.com
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             AppSettings appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>() ?? new AppSettings();
             services.AddHttpClient(nameof(SupabaseTokenValidator));
+            services.AddHttpClient(nameof(LocalAiVestingPromptInterpreter));
             services.AddSingleton<RequestContextAccessor>();
             services.AddSingleton<HeaderTenantResolver>();
             services.AddSingleton<HeaderUserResolver>();
@@ -37,7 +38,13 @@ namespace inctrak.com
             services.TryAddSingleton<HmacSupabaseTokenValidator>();
             services.TryAddSingleton<ISupabaseTokenValidator, SupabaseTokenValidator>();
             services.TryAddSingleton<ITenantSignupProvisioner, TenantSignupProvisioner>();
-            services.TryAddSingleton<IVestingPromptInterpreter, RulesVestingPromptInterpreter>();
+            services.TryAddSingleton<RulesVestingPromptInterpreter>();
+            services.TryAddSingleton<LlamaSharpVestingPromptInterpreter>();
+            services.TryAddSingleton<LocalAiVestingPromptInterpreter>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IVestingPromptInterpreterProvider, LlamaSharpVestingPromptInterpreter>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IVestingPromptInterpreterProvider, LocalAiVestingPromptInterpreter>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IVestingPromptInterpreterProvider, RulesVestingPromptInterpreter>());
+            services.TryAddSingleton<IVestingPromptInterpreter, HybridVestingPromptInterpreter>();
             services.AddSingleton<ITenantResolver, ControlPlaneTenantResolver>();
             services.AddSingleton<IUserResolver, ControlPlaneUserResolver>();
             services.AddSingleton<IMembershipResolver, ControlPlaneMembershipResolver>();

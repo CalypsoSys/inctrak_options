@@ -164,6 +164,7 @@ import PageIntro from '@/components/PageIntro.vue'
 import VestingPeriodEditor from '@/components/VestingPeriodEditor.vue'
 import VestingScheduleTable from '@/components/VestingScheduleTable.vue'
 import { getApiMessage } from '@/services/api'
+import { buildPromptGrantPatch } from '@/services/prompt-interpret'
 import { normalizeQuickStartDate } from '@/services/quick-vesting'
 import { fetchQuickGrant, interpretQuickPrompt, saveQuickGrant } from '@/services/vesting-service'
 import type { AmountType, Grant, Period, PeriodType, VestScheduleEntry } from '@/services/types'
@@ -252,9 +253,12 @@ async function generateFromPrompt(): Promise<void> {
     }
 
     quickPeriods.value = response.Periods
+    Object.assign(quickGrant, buildPromptGrantPatch(response))
     quickPeriodTypes.value = response.PeriodTypes
     quickAmountTypes.value = response.AmountTypes
-    interpretSummary.value = response.summary ?? 'Built a suggested vesting schedule from your description.'
+    const providerLabel = response.provider ? `Provider: ${response.provider}.` : ''
+    const summary = response.summary ?? 'Built a suggested vesting schedule from your description.'
+    interpretSummary.value = providerLabel ? `${providerLabel} ${summary}` : summary
   } catch (error) {
     showDialog(getApiMessage(error, 'Unable to interpret that vesting description yet.'), false)
   } finally {

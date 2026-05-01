@@ -52,11 +52,15 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Logging and audit | Access/error logging is file-based and production-friendly | Partial | File logging and access logging are in place; structured audit work is still open. |
 | Public vesting UX | `frontend-vesting` is a focused public calculator with clear helper flows | Partial | Dedicated app exists, and schedule entry guidance is improving, but natural-language generation and broader polish are still in progress. |
 | Public vesting schedule presets | Common schedules can be inserted from presets/examples | Planned | Examples exist in UI copy, but one-click preset application is still pending. |
-| Public vesting prompt interpreter | Users can describe a schedule in plain English and get structured periods | Partial | First phase uses deterministic rules/templates; broader language coverage is still pending. |
-| AI abstraction layer | Varying prompt interpreters can plug in behind one backend interface | Partial | A rule-based interpreter interface is the current direction; hosted/local model adapters are still planned. |
+| Public vesting prompt interpreter | Users can describe a schedule in plain English and get structured periods | Partial | First phase uses deterministic rules/templates; broader language coverage and better ambiguity handling are still pending. |
+| AI abstraction layer | Varying prompt interpreters can plug in behind one backend interface | Partial | `IVestingPromptInterpreter` plus ordered provider adapters now isolate the controller from concrete AI backends, but richer provider telemetry and provider-specific settings UX are still pending. |
+| Embedded local AI via LlamaSharp | Backend can run a GGUF model in-process for offline vesting interpretation | Partial | Preferred self-hosted path; config surface is being added now, but real model validation, packaging guidance, and runtime tuning are still open. |
 | Local AI via Microsoft.Extensions.AI | Backend can swap in `IChatClient`-style local or hosted model integrations later | Planned | Preferred abstraction for future AI-backed schedule interpretation because it keeps provider choice open. |
 | Local AI via Ollama | Local model inference can be used for schedule interpretation during development or self-hosted installs | Planned | Good fit for quick experimentation and narrow JSON output if we later want a local non-Microsoft runtime. |
 | Local AI via Foundry Local | Microsoft-native local model runtime can power schedule interpretation on supported devices | Planned | Attractive for a future Windows-first local AI path, but not needed for the phase-1 rules-based release. |
+| Hosted external AI adapter | Backend can swap to a hosted model provider without changing controller/UI contracts | Planned | Provider interface is intended to support this cleanly, but no external-provider adapter has been implemented yet. |
+| AI follow-up questions | Interpreter can ask for missing or ambiguous schedule details instead of guessing | Planned | Current flow returns best-effort periods or an error; interactive clarification is still not implemented. |
+| GGUF model operations | Local model download, refresh, sizing, and machine guidance are documented and repeatable | Not implemented | We still need concrete guidance for model files, memory footprint, CPU/GPU expectations, and update workflow. |
 
 ## Authentication Recommendation
 

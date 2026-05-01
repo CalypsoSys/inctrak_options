@@ -227,6 +227,9 @@ namespace IncTrak.Controllers
                     success = result.Success,
                     message = result.Message,
                     summary = result.Summary,
+                    provider = result.Provider,
+                    sharesGranted = result.SharesGranted,
+                    vestingStart = result.VestingStart,
                     Periods = result.Periods,
                     PeriodTypes = QuickPeriodTypes,
                     AmountTypes = QuickAmountTypes
@@ -235,7 +238,7 @@ namespace IncTrak.Controllers
             catch (Exception excp)
             {
                 string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "quick vesting interpret");
-                return Ok(new { success = false, message = message, Periods = Array.Empty<PERIOD_UI>() });
+                return Ok(new { success = false, message = message, provider = "error", Periods = Array.Empty<PERIOD_UI>() });
             }
         }
 

@@ -46,6 +46,21 @@ namespace inctrak.com.Tests
         }
 
         [Fact]
+        public void Interpret_FillsSharesAndVestingStartWhenPromptIncludesThem()
+        {
+            var interpreter = new RulesVestingPromptInterpreter();
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "Create a standard four-year monthly vesting schedule for 4800 shares starting January 1, 2026."
+            });
+
+            Assert.True(result.Success);
+            Assert.Equal(4800m, result.SharesGranted);
+            Assert.Equal("2026-01-01", result.VestingStart);
+        }
+
+        [Fact]
         public void Interpret_ReturnsHelpfulErrorWhenDurationMissing()
         {
             var interpreter = new RulesVestingPromptInterpreter();

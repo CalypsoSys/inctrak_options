@@ -25,6 +25,16 @@ AppSettings:
   # Real PostgreSQL template database used for CREATE DATABASE ... WITH TEMPLATE ...
   TenantTemplateDatabaseName: inctrak_template
   TenantDatabasePrefix: inctrak_
+  # Preferred embedded local-AI path via LlamaSharp + GGUF.
+  LocalAiModelPath: ${INCTRAK_LOCAL_AI_MODEL_PATH}
+  LocalAiContextSize: 4096
+  LocalAiGpuLayerCount: 999
+  LocalAiMaxTokens: 512
+  # Optional local AI interpreter. Example Ollama/OpenAI-compatible endpoint:
+  # http://localhost:11434/v1/chat/completions
+  LocalAiEndpoint: ${INCTRAK_LOCAL_AI_ENDPOINT}
+  LocalAiModel: ${INCTRAK_LOCAL_AI_MODEL}
+  LocalAiApiKey: ${INCTRAK_LOCAL_AI_API_KEY}
   SupabaseUrl: ${INCTRAK_SUPABASE_URL}
   SupabaseAnonKey: ${INCTRAK_SUPABASE_PUBLISHABLE_KEY}
   # Optional legacy fallback for HS256 projects; leave unset for the default JWKS path.

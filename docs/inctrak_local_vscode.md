@@ -25,6 +25,48 @@ For tenant signup and provisioning, make sure your local Postgres instance alrea
 template by applying [inctrak.db/inctrak.sql](../inctrak.db/inctrak.sql) to a database once, then use that database as
 the clone source for tenant provisioning.
 
+## Local AI for vesting interpretation
+
+The public vesting app can use an embedded local GGUF model through `LLamaSharp`.
+
+Recommended first model:
+
+- `Qwen2.5-1.5B-Instruct Q4_K_M`
+
+Keep GGUF files outside Git in a machine-local folder such as:
+
+```text
+/home/joe/models
+```
+
+Point `config.local.yaml` at the real model file:
+
+```yaml
+AppSettings:
+  LocalAiModelPath: /home/joe/models/qwen2.5-1.5b-instruct-q4_k_m.gguf
+  LocalAiContextSize: 4096
+  LocalAiGpuLayerCount: 999
+  LocalAiMaxTokens: 512
+```
+
+Notes:
+
+- `LocalAiModelPath` must be the absolute path to a real `.gguf` file on disk.
+- `LocalAiGpuLayerCount: 999` is the preferred NVIDIA starting point because it tells the runtime to offload as many
+  layers as possible.
+- Restart the backend after changing any local-AI setting.
+
+If strict AI mode says no AI interpreter is configured, the backend is not seeing a usable `LocalAiModelPath` yet.
+
+Helpful GPU sanity check while testing:
+
+```bash
+watch -n 0.5 nvidia-smi
+```
+
+That makes it easy to confirm GPU memory and utilization change when the backend loads the model and serves prompt
+interpretation requests.
+
 ## How VS Code launch works
 
 The local launch entries in `.vscode/launch.json` use the `backend: prepare local launch` task.

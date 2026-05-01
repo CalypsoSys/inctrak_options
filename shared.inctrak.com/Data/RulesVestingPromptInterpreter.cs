@@ -1,14 +1,26 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using IncTrak.data;
 
 namespace IncTrak.Data
 {
-    public class RulesVestingPromptInterpreter : IVestingPromptInterpreter
+    public class RulesVestingPromptInterpreter : IVestingPromptInterpreter, IVestingPromptInterpreterProvider
     {
         private static readonly Regex NumberAndUnitRegex = new Regex(@"\b(?<value>\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s*[- ]?(?<unit>year|years|month|months|week|weeks|day|days)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex SharesRegex = new Regex(@"\b(?<shares>\d[\d,]*(?:\.\d+)?)\s+shares?\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex StartDateRegex = new Regex(@"\b(?:vesting\s+start|start(?:ing|s)?|begin(?:ning|s)?)\s+(?:on\s+)?(?<date>(?:[A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})|(?:\d{4}-\d{2}-\d{2})|(?:\d{1,2}/\d{1,2}/\d{4}))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        public string Name => "rules";
+
+        public int Priority => 1000;
+
+        public bool IsConfigured()
+        {
+            return true;
+        }
 
         public QuickVestingInterpretResult Interpret(QuickVestingInterpretRequest request)
         {
@@ -57,6 +69,9 @@ namespace IncTrak.Data
             }
 
             var periods = new List<PERIOD_UI>();
+            decimal? sharesGranted = ParseSharesGranted(prompt);
+            string vestingStart = ParseVestingStart(prompt);
+
             if (cliffMonths > 0)
             {
                 decimal cliffPercent = Math.Round(100m * cliffMonths / totalMonths, 6);
@@ -85,11 +100,14 @@ namespace IncTrak.Data
                     EVEN_OVER_N = 0
                 });
 
-                return new QuickVestingInterpretResult
-                {
-                    Success = true,
-                    Message = "Built a suggested vesting schedule from your description.",
-                    Summary = $"Cliff at {DescribeDuration(cliffDuration)} for {cliffPercent:0.######}% of the grant, then {DescribeCadence(cadence)} for the remaining {remainingPercent:0.######}% over {remainingSteps} steps.",
+            return new QuickVestingInterpretResult
+            {
+                Success = true,
+                Provider = Name,
+                Message = "Built a suggested vesting schedule from your description.",
+                Summary = $"Cliff at {DescribeDuration(cliffDuration)} for {cliffPercent:0.######}% of the grant, then {DescribeCadence(cadence)} for the remaining {remainingPercent:0.######}% over {remainingSteps} steps.",
+                SharesGranted = sharesGranted,
+                    VestingStart = vestingStart,
                     Periods = periods.ToArray()
                 };
             }
@@ -109,10 +127,18 @@ namespace IncTrak.Data
             return new QuickVestingInterpretResult
             {
                 Success = true,
+                Provider = Name,
                 Message = "Built a suggested vesting schedule from your description.",
                 Summary = $"{DescribeCadence(cadence, true)} over {DescribeDuration(totalDuration)} in {steps} equal steps.",
+                SharesGranted = sharesGranted,
+                VestingStart = vestingStart,
                 Periods = periods.ToArray()
             };
+        }
+
+        public QuickVestingInterpretResult TryInterpret(QuickVestingInterpretRequest request)
+        {
+            return Interpret(request);
         }
 
         private static QuickVestingInterpretResult Failure(string message)
@@ -120,6 +146,7 @@ namespace IncTrak.Data
             return new QuickVestingInterpretResult
             {
                 Success = false,
+                Provider = "rules",
                 Message = message,
                 Periods = Array.Empty<PERIOD_UI>()
             };
@@ -264,6 +291,41 @@ namespace IncTrak.Data
                 "twelve" => 12,
                 _ => 0
             };
+        }
+
+        private static decimal? ParseSharesGranted(string prompt)
+        {
+            Match match = SharesRegex.Match(prompt ?? string.Empty);
+            if (match.Success == false)
+            {
+                return null;
+            }
+
+            string sharesText = match.Groups["shares"].Value.Replace(",", string.Empty);
+            if (decimal.TryParse(sharesText, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal shares))
+            {
+                return shares;
+            }
+
+            return null;
+        }
+
+        private static string ParseVestingStart(string prompt)
+        {
+            Match match = StartDateRegex.Match(prompt ?? string.Empty);
+            if (match.Success == false)
+            {
+                return null;
+            }
+
+            string dateText = match.Groups["date"].Value.Trim().TrimEnd('.', ';', ':');
+            if (DateTime.TryParse(dateText, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out DateTime parsed) ||
+                DateTime.TryParse(dateText, CultureInfo.GetCultureInfo("en-US"), DateTimeStyles.AllowWhiteSpaces, out parsed))
+            {
+                return parsed.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            }
+
+            return null;
         }
 
         private static TimeUnit NormalizeUnit(string unit)

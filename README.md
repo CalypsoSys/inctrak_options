@@ -67,6 +67,9 @@ The VS Code frontend task maps those `INCTRAK_*` values into the `VITE_*` names 
 
 For env-driven local backend runs, copy `scripts/inctrak/config.example.yaml` to `scripts/inctrak/config.local.yaml`, then use the VS Code launch flow documented in [docs/inctrak_local_vscode.md](docs/inctrak_local_vscode.md). For Cloudflare Pages proxy setup, see [docs/cloudflare-pages-gateway.md](docs/cloudflare-pages-gateway.md).
 
+For local vesting AI setup with `LLamaSharp`, GGUF model placement, and the `watch -n 0.5 nvidia-smi` GPU helper,
+see [docs/inctrak_local_vscode.md](docs/inctrak_local_vscode.md#local-ai-for-vesting-interpretation).
+
 For control-plane provisioning metadata, use [inctrak.db/control_plane.sql](inctrak.db/control_plane.sql) as the bootstrap source for the shared control-plane PostgreSQL database.
 
 For local control-plane seeding, start from [inctrak.db/control_plane.local_seed.example.sql](inctrak.db/control_plane.local_seed.example.sql) and adapt the sample tenant, domain, user, and membership values before applying it with `psql`.

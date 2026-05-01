@@ -186,6 +186,42 @@ namespace inctrak.com.Tests
         }
 
         [Fact]
+        public async Task ApiOnlyHost_QuickInterpret_CanFillSharesAndVestingStart()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/api/optionee/quick/interpret/", new
+            {
+                Prompt = "Create a standard four-year monthly vesting schedule for 4800 shares starting January 1, 2026."
+            });
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"success\":true", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("\"sharesGranted\":4800", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("\"vestingStart\":\"2026-01-01\"", body, System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task ApiOnlyHost_QuickInterpret_StrictAiMode_DoesNotFallBackToRules()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/api/optionee/quick/interpret/", new
+            {
+                Prompt = "Create a three-year quarterly vesting schedule.",
+                StrictAi = true
+            });
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"success\":false", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("\"provider\":\"strict-ai\"", body, System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
         public async Task ApiOnlyHost_QuickVesting_RejectsZeroSharesWithFriendlyMessage()
         {
             using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());

@@ -27,6 +27,13 @@ namespace IncTrak.Data
         public string ErrorLogPath { get; set; } = "logs/errors.log";
         public string TenantTemplateDatabaseName { get; set; } = "inctrak_template";
         public string TenantDatabasePrefix { get; set; } = "inctrak_";
+        public string LocalAiEndpoint { get; set; }
+        public string LocalAiModel { get; set; }
+        public string LocalAiApiKey { get; set; }
+        public string LocalAiModelPath { get; set; }
+        public int LocalAiContextSize { get; set; } = 4096;
+        public int LocalAiGpuLayerCount { get; set; }
+        public int LocalAiMaxTokens { get; set; } = 512;
 
         public string GetIncTrakDns()
         {
@@ -86,6 +93,41 @@ namespace IncTrak.Data
         public string GetTenantDatabasePrefix()
         {
             return TenantDatabasePrefix;
+        }
+
+        public string GetLocalAiEndpoint()
+        {
+            return LocalAiEndpoint;
+        }
+
+        public string GetLocalAiModel()
+        {
+            return LocalAiModel;
+        }
+
+        public string GetLocalAiApiKey()
+        {
+            return LocalAiApiKey;
+        }
+
+        public string GetLocalAiModelPath()
+        {
+            return LocalAiModelPath;
+        }
+
+        public int GetLocalAiContextSize()
+        {
+            return LocalAiContextSize;
+        }
+
+        public int GetLocalAiGpuLayerCount()
+        {
+            return LocalAiGpuLayerCount;
+        }
+
+        public int GetLocalAiMaxTokens()
+        {
+            return LocalAiMaxTokens;
         }
     }
 }

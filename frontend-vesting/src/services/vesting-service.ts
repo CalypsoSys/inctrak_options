@@ -22,6 +22,7 @@ export function saveQuickGrant(grant: Grant, periods: Period[]): Promise<QuickGr
 
 export function interpretQuickPrompt(prompt: string): Promise<QuickInterpretResponse> {
   return apiPost<QuickInterpretResponse>('/api/optionee/quick/interpret/', {
-    Prompt: prompt
+    Prompt: prompt,
+    StrictAi: true
   })
 }
