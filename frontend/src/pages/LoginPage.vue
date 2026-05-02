@@ -57,6 +57,7 @@
 </template>
 
 <script setup lang="ts">
+import axios from 'axios'
 import { reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
@@ -64,11 +65,12 @@ import Password from 'primevue/password'
 import AppDialog from '@/components/AppDialog.vue'
 import PageIntro from '@/components/PageIntro.vue'
 import { useAsyncState } from '@/composables/useAsyncState'
-import { createLoginForm } from '@/services/auth-service'
+import { createLoginForm, resolvePendingProvisioningMetadata } from '@/services/auth-service'
 import { fetchAppSession } from '@/services/auth-session'
 import { getApiMessage } from '@/services/api'
 import { buildSignupAppUrl } from '@/services/runtime-config'
 import { signInWithPassword } from '@/services/supabase-auth'
+import { provisionTenantSignup } from '@/services/tenant-signup'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
@@ -94,13 +96,16 @@ async function submitForm(): Promise<void> {
     }
 
     const expiresAt = session.expires_at ?? Math.floor(Date.now() / 1000) + session.expires_in
-    const appSession = await fetchAppSession(session.access_token)
+    const { appSession, tenant } = await ensureAppSession(session.access_token, session.user?.user_metadata)
     authStore.setSession(
       session.access_token,
       session.refresh_token,
       expiresAt,
       appSession.Role,
-      session.user?.email ?? email
+      session.user?.email ?? email,
+      tenant?.TenantId ?? null,
+      tenant?.TenantSlug ?? null,
+      tenant?.TenantDatabaseName ?? null
     )
 
     showMessage('Login successful.', true)
@@ -118,6 +123,40 @@ async function submitForm(): Promise<void> {
     showMessage(getApiMessage(error, 'Unable to complete the Supabase login request.'), false)
   } finally {
     isBusy.value = false
+  }
+}
+
+async function ensureAppSession(
+  accessToken: string,
+  userMetadata?: {
+    company_name?: string
+    tenant_slug?: string
+  }
+) {
+  try {
+    return {
+      appSession: await fetchAppSession(accessToken),
+      tenant: null
+    }
+  } catch (error) {
+    if (!axios.isAxiosError(error) || !error.response || (error.response.status !== 401 && error.response.status !== 403)) {
+      throw error
+    }
+
+    const metadata = resolvePendingProvisioningMetadata(userMetadata)
+    if (!metadata) {
+      throw error
+    }
+
+    const tenant = await provisionTenantSignup(metadata.companyName, metadata.tenantSlug, accessToken)
+    return {
+      appSession: await fetchAppSession(accessToken, {
+        tenantId: tenant.TenantId,
+        tenantSlug: tenant.TenantSlug,
+        tenantDatabaseName: tenant.TenantDatabaseName
+      }),
+      tenant
+    }
   }
 }
 </script>

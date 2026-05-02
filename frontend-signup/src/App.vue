@@ -238,6 +238,7 @@ import PageIntro from '@/components/PageIntro.vue'
 import { useAsyncState } from '@/composables/useAsyncState'
 import { getApiMessage } from '@/services/api'
 import { buildMainAppLoginUrl } from '@/services/runtime-config'
+import { buildPendingSignupMessage } from '@/services/signup-messages'
 import { signUpWithPassword } from '@/services/supabase-auth'
 import { fetchTenantSlugAvailability, normalizeTenantSlug } from '@/services/tenant-slug'
 import { provisionTenantSignup } from '@/services/tenant-signup'
@@ -316,7 +317,7 @@ async function submitForm(): Promise<void> {
     const session = await signUpWithPassword(email, form.password, companyName, tenantSlug)
 
     if (!session.access_token) {
-      showMessage('Account created. Check your email to confirm your account, then log in from the main app to finish provisioning your company workspace.', true)
+      showMessage(buildPendingSignupMessage(), true)
       form.password = ''
       form.confirmPassword = ''
       return
