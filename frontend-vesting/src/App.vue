@@ -19,6 +19,7 @@
           <div class="max-w-3xl">
             <h2 class="text-lg font-bold text-slate-900">Describe the schedule in plain English</h2>
             <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Start with a common vesting phrase and let IncTrak build the first draft for you.</p>
+            <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Best results usually include three things: the total duration, the cadence or cliff, and if you know them already, the shares granted and vesting start date.</p>
           </div>
           <div class="mt-4 rounded-[1.5rem] border-2 border-[var(--app-accent)]/20 bg-white/85 p-4 shadow-[0_18px_40px_rgba(15,118,110,0.08)]">
             <label class="field-label">Schedule Description</label>
@@ -110,6 +111,9 @@
 
     <section v-if="quickVestSchedule.length > 0" ref="timelineSection" class="mt-8">
       <VestingScheduleTable :rows="quickVestSchedule" />
+      <div class="mt-4 flex justify-end">
+        <Button label="Back To Top" icon="pi pi-arrow-up" severity="contrast" variant="outlined" @click="scrollToTop" />
+      </div>
     </section>
 
     <Dialog
@@ -137,7 +141,16 @@
       :style="{ width: 'min(44rem, 94vw)' }"
     >
       <div class="space-y-5 text-sm leading-7 text-[var(--app-muted)]">
-        <p>Each vesting period describes one repeating step in the schedule: how long each step is, what vests each time, and how many times that step repeats.</p>
+        <p>Think of the calculator as a two-step process. First, describe the vesting logic clearly enough that IncTrak can draft the steps. Then review the draft and calculate the dated vesting timeline.</p>
+
+        <div class="rounded-2xl border border-[var(--app-border)] bg-white/70 p-4">
+          <p class="font-semibold text-slate-900">Fastest way to get a good result</p>
+          <ol class="mt-3 list-decimal space-y-2 pl-5">
+            <li>Start with the overall schedule shape: for example <strong class="text-slate-900">four years</strong>, <strong class="text-slate-900">three years quarterly</strong>, or <strong class="text-slate-900">one-year cliff, monthly after</strong>.</li>
+            <li>Add the grant facts if you know them: <strong class="text-slate-900">50000 shares</strong> and a <strong class="text-slate-900">vesting start date</strong>.</li>
+            <li>Review the generated periods, then calculate the full vesting timeline below.</li>
+          </ol>
+        </div>
 
         <div class="rounded-2xl border border-[var(--app-border)] bg-white/70 p-4">
           <p class="font-semibold text-slate-900">What the fields mean</p>
@@ -159,6 +172,16 @@
         </div>
 
         <div class="rounded-2xl border border-[var(--app-border)] bg-white/70 p-4">
+          <p class="font-semibold text-slate-900">What happens after you click Generate</p>
+          <ul class="mt-3 list-disc space-y-2 pl-5">
+            <li>If the built-in interpreter understands your wording, it drafts the schedule immediately.</li>
+            <li>If two low-cost built-in interpretations disagree, you may see <strong class="text-slate-900">Try Alternate</strong> so you can compare the other draft.</li>
+            <li>If neither built-in draft feels right, use <strong class="text-slate-900">Still not right</strong> and then <strong class="text-slate-900">Use AI Instead</strong> as the last step.</li>
+            <li>If the prompt also gives us both shares granted and vesting start, the page will calculate the vesting timeline automatically for you.</li>
+          </ul>
+        </div>
+
+        <div class="rounded-2xl border border-[var(--app-border)] bg-white/70 p-4">
           <p class="font-semibold text-slate-900">Simple example</p>
           <p class="mt-2">For a 4-year monthly vesting schedule with equal vesting, you could use one period with:</p>
           <ul class="mt-3 list-disc space-y-2 pl-5">
@@ -175,6 +198,8 @@
           <p class="mt-2">You can also describe a schedule in plain English, for example:</p>
           <p class="mt-3 rounded-2xl bg-slate-950/5 px-4 py-3 font-medium text-slate-900">"I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after."</p>
           <p class="mt-3">That should translate into a 25% cliff after one year, then monthly vesting across the remaining 36 months.</p>
+          <p class="mt-3 rounded-2xl bg-slate-950/5 px-4 py-3 font-medium text-slate-900">"Create a three-year quarterly vesting schedule for 100000 shares with vest start date 1/1/2022."</p>
+          <p class="mt-3">That should fill the shares granted, vesting start, and quarterly vesting periods in one pass.</p>
         </div>
 
         <div class="flex justify-end">
@@ -194,6 +219,12 @@ import PageIntro from '@/components/PageIntro.vue'
 import VestingPeriodEditor from '@/components/VestingPeriodEditor.vue'
 import VestingScheduleTable from '@/components/VestingScheduleTable.vue'
 import { getApiMessage } from '@/services/api'
+import {
+  canAutoCalculateFromPromptResult,
+  shouldShowStillNotRight as shouldShowStillNotRightForProvider,
+  shouldShowTryAlternate as shouldShowTryAlternateForProvider,
+  shouldShowUseAiInstead as shouldShowUseAiInsteadForProvider
+} from '@/services/prompt-flow'
 import { buildPromptGrantPatch } from '@/services/prompt-interpret'
 import { normalizeQuickStartDate } from '@/services/quick-vesting'
 import { fetchQuickGrant, interpretQuickPrompt, saveQuickGrant } from '@/services/vesting-service'
@@ -379,30 +410,25 @@ function scrollToTimeline(): void {
   })
 }
 
+function scrollToTop(): void {
+  window.requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  })
+}
+
 function clearTimeline(): void {
   quickVestSchedule.value = []
 }
 
 function canAutoCalculate(): boolean {
-  return quickGrant.SHARES > 0 &&
-    quickGrant.VESTING_START !== '' &&
-    quickPeriods.value.length > 0
+  return canAutoCalculateFromPromptResult(quickGrant.SHARES, quickGrant.VESTING_START, quickPeriods.value.length)
 }
 
-const showTryAlternate = computed(() => interpretAlternateProvider.value !== '')
+const showTryAlternate = computed(() => shouldShowTryAlternateForProvider(interpretAlternateProvider.value))
 
-const showStillNotRight = computed(() => {
-  return interpretProvider.value !== '' &&
-    interpretProvider.value !== 'llamasharp' &&
-    interpretProvider.value !== 'local-http'
-})
+const showStillNotRight = computed(() => shouldShowStillNotRightForProvider(interpretProvider.value))
 
-const showUseAiInstead = computed(() => {
-  return revealAiChoice.value &&
-    interpretProvider.value !== '' &&
-    interpretProvider.value !== 'llamasharp' &&
-    interpretProvider.value !== 'local-http'
-})
+const showUseAiInstead = computed(() => shouldShowUseAiInsteadForProvider(revealAiChoice.value, interpretProvider.value))
 
 function getInterpretProviderLabel(provider?: string): string {
   switch (provider) {

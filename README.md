@@ -31,17 +31,21 @@ IncTrak provides an intuitive, always-accessible experience for both administrat
 
 ## Development
 
-The API lives in `shared.inctrak.com/`. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, and the public quick-vesting app now lives in `frontend-vesting/` as a separate Vue + Vite frontend. The `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
+The API lives in `shared.inctrak.com/`. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, the public quick-vesting app lives in `frontend-vesting/`, and the public workspace-signup app now lives in `frontend-signup/` as separate Vue + Vite frontends. The `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
 
 - `./build.sh` builds and tests the frontend, then builds the API project and its test project from the repo root.
 - `npm install --prefix frontend` installs frontend dependencies.
 - `npm install --prefix frontend-vesting` installs public vesting frontend dependencies.
+- `npm install --prefix frontend-signup` installs public signup frontend dependencies.
 - `npm run dev --prefix frontend` starts the Vite dev server.
 - `npm run dev --prefix frontend-vesting` starts the public vesting Vite dev server on `127.0.0.1:5176`.
+- `npm run dev --prefix frontend-signup` starts the public signup Vite dev server on `127.0.0.1:5177`.
 - `npm run build --prefix frontend` produces the generated frontend bundle in `frontend/dist/`.
 - `npm run build --prefix frontend-vesting` produces the generated public vesting bundle in `frontend-vesting/dist/`.
+- `npm run build --prefix frontend-signup` produces the generated public signup bundle in `frontend-signup/dist/`.
 - `npm run test --prefix frontend` runs the frontend unit tests.
 - `npm run test --prefix frontend-vesting` runs the public vesting frontend unit tests.
+- `npm run test --prefix frontend-signup` runs the public signup frontend unit tests.
 - `node --test scripts/tests/static-sites.test.mjs` runs the static-site regression checks.
 - `node --test scripts/tests/control-plane-schema.test.mjs` checks the control-plane bootstrap SQL.
 - `node --test scripts/tests/gitleaks-config.test.mjs` checks the Gitleaks repo configuration.

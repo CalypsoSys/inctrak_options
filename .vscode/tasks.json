@@ -155,6 +155,55 @@
         }
       },
       "problemMatcher": []
+    },
+    {
+      "label": "frontend-signup: dev",
+      "type": "shell",
+      "command": "VITE_SUPABASE_URL=\"$INCTRAK_SUPABASE_URL\" VITE_SUPABASE_PUBLISHABLE_KEY=\"$INCTRAK_SUPABASE_PUBLISHABLE_KEY\" npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend-signup",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*VITE.*",
+          "endsPattern": ".*Local:.*"
+        }
+      }
+    },
+    {
+      "label": "frontend-signup: prepare browser launch",
+      "dependsOn": [
+        "frontend-signup: dev",
+        "backend: wait for ready"
+      ],
+      "dependsOrder": "parallel"
+    },
+    {
+      "label": "frontend-signup: build",
+      "type": "shell",
+      "command": "VITE_SUPABASE_URL=\"$INCTRAK_SUPABASE_URL\" VITE_SUPABASE_PUBLISHABLE_KEY=\"$INCTRAK_SUPABASE_PUBLISHABLE_KEY\" npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend-signup",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "problemMatcher": []
     }
   ]
 }

@@ -45,15 +45,29 @@
         "order": 2,
         "hidden": true
       }
+    },
+    {
+      "name": "Frontend Signup: Vite",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "preLaunchTask": "frontend-signup: prepare browser launch",
+      "url": "http://127.0.0.1:5177",
+      "webRoot": "${workspaceFolder}/frontend-signup",
+      "presentation": {
+        "group": "local",
+        "order": 3,
+        "hidden": true
+      }
     }
   ],
   "compounds": [
     {
-      "name": "Local: (frontend + vesting) + backend",
+      "name": "Local: (frontend + vesting + signup) + backend",
       "configurations": [
         "Backend: shared.inctrak.com (no browser)",
         "Frontend: Vite",
-        "Frontend Vesting: Vite"
+        "Frontend Vesting: Vite",
+        "Frontend Signup: Vite"
       ],
       "stopAll": true,
       "presentation": {

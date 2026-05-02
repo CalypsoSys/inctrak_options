@@ -1,0 +1,90 @@
+:root {
+  color-scheme: light;
+  --app-bg: #f6f1e7;
+  --app-surface: #fffdf8;
+  --app-panel: rgba(255, 252, 246, 0.9);
+  --app-border: rgba(122, 101, 78, 0.16);
+  --app-ink: #1f1a16;
+  --app-muted: #6b6259;
+  --app-accent: #0f766e;
+  --app-accent-strong: #115e59;
+  --app-warm: #d97706;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Inter", sans-serif;
+  color: var(--app-ink);
+  background:
+    radial-gradient(circle at top left, rgba(217, 119, 6, 0.14), transparent 28%),
+    radial-gradient(circle at right, rgba(15, 118, 110, 0.16), transparent 30%),
+    linear-gradient(180deg, #fdfbf6 0%, var(--app-bg) 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-surface {
+  background: var(--app-panel);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 24px 60px rgba(39, 25, 11, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--app-muted);
+}
+
+.field-input,
+.field-select {
+  width: 100%;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(115, 95, 72, 0.2);
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.9rem 1rem;
+  color: var(--app-ink);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.field-input:focus,
+.field-select:focus {
+  outline: none;
+  border-color: rgba(15, 118, 110, 0.45);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+}
+
+.app-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.app-table th {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.app-table th,
+.app-table td {
+  border-bottom: 1px solid rgba(115, 95, 72, 0.14);
+  padding: 0.95rem 0.8rem;
+  text-align: left;
+}
+
+.app-table tr:hover td {
+  background: rgba(255, 255, 255, 0.55);
+}

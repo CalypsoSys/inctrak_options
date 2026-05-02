@@ -12,5 +12,10 @@ npm run build
 npm run test
 popd >/dev/null
 
+pushd frontend-signup >/dev/null
+npm run build
+npm run test
+popd >/dev/null
+
 dotnet build shared.inctrak.com/shared.inctrak.com.csproj
 dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj
