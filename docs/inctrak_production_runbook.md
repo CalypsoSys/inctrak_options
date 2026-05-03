@@ -36,7 +36,6 @@ Run on the Ubuntu host:
 
 ```bash
 sudo mkdir -p /srv/stacks/inctrak/api
-sudo mkdir -p /srv/stacks/inctrak/secrets
 sudo mkdir -p /srv/backups/inctrak/incoming
 sudo mkdir -p /srv/backups/inctrak/archive
 sudo mkdir -p /srv/backups/postgres
@@ -46,7 +45,6 @@ sudo mkdir -p /srv/logs/inctrak/postgres
 sudo chown -R $USER:$USER /srv/stacks/inctrak
 sudo chown -R $USER:$USER /srv/backups/inctrak
 sudo chown -R $USER:$USER /srv/logs/inctrak
-sudo chmod 700 /srv/stacks/inctrak/secrets
 ```
 
 ## 1. Confirm the directory layout on the server
@@ -62,7 +60,6 @@ Expected structure:
     compose-inctrak.sh
     render-config-env
 
-/srv/stacks/inctrak/secrets
 /srv/backups/inctrak/incoming
 /srv/backups/inctrak/archive
 /srv/backups/postgres
