@@ -2,7 +2,21 @@
 # or to another environment-specific file for deployment-time rendering.
 # Values written as ${VARIABLE_NAME} are resolved from the process environment.
 
+INCTRAK_API_IMAGE: inctrak-api:latest
+INCTRAK_POSTGRES_IMAGE: postgres:18
+
 ASPNETCORE_ENVIRONMENT: Development
+INCTRAK_API_HOST_BIND: 127.0.0.1
+INCTRAK_API_HOST_PORT: 8080
+INCTRAK_POSTGRES_HOST_BIND: 127.0.0.1
+INCTRAK_POSTGRES_HOST_PORT: 5432
+INCTRAK_LOGS_HOST_PATH: /srv/logs/inctrak/api
+INCTRAK_POSTGRES_LOGS_HOST_PATH: /srv/logs/inctrak/postgres
+INCTRAK_POSTGRES_DATA_HOST_PATH: /srv/pgsql/inctrak
+
+POSTGRES_DB: postgres
+POSTGRES_USER: postgres
+POSTGRES_PASSWORD: ${INCTRAK_DB_PASSWORD}
 
 AppSettings:
   AccessLogPath: /app/logs/access.log

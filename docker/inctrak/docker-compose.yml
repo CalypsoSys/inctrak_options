@@ -1,0 +1,78 @@
+services:
+  inctrak-postgres:
+    image: ${INCTRAK_POSTGRES_IMAGE:-postgres:18}
+    container_name: inctrak-postgres
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - logging_collector=on
+      - -c
+      - log_destination=stderr
+      - -c
+      - log_directory=/var/log/postgresql
+      - -c
+      - log_filename=postgresql.log
+      - -c
+      - log_file_mode=0644
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${INCTRAK_POSTGRES_HOST_BIND:-127.0.0.1}:${INCTRAK_POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - ${INCTRAK_POSTGRES_DATA_HOST_PATH:-/srv/pgsql/inctrak}:/var/lib/postgresql/data
+      - ${INCTRAK_POSTGRES_LOGS_HOST_PATH:-/srv/logs/inctrak/postgres}:/var/log/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  inctrak-api:
+    image: ${INCTRAK_API_IMAGE:-inctrak-api:latest}
+    container_name: inctrak-api
+    restart: unless-stopped
+    depends_on:
+      inctrak-postgres:
+        condition: service_healthy
+    ports:
+      - "${INCTRAK_API_HOST_BIND:-127.0.0.1}:${INCTRAK_API_HOST_PORT:-8080}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_HTTP_PORTS: 8080
+      AppSettings__IncTrakDns: ${AppSettings__IncTrakDns}
+      AppSettings__AllowedOrigins__0: ${AppSettings__AllowedOrigins__0}
+      AppSettings__AllowedOrigins__1: ${AppSettings__AllowedOrigins__1}
+      AppSettings__AllowedOrigins__2: ${AppSettings__AllowedOrigins__2}
+      AppSettings__AllowedOrigins__3: ${AppSettings__AllowedOrigins__3}
+      AppSettings__AllowedOrigins__4: ${AppSettings__AllowedOrigins__4}
+      AppSettings__RequireGatewaySecret: ${AppSettings__RequireGatewaySecret}
+      AppSettings__GatewaySecretHeaderName: ${AppSettings__GatewaySecretHeaderName}
+      AppSettings__GatewaySecret: ${AppSettings__GatewaySecret}
+      AppSettings__RateLimit__Enabled: ${AppSettings__RateLimit__Enabled}
+      AppSettings__RateLimit__PermitLimit: ${AppSettings__RateLimit__PermitLimit}
+      AppSettings__RateLimit__WindowSeconds: ${AppSettings__RateLimit__WindowSeconds}
+      AppSettings__RateLimit__QueueLimit: ${AppSettings__RateLimit__QueueLimit}
+      AppSettings__ControlPlaneConnection: ${AppSettings__ControlPlaneConnection}
+      AppSettings__FeedbackConnection: ${AppSettings__FeedbackConnection}
+      AppSettings__IncTrakConnection: ${AppSettings__IncTrakConnection}
+      AppSettings__SupabaseUrl: ${AppSettings__SupabaseUrl}
+      AppSettings__SupabaseAnonKey: ${AppSettings__SupabaseAnonKey}
+      AppSettings__SupabaseJwtSecret: ${AppSettings__SupabaseJwtSecret}
+      AppSettings__SlackFeedbackWebhookUrl: ${AppSettings__SlackFeedbackWebhookUrl}
+      AppSettings__AccessLogPath: ${AppSettings__AccessLogPath:-/app/logs/access.log}
+      AppSettings__ErrorLogPath: ${AppSettings__ErrorLogPath:-/app/logs/errors.log}
+      AppSettings__TenantTemplateDatabaseName: ${AppSettings__TenantTemplateDatabaseName}
+      AppSettings__TenantDatabasePrefix: ${AppSettings__TenantDatabasePrefix}
+      AppSettings__LocalAiEndpoint: ${AppSettings__LocalAiEndpoint}
+      AppSettings__LocalAiModel: ${AppSettings__LocalAiModel}
+      AppSettings__LocalAiApiKey: ${AppSettings__LocalAiApiKey}
+      AppSettings__LocalAiModelPath: ${AppSettings__LocalAiModelPath}
+      AppSettings__LocalAiContextSize: ${AppSettings__LocalAiContextSize}
+      AppSettings__LocalAiGpuLayerCount: ${AppSettings__LocalAiGpuLayerCount}
+      AppSettings__LocalAiMaxTokens: ${AppSettings__LocalAiMaxTokens}
+    volumes:
+      - ${INCTRAK_LOGS_HOST_PATH:-/srv/logs/inctrak/api}:/app/logs

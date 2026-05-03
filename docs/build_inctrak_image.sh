@@ -1,21 +1,4 @@
-1. cd ~/dotnet/inctrak_options
-2. git pull
-3. cd shared.inctrak.com/
-4. docker build -t inctrak .
-5. docker rmi $(docker images -f "dangling=true" -q)
-6. docker save inctrak > /tmp/inctrak.tar
-7. Copy to local machine (host)
-
-1. Transfer inctrak.tar to production and update .lastgood
-2. cd ~/docker/inctrak_demo_dotnet
-3. docker-compose stop
-4. cd ~/docker/inctrak_shared_dotnet
-5. docker-compose stop
-6. cd ..
-7. docker load < inctrak.tar
-8. docker rmi $(docker images -f "dangling=true" -q)
-9. cd ~/docker/inctrak_demo_dotnet
-10. docker-compose start
-11. cd ~/docker/inctrak_shared_dotnet
-12. docker-compose start
-
+1. Use [docs/inctrak_production_runbook.md](/home/joe/dotnet/inctrak_options/docs/inctrak_production_runbook.md:1) as the source of truth.
+2. Build the API image from `shared.inctrak.com/` into `C:\transfer\inctrak-api-latest.tar.gz`.
+3. Copy the image tarball, `config.yaml`, `docker/inctrak/docker-compose.yml`, `scripts/inctrak/compose-inctrak.sh`, and `render-config-env` to `/srv/stacks/inctrak/api`.
+4. On the host, use `./scripts/compose-inctrak.sh ...` instead of the old demo/shared docker directories.
