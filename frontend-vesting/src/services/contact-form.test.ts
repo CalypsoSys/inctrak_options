@@ -6,7 +6,7 @@ describe('canSubmitContactForm', () => {
     expect(canSubmitContactForm({
       EmailAddress: 'contact@inctrak.com',
       Name: 'Founder',
-      MessageTypeFk: 7,
+      MessageTypeFk: 8,
       Subject: 'Question about vesting',
       Message: 'Can you help me review this schedule?'
     })).toBe(true)
@@ -16,7 +16,7 @@ describe('canSubmitContactForm', () => {
     expect(canSubmitContactForm({
       EmailAddress: 'contact@inctrak.com',
       Name: '',
-      MessageTypeFk: 7,
+      MessageTypeFk: 8,
       Subject: 'Question about vesting',
       Message: 'Can you help me review this schedule?'
     })).toBe(false)

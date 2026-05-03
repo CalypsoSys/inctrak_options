@@ -32,6 +32,14 @@
     };
   }
 
+  function getFeedbackSuccessMessage(data) {
+    if (data && data.success === false) {
+      return data.message || "Unable to submit your message right now.";
+    }
+
+    return "Your message has been sent. We will reach out soon.";
+  }
+
   function shouldEnableSticky(scrollY, triggerTop, offset) {
     return scrollY >= Math.max(0, triggerTop - offset);
   }
@@ -239,7 +247,7 @@
                 throw new Error(data.message || "Unable to submit your message right now.");
               }
 
-              global.alert(data.message || "Your message has been sent.");
+              global.alert(getFeedbackSuccessMessage(data));
               form.reset();
             });
         })
@@ -264,6 +272,7 @@
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
       buildFeedbackPayload: buildFeedbackPayload,
+      getFeedbackSuccessMessage: getFeedbackSuccessMessage,
       parseTimingValue: parseTimingValue,
       applyLoadRevealState: applyLoadRevealState,
       applyRevealState: applyRevealState,

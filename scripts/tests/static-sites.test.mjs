@@ -52,6 +52,22 @@ test('inctrak.com reveal animations match matrixease transition behavior', () =>
   assert.match(css, /\.reveal-right \{/);
 });
 
+test('inctrak.com contact form uses the marketing contact-us message type and neutral success copy', async () => {
+  const runtime = await import(new URL('../../inctrak.com/js/site.js', import.meta.url));
+  const payload = runtime.buildFeedbackPayload({
+    emailAddress: 'founder@example.test',
+    name: 'Founder',
+    subject: 'Need help',
+    message: 'Please contact me.'
+  });
+
+  assert.equal(payload.MessageTypeFk, '8');
+  assert.equal(
+    runtime.getFeedbackSuccessMessage({ success: true, message: 'Thanks for the compliment, Founder' }),
+    'Your message has been sent. We will reach out soon.'
+  );
+});
+
 test('docs pages load the shared vanilla docs script', () => {
   const pages = [
     '../../docs.inctrak.com/index.html',

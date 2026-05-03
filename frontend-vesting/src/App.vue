@@ -343,7 +343,7 @@ const quickVestSchedule = ref<VestScheduleEntry[]>([])
 const contactForm = reactive<FeedbackForm>({
   EmailAddress: '',
   Name: '',
-  MessageTypeFk: 7,
+  MessageTypeFk: 8,
   Subject: '',
   Message: ''
 })
