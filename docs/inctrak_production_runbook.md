@@ -37,7 +37,6 @@ Run on the Ubuntu host:
 ```bash
 sudo mkdir -p /srv/stacks/inctrak/api
 sudo mkdir -p /srv/backups/inctrak/incoming
-sudo mkdir -p /srv/backups/inctrak/archive
 sudo mkdir -p /srv/backups/postgres
 sudo mkdir -p /srv/logs/inctrak/api
 sudo mkdir -p /srv/logs/inctrak/postgres
@@ -61,7 +60,6 @@ Expected structure:
     render-config-env
 
 /srv/backups/inctrak/incoming
-/srv/backups/inctrak/archive
 /srv/backups/postgres
 /srv/logs/inctrak/api
 /srv/logs/inctrak/postgres
