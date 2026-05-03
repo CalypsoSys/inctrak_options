@@ -387,6 +387,45 @@ Note:
 
 - `TenantSignupProvisioner` now expects a real PostgreSQL template database.
 
+## 16.1 Verify PostgreSQL log-directory ownership
+
+This stack bind-mounts PostgreSQL logs to:
+
+```text
+/srv/logs/inctrak/postgres
+```
+
+The official PostgreSQL container commonly writes those files as container user/group `999:999`.
+Check the host directory ownership:
+
+```bash
+stat -c '%u:%g %n' /srv/logs/inctrak/postgres
+```
+
+Check the running container user:
+
+```bash
+docker exec inctrak-postgres id
+```
+
+Check the log directory inside the container:
+
+```bash
+docker exec inctrak-postgres stat -c '%u:%g %n' /var/log/postgresql
+```
+
+If needed, fix the host log directory:
+
+```bash
+sudo chown 999:999 /srv/logs/inctrak/postgres
+```
+
+If ownership is wrong, you will usually see permission errors in:
+
+```bash
+docker logs inctrak-postgres
+```
+
 ## 17. Bring up the stack
 
 On the Ubuntu host:
