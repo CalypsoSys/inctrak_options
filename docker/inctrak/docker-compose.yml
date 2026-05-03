@@ -22,7 +22,7 @@ services:
     ports:
       - "${INCTRAK_POSTGRES_HOST_BIND:-127.0.0.1}:${INCTRAK_POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
-      - ${INCTRAK_POSTGRES_DATA_HOST_PATH:-/srv/pgsql/inctrak}:/var/lib/postgresql/data
+      - inctrak_postgres_data:/var/lib/postgresql/data
       - ${INCTRAK_POSTGRES_LOGS_HOST_PATH:-/srv/logs/inctrak/postgres}:/var/log/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
@@ -76,3 +76,6 @@ services:
       AppSettings__LocalAiMaxTokens: ${AppSettings__LocalAiMaxTokens}
     volumes:
       - ${INCTRAK_LOGS_HOST_PATH:-/srv/logs/inctrak/api}:/app/logs
+
+volumes:
+  inctrak_postgres_data:

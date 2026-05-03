@@ -49,7 +49,6 @@ Expected structure:
 /srv/backups/postgres
 /srv/logs/inctrak/api
 /srv/logs/inctrak/postgres
-/srv/pgsql/inctrak
 ```
 
 ## Files that come from this repo
@@ -111,7 +110,6 @@ INCTRAK_POSTGRES_HOST_BIND: 127.0.0.1
 INCTRAK_POSTGRES_HOST_PORT: 5432
 INCTRAK_LOGS_HOST_PATH: /srv/logs/inctrak/api
 INCTRAK_POSTGRES_LOGS_HOST_PATH: /srv/logs/inctrak/postgres
-INCTRAK_POSTGRES_DATA_HOST_PATH: /srv/pgsql/inctrak
 
 POSTGRES_DB: postgres
 POSTGRES_USER: postgres
@@ -155,6 +153,7 @@ AppSettings:
 
 Notes:
 
+- PostgreSQL data persistence now lives in the named Docker volume `inctrak_postgres_data`
 - `IncTrakConnection` is still present, but for production it is safest to point it at the real template database,
   not a dead `inctrak` database
 - if you do not want local AI enabled on the server, leave those values blank

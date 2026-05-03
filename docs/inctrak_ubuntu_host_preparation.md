@@ -202,12 +202,10 @@ sudo mkdir -p /srv/backups/inctrak/archive
 sudo mkdir -p /srv/backups/postgres
 sudo mkdir -p /srv/logs/inctrak/api
 sudo mkdir -p /srv/logs/inctrak/postgres
-sudo mkdir -p /srv/pgsql/inctrak
 
 sudo chown -R $USER:$USER /srv/stacks/inctrak
 sudo chown -R $USER:$USER /srv/backups/inctrak
 sudo chown -R $USER:$USER /srv/logs/inctrak
-sudo chown -R $USER:$USER /srv/pgsql/inctrak
 sudo chmod 700 /srv/stacks/inctrak/secrets
 ```
 
@@ -250,6 +248,13 @@ http://127.0.0.1:8080
 ```
 
 ## 13. Plan the PostgreSQL databases
+
+The Docker Compose stack now uses a named Docker volume for PostgreSQL data persistence, so there is no separate
+host-path setting to manage for the main data directory. The host still keeps PostgreSQL logs under:
+
+```text
+/srv/logs/inctrak/postgres
+```
 
 Recommended production database names:
 
