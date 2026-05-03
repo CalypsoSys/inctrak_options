@@ -190,90 +190,7 @@ sudo apt install -y cloudflared
 cloudflared --version
 ```
 
-## 10. Create the server directory layout
-
-Run on the Ubuntu host:
-
-```bash
-sudo mkdir -p /srv/stacks/inctrak/api
-sudo mkdir -p /srv/stacks/inctrak/secrets
-sudo mkdir -p /srv/backups/inctrak/incoming
-sudo mkdir -p /srv/backups/inctrak/archive
-sudo mkdir -p /srv/backups/postgres
-sudo mkdir -p /srv/logs/inctrak/api
-sudo mkdir -p /srv/logs/inctrak/postgres
-
-sudo chown -R $USER:$USER /srv/stacks/inctrak
-sudo chown -R $USER:$USER /srv/backups/inctrak
-sudo chown -R $USER:$USER /srv/logs/inctrak
-sudo chmod 700 /srv/stacks/inctrak/secrets
-```
-
-## 11. Install the shared YAML-to-env renderer
-
-The IncTrak deployment pattern now expects a shared renderer binary such as:
-
-```text
-babalu-yaml-env
-```
-
-Recommended server target path:
-
-```text
-/srv/stacks/inctrak/api/scripts/render-config-env
-```
-
-That binary comes from the public repo you are spinning out under:
-
-```text
-~/gocode/babalu-yaml-env
-```
-
-There is no hardcoded home-directory fallback in the wrapper. Either:
-
-- place the binary at `/srv/stacks/inctrak/api/scripts/render-config-env`
-- or set `RENDER_BIN` explicitly before invoking the wrapper
-
-## 12. Decide the internal runtime ports
-
-Recommended host-local bindings:
-
-- PostgreSQL: `127.0.0.1:5432`
-- API: `127.0.0.1:8080`
-
-The API origin exposed to Cloudflare Tunnel will then be:
-
-```text
-http://127.0.0.1:8080
-```
-
-## 13. Plan the PostgreSQL databases
-
-The Docker Compose stack now uses a named Docker volume for PostgreSQL data persistence, so there is no separate
-host-path setting to manage for the main data directory. The host still keeps PostgreSQL logs under:
-
-```text
-/srv/logs/inctrak/postgres
-```
-
-Recommended production database names:
-
-- `inctrak_control`
-- `inctrak_feedback`
-- `inctrak_template`
-
-The application will create tenant databases with prefix:
-
-```text
-inctrak_
-```
-
-Examples:
-
-- `inctrak_acme`
-- `inctrak_contoso`
-
-## 14. Verify prepared host state
+## 10. Verify prepared host state
 
 Run on the Ubuntu host:
 
@@ -285,6 +202,21 @@ systemctl status ssh --no-pager
 sudo ufw status verbose
 cloudflared --version
 ```
+
+## 11. Continue with the production runbook
+
+The remaining IncTrak-specific deployment steps belong in:
+
+- [inctrak_production_runbook.md](/home/joe/dotnet/inctrak_options/docs/inctrak_production_runbook.md:1)
+
+That runbook covers:
+
+- server directory layout
+- rendered-config binary placement
+- internal runtime ports
+- PostgreSQL database planning and bootstrap
+- Docker stack bring-up
+- Cloudflare wiring and validation
 
 ## Deployment direction
 

@@ -30,7 +30,26 @@ Server-side stack in the lab:
 - `shared.inctrak.com` API in Docker
 - `cloudflared` service on the host
 
-## Directory layout on the server
+## 0. Create the server directory layout
+
+Run on the Ubuntu host:
+
+```bash
+sudo mkdir -p /srv/stacks/inctrak/api
+sudo mkdir -p /srv/stacks/inctrak/secrets
+sudo mkdir -p /srv/backups/inctrak/incoming
+sudo mkdir -p /srv/backups/inctrak/archive
+sudo mkdir -p /srv/backups/postgres
+sudo mkdir -p /srv/logs/inctrak/api
+sudo mkdir -p /srv/logs/inctrak/postgres
+
+sudo chown -R $USER:$USER /srv/stacks/inctrak
+sudo chown -R $USER:$USER /srv/backups/inctrak
+sudo chown -R $USER:$USER /srv/logs/inctrak
+sudo chmod 700 /srv/stacks/inctrak/secrets
+```
+
+## 1. Confirm the directory layout on the server
 
 Expected structure:
 
@@ -51,7 +70,76 @@ Expected structure:
 /srv/logs/inctrak/postgres
 ```
 
-## Files that come from this repo
+## 2. Install the shared YAML-to-env renderer
+
+The IncTrak deployment pattern expects the shared renderer binary:
+
+```text
+babalu-yaml-env
+```
+
+Recommended server target path:
+
+```text
+/srv/stacks/inctrak/api/scripts/render-config-env
+```
+
+That binary comes from:
+
+```text
+~/gocode/babalu-yaml-env
+```
+
+There is no hardcoded home-directory fallback in the wrapper. Either:
+
+- place the binary at `/srv/stacks/inctrak/api/scripts/render-config-env`
+- or set `RENDER_BIN` explicitly before invoking the wrapper
+
+## 3. Decide the internal runtime ports
+
+Recommended host-local bindings:
+
+- PostgreSQL: `127.0.0.1:5432`
+- API: `127.0.0.1:8080`
+
+The API origin exposed to Cloudflare Tunnel will then be:
+
+```text
+http://127.0.0.1:8080
+```
+
+## 4. Plan the PostgreSQL databases
+
+The Docker Compose stack uses a named Docker volume for PostgreSQL data persistence:
+
+```text
+inctrak_postgres_data
+```
+
+The host still keeps PostgreSQL logs under:
+
+```text
+/srv/logs/inctrak/postgres
+```
+
+Recommended production database names:
+
+- `inctrak_control`
+- `inctrak_feedback`
+- `inctrak_template`
+
+The application will create tenant databases with prefix:
+
+```text
+inctrak_
+```
+
+Examples:
+
+- `inctrak_acme`
+- `inctrak_contoso`
+
+## 5. Files that come from this repo
 
 Copy or derive these from the repo:
 
@@ -64,13 +152,13 @@ Copy or derive these from the repo:
 - `inctrak.db/inctrak_feedback.sql`
 - the built API image tarball you create locally
 
-## Server-local files that should not come from git
+## 6. Server-local files that should not come from git
 
 - `/srv/stacks/inctrak/api/config.yaml`
 - Cloudflare Tunnel credentials
 - real secrets and passwords
 
-## 1. Build the API image locally in WSL
+## 7. Build the API image locally in WSL
 
 From the repo root in WSL:
 
@@ -89,7 +177,7 @@ That leaves:
 C:\transfer\inctrak-api-latest.tar.gz
 ```
 
-## 2. Prepare the production config.yaml
+## 8. Prepare the production config.yaml
 
 On your workstation, copy the example config as a starting point:
 
@@ -158,7 +246,7 @@ Notes:
   not a dead `inctrak` database
 - if you do not want local AI enabled on the server, leave those values blank
 
-## 3. Build the shared YAML-to-env renderer
+## 9. Build the shared YAML-to-env renderer
 
 Build the shared renderer from the public repo:
 
@@ -173,7 +261,7 @@ That gives you:
 C:\transfer\render-config-env
 ```
 
-## 4. Create the Docker Compose stack file
+## 10. Create the Docker Compose stack file
 
 On the Ubuntu host, create:
 
@@ -187,7 +275,7 @@ Recommended source file from this repo:
 docker/inctrak/docker-compose.yml
 ```
 
-## 5. Create the server `config.yaml`
+## 11. Create the server `config.yaml`
 
 On the Ubuntu host:
 
@@ -203,7 +291,7 @@ Important note:
 - the default expected path is `scripts/render-config-env` beside the wrapper
 - otherwise set `RENDER_BIN=/full/path/to/render-config-env` explicitly
 
-## 6. Stage artifacts into `C:\transfer`
+## 12. Stage artifacts into `C:\transfer`
 
 Recommended transfer staging:
 
@@ -219,7 +307,7 @@ Copy the production config reference into transfer if you prepared it in WSL:
 cp /tmp/inctrak-config.production.yaml /mnt/c/transfer/inctrak-config.production.yaml
 ```
 
-## 7. Copy artifacts to the server
+## 13. Copy artifacts to the server
 
 From Windows PowerShell, for example:
 
@@ -238,7 +326,7 @@ chmod +x /srv/stacks/inctrak/api/scripts/compose-inctrak.sh
 chmod +x /srv/stacks/inctrak/api/scripts/render-config-env
 ```
 
-## 8. Validate the rendered compose config
+## 14. Validate the rendered compose config
 
 On the Ubuntu host:
 
@@ -256,7 +344,7 @@ If the renderer is installed somewhere else on the host, invoke the wrapper like
 RENDER_BIN=/opt/babalu-yaml-env/render-config-env ./scripts/compose-inctrak.sh config
 ```
 
-## 9. Load the image on the server
+## 15. Load the image on the server
 
 On the Ubuntu host:
 
@@ -266,7 +354,7 @@ gunzip -f inctrak-api-latest.tar.gz
 docker load -i inctrak-api-latest.tar
 ```
 
-## 10. Bootstrap PostgreSQL the first time
+## 16. Bootstrap PostgreSQL the first time
 
 ### Control-plane database
 
@@ -304,7 +392,7 @@ Note:
 
 - `TenantSignupProvisioner` now expects a real PostgreSQL template database.
 
-## 11. Bring up the stack
+## 17. Bring up the stack
 
 On the Ubuntu host:
 
