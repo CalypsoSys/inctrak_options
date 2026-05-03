@@ -31,10 +31,15 @@ namespace IncTrak.Controllers
         };
 
         private readonly IVestingPromptInterpreter _vestingPromptInterpreter;
+        private readonly IPublicVestingUsageNotifier _publicVestingUsageNotifier;
 
-        public DashboardController(IOptions<AppSettings> config, IVestingPromptInterpreter vestingPromptInterpreter) : base(config)
+        public DashboardController(
+            IOptions<AppSettings> config,
+            IVestingPromptInterpreter vestingPromptInterpreter,
+            IPublicVestingUsageNotifier publicVestingUsageNotifier) : base(config)
         {
             _vestingPromptInterpreter = vestingPromptInterpreter;
+            _publicVestingUsageNotifier = publicVestingUsageNotifier;
         }
 
         [Route("api/company/summary/")]
@@ -222,6 +227,27 @@ namespace IncTrak.Controllers
             try
             {
                 QuickVestingInterpretResult result = _vestingPromptInterpreter.Interpret(request);
+                TryNotifyPublicVestingUsage(new PublicVestingUsageEvent
+                {
+                    EventType = "interpret",
+                    Path = Request?.Path.Value,
+                    Prompt = request?.Prompt,
+                    Provider = result.Provider,
+                    AlternateProvider = result.AlternateProvider,
+                    Confidence = result.Confidence,
+                    RequiresAi = result.RequiresAi,
+                    UsedAi = result.UsedAi,
+                    StrictAi = request?.StrictAi == true,
+                    PreferredProvider = request?.PreferredProvider,
+                    Success = result.Success,
+                    Message = result.Message,
+                    Kind = result.Kind,
+                    SharesGranted = result.SharesGranted,
+                    VestingStart = result.VestingStart,
+                    PeriodCount = result.Periods?.Length ?? 0,
+                    SourceIp = GetSourceIpAddress(),
+                    UserAgent = Request?.Headers["User-Agent"].ToString()
+                });
                 return Ok(new
                 {
                     success = result.Success,
@@ -247,6 +273,19 @@ namespace IncTrak.Controllers
             catch (Exception excp)
             {
                 string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "quick vesting interpret");
+                TryNotifyPublicVestingUsage(new PublicVestingUsageEvent
+                {
+                    EventType = "interpret",
+                    Path = Request?.Path.Value,
+                    Prompt = request?.Prompt,
+                    StrictAi = request?.StrictAi == true,
+                    PreferredProvider = request?.PreferredProvider,
+                    Success = false,
+                    Message = message,
+                    Provider = "error",
+                    SourceIp = GetSourceIpAddress(),
+                    UserAgent = Request?.Headers["User-Agent"].ToString()
+                });
                 return Ok(new { success = false, message = message, provider = "error", Periods = Array.Empty<PERIOD_UI>() });
             }
         }
@@ -310,12 +349,48 @@ namespace IncTrak.Controllers
                 var vestingSchedule = ScheduleCalc.GetVestedShares(grant);
 
                 LogQuick(message.ToString());
+                TryNotifyPublicVestingUsage(new PublicVestingUsageEvent
+                {
+                    EventType = "calculate",
+                    Path = Request?.Path.Value,
+                    Success = true,
+                    Message = "Calculated vesting schedule.",
+                    SharesGranted = saveSchedule?.Data?.SHARES,
+                    VestingStart = saveSchedule?.Data?.VESTING_START.ToString("yyyy-MM-dd"),
+                    PeriodCount = saveSchedule?.Children?.Length ?? 0,
+                    SourceIp = GetSourceIpAddress(),
+                    UserAgent = Request?.Headers["User-Agent"].ToString()
+                });
                 return Ok(new { success = true, message = "Quick saved.", Grant = saveSchedule.Data, Periods = saveSchedule.Children, PeriodTypes = periodTypes, AmountTypes = amountTypes, VestSchedule = vestingSchedule });
             }
             catch (Exception excp)
             {
                 string message = IncTrakErrors.LogError(_options.Value, GetLoginUser(), excp, "quick vesting");
+                TryNotifyPublicVestingUsage(new PublicVestingUsageEvent
+                {
+                    EventType = "calculate",
+                    Path = Request?.Path.Value,
+                    Success = false,
+                    Message = message,
+                    SharesGranted = saveSchedule?.Data?.SHARES,
+                    VestingStart = saveSchedule?.Data?.VESTING_START.ToString("yyyy-MM-dd"),
+                    PeriodCount = saveSchedule?.Children?.Length ?? 0,
+                    SourceIp = GetSourceIpAddress(),
+                    UserAgent = Request?.Headers["User-Agent"].ToString()
+                });
                 return Ok(new { success = false, message = message });
+            }
+        }
+
+        private void TryNotifyPublicVestingUsage(PublicVestingUsageEvent usageEvent)
+        {
+            try
+            {
+                _publicVestingUsageNotifier.Notify(usageEvent);
+            }
+            catch (Exception notifyExcp)
+            {
+                IncTrakErrors.LogError(_options.Value, GetLoginUser(), notifyExcp, "public vesting usage notifier");
             }
         }
     }

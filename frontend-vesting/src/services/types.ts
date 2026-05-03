@@ -3,6 +3,14 @@ export type ApiResponse = {
   message?: string
 }
 
+export type FeedbackForm = {
+  EmailAddress: string
+  Name: string
+  MessageTypeFk: number
+  Subject: string
+  Message: string
+}
+
 export type QuickInterpretResponse = ApiResponse & {
   summary?: string
   provider?: string

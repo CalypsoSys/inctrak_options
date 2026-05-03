@@ -15,6 +15,18 @@
           </template>
         </PageIntro>
 
+        <div class="mt-4 text-sm text-[var(--app-muted)]">
+          Need help tailoring a vesting schedule for your company?
+          <button
+            class="ml-1 font-semibold text-[var(--app-accent)] transition hover:text-slate-900"
+            type="button"
+            @click="openContactDialog"
+          >
+            Contact us
+          </button>
+          .
+        </div>
+
         <div class="mt-8 rounded-[2rem] border border-[var(--app-border)] bg-white/70 p-5">
           <div class="max-w-3xl">
             <h2 class="text-lg font-bold text-slate-900">Describe the schedule in plain English</h2>
@@ -134,6 +146,65 @@
     </Dialog>
 
     <Dialog
+      v-model:visible="contactVisible"
+      modal
+      dismissable-mask
+      header="Contact Us"
+      :style="{ width: 'min(48rem, 94vw)' }"
+    >
+      <form class="space-y-4" @submit.prevent="submitContactForm">
+        <p class="text-sm leading-6 text-[var(--app-muted)]">
+          Tell us what you are working on and we will get the message in Slack right away.
+        </p>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label class="field-label">Name</label>
+            <input v-model="contactForm.Name" class="field-input" type="text" />
+          </div>
+          <div>
+            <label class="field-label">Email</label>
+            <input v-model="contactForm.EmailAddress" class="field-input" type="email" />
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Subject</label>
+          <input v-model="contactForm.Subject" class="field-input" type="text" />
+        </div>
+        <div>
+          <label class="field-label">Message</label>
+          <textarea
+            v-model="contactForm.Message"
+            class="field-textarea min-h-40 w-full resize-y"
+            placeholder="Tell us about your vesting question, your company stage, or the workflow you want help with."
+          />
+        </div>
+        <div class="rounded-2xl border border-[var(--app-border)] bg-white/70 p-4">
+          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--app-accent)]">Direct Contact</p>
+          <div class="mt-3 grid gap-3 md:grid-cols-2">
+            <a
+              class="flex items-center gap-3 rounded-2xl border border-[var(--app-border)] px-4 py-3 text-sm font-medium text-slate-900 transition hover:border-[var(--app-accent)] hover:text-[var(--app-accent)]"
+              href="tel:+12038487851"
+            >
+              <i class="pi pi-phone text-[var(--app-accent)]" />
+              <span>+1-203-848-7851</span>
+            </a>
+            <a
+              class="flex items-center gap-3 rounded-2xl border border-[var(--app-border)] px-4 py-3 text-sm font-medium text-slate-900 transition hover:border-[var(--app-accent)] hover:text-[var(--app-accent)]"
+              href="mailto:contact@inctrak.com"
+            >
+              <i class="pi pi-envelope text-[var(--app-accent)]" />
+              <span>contact@inctrak.com</span>
+            </a>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3">
+          <Button label="Close" severity="contrast" variant="outlined" type="button" @click="contactVisible = false" />
+          <Button label="Submit" :loading="isSendingContact" type="submit" />
+        </div>
+      </form>
+    </Dialog>
+
+    <Dialog
       v-model:visible="helpVisible"
       modal
       dismissable-mask
@@ -219,6 +290,8 @@ import PageIntro from '@/components/PageIntro.vue'
 import VestingPeriodEditor from '@/components/VestingPeriodEditor.vue'
 import VestingScheduleTable from '@/components/VestingScheduleTable.vue'
 import { getApiMessage } from '@/services/api'
+import { canSubmitContactForm } from '@/services/contact-form'
+import { sendContactMessage } from '@/services/contact-service'
 import {
   canAutoCalculateFromPromptResult,
   shouldShowStillNotRight as shouldShowStillNotRightForProvider,
@@ -228,7 +301,7 @@ import {
 import { buildPromptGrantPatch } from '@/services/prompt-interpret'
 import { normalizeQuickStartDate } from '@/services/quick-vesting'
 import { fetchQuickGrant, interpretQuickPrompt, saveQuickGrant } from '@/services/vesting-service'
-import type { AmountType, Grant, Period, PeriodType, VestScheduleEntry } from '@/services/types'
+import type { AmountType, FeedbackForm, Grant, Period, PeriodType, VestScheduleEntry } from '@/services/types'
 
 const isBusy = ref(false)
 const isInterpreting = ref(false)
@@ -236,7 +309,9 @@ const dialogVisible = ref(false)
 const dialogSuccess = ref(false)
 const dialogTitle = ref('Vesting')
 const dialogMessage = ref('')
+const contactVisible = ref(false)
 const helpVisible = ref(false)
+const isSendingContact = ref(false)
 const timelineSection = ref<HTMLElement | null>(null)
 const promptText = ref('I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after.')
 const interpretSummary = ref('')
@@ -265,6 +340,13 @@ const quickPeriods = ref<Period[]>([])
 const quickPeriodTypes = ref<PeriodType[]>([])
 const quickAmountTypes = ref<AmountType[]>([])
 const quickVestSchedule = ref<VestScheduleEntry[]>([])
+const contactForm = reactive<FeedbackForm>({
+  EmailAddress: '',
+  Name: '',
+  MessageTypeFk: 7,
+  Subject: '',
+  Message: ''
+})
 
 onMounted(async () => {
   const quickData = await fetchQuickGrant()
@@ -404,6 +486,10 @@ function showDialog(message: string, success: boolean): void {
   dialogVisible.value = true
 }
 
+function openContactDialog(): void {
+  contactVisible.value = true
+}
+
 function scrollToTimeline(): void {
   window.requestAnimationFrame(() => {
     timelineSection.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -418,6 +504,35 @@ function scrollToTop(): void {
 
 function clearTimeline(): void {
   quickVestSchedule.value = []
+}
+
+async function submitContactForm(): Promise<void> {
+  if (canSubmitContactForm(contactForm) === false) {
+    showDialog('Please enter your name, email, subject, and message before submitting.', false)
+    return
+  }
+
+  isSendingContact.value = true
+  try {
+    const response = await sendContactMessage(contactForm)
+    contactVisible.value = false
+    showDialog(
+      response.success !== false
+        ? 'Your message has been sent. We will reach out soon.'
+        : (response.message ?? 'Unable to send your message right now.'),
+      response.success !== false
+    )
+    if (response.success !== false) {
+      contactForm.EmailAddress = ''
+      contactForm.Name = ''
+      contactForm.Subject = ''
+      contactForm.Message = ''
+    }
+  } catch (error) {
+    showDialog(getApiMessage(error, 'Unable to send your message right now.'), false)
+  } finally {
+    isSendingContact.value = false
+  }
 }
 
 function canAutoCalculate(): boolean {

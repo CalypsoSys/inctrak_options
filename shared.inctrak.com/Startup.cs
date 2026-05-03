@@ -30,6 +30,7 @@ namespace inctrak.com
             AppSettings appSettings = Configuration.GetSection("AppSettings").Get<AppSettings>() ?? new AppSettings();
             services.AddHttpClient(nameof(SupabaseTokenValidator));
             services.AddHttpClient(nameof(LocalAiVestingPromptInterpreter));
+            services.AddHttpClient(nameof(SlackPublicVestingUsageNotifier));
             services.AddSingleton<RequestContextAccessor>();
             services.AddSingleton<HeaderTenantResolver>();
             services.AddSingleton<HeaderUserResolver>();
@@ -47,6 +48,7 @@ namespace inctrak.com
             services.TryAddSingleton<RulesVestingPromptInterpreter>();
             services.TryAddSingleton<LlamaSharpVestingPromptInterpreter>();
             services.TryAddSingleton<LocalAiVestingPromptInterpreter>();
+            services.TryAddSingleton<IPublicVestingUsageNotifier, SlackPublicVestingUsageNotifier>();
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IVestingPromptInterpreterProvider, PatternVestingPromptInterpreter>());
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IVestingPromptInterpreterProvider, LlamaSharpVestingPromptInterpreter>());
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IVestingPromptInterpreterProvider, LocalAiVestingPromptInterpreter>());

@@ -203,6 +203,19 @@ namespace IncTrak.Controllers
             return clientInfo;
         }
 
+        protected string GetSourceIpAddress()
+        {
+            if (Request?.Headers.TryGetValue("CF-Connecting-IP", out var cfConnectingIp) == true &&
+                string.IsNullOrWhiteSpace(cfConnectingIp.ToString()) == false)
+                return cfConnectingIp.ToString();
+
+            if (Request?.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor) == true &&
+                string.IsNullOrWhiteSpace(forwardedFor.ToString()) == false)
+                return forwardedFor.ToString();
+
+            return Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        }
+
         protected void SendMail(string to, string subject, string body)
         {
             // Auth/account mail flows are being retired. Keep the call sites harmless until

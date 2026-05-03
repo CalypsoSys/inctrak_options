@@ -62,70 +62,83 @@ namespace IncTrak.Controllers
                 if (Request.Headers.TryGetValue("Referer", out header))
                     referrer = new Uri(header);
 
-                if (referrer == null ||
-                    (referrer.DnsSafeHost.EndsWith("inctrak.com") == false
-#if DEBUG 
-                    && referrer.DnsSafeHost != "localhost"
-#endif
-                    ))
+                if (FeedbackRequestOriginPolicy.IsAllowedReferrer(referrer) == false)
                 {
                     return Ok(new { success = false, message = "Invalid request" });
                 }
                 var incTrak = referrer.GetLeftPart(UriPartial.Authority);
 
-                using (inctrak_feedbackContext context = new inctrak_feedbackContext(_options.Value))
+                if (feedBack == null || (string.IsNullOrWhiteSpace(feedBack.EmailAddress) && string.IsNullOrWhiteSpace(feedBack.Name))
+                     || (string.IsNullOrWhiteSpace(feedBack.Message) && string.IsNullOrWhiteSpace(feedBack.Subject)))
                 {
-                    if (feedBack == null || (string.IsNullOrWhiteSpace(feedBack.EmailAddress) && string.IsNullOrWhiteSpace(feedBack.Name))
-                         || (string.IsNullOrWhiteSpace(feedBack.Message) && string.IsNullOrWhiteSpace(feedBack.Subject)))
+                    return Ok(new { success = false, message = "Please enter email or name and subject or message" });
+                }
+                else
+                {
+                    string who = "";
+                    if (string.IsNullOrWhiteSpace(feedBack.EmailAddress))
                     {
-                        return Ok(new { success = false, message = "Please enter email or name and subject or message" });
+                        feedBack.EmailAddress = "none";
                     }
                     else
                     {
-                        string who = "";
-                        if (string.IsNullOrWhiteSpace(feedBack.EmailAddress))
-                        {
-                            feedBack.EmailAddress = "none";
-                        }
-                        else
-                        {
-                            who = string.Format(", {0}", feedBack.EmailAddress);
-                        }
-                        if (string.IsNullOrWhiteSpace(feedBack.Name))
-                        {
-                            feedBack.Name = "none";
-                        }
-                        else
-                        {
-                            who = string.Format(", {0}", feedBack.Name);
-                        }
-
-                        if (string.IsNullOrWhiteSpace(feedBack.Message))
-                            feedBack.Message = "none";
-                        else if (string.IsNullOrWhiteSpace(feedBack.Subject))
-                            feedBack.Subject = "none";
-                        feedBack.Created = DateTime.Now;
-                        feedBack.ClientData = GetClientInfo();
-                        context.Feedback.Add(feedBack);
-                        context.SaveChanges();
-                        string messageType = context.MessageType.Single(s => s.MessageTypePk == feedBack.MessageTypeFk).MessageType1;
-                        var response = Ok(new { success = true, message = string.Format("Thanks for the {0}{1}", messageType, who) });
-
-                        try
-                        {
-                            SendSlackMessage(
-                                _options.Value.GetSlackFeedbackWebhookUrl(),
-                                BuildFeedbackSlackMessage(feedBack.Name, feedBack.EmailAddress, messageType, feedBack.ClientData, feedBack.Message));
-                        }
-                        catch (Exception slackExcp)
-                        {
-                            IncTrakErrors.LogError(_options.Value, GetLoginUser(), slackExcp, "slack feedback");
-                        }
-
-                        // TODO response.Headers.Add("Access-Control-Allow-Origin", incTrak);
-
-                        return response;
+                        who = string.Format(", {0}", feedBack.EmailAddress);
                     }
+                    if (string.IsNullOrWhiteSpace(feedBack.Name))
+                    {
+                        feedBack.Name = "none";
+                    }
+                    else
+                    {
+                        who = string.Format(", {0}", feedBack.Name);
+                    }
+
+                    if (string.IsNullOrWhiteSpace(feedBack.Message))
+                        feedBack.Message = "none";
+                    else if (string.IsNullOrWhiteSpace(feedBack.Subject))
+                        feedBack.Subject = "none";
+
+                    feedBack.Created = DateTime.UtcNow;
+                    feedBack.ClientData = GetClientInfo();
+
+                    string messageType = "message";
+                    bool savedToDatabase = false;
+                    try
+                    {
+                        using (inctrak_feedbackContext context = new inctrak_feedbackContext(_options.Value))
+                        {
+                            context.Feedback.Add(feedBack);
+                            context.SaveChanges();
+                            messageType = context.MessageType.Single(s => s.MessageTypePk == feedBack.MessageTypeFk).MessageType1;
+                            savedToDatabase = true;
+                        }
+                    }
+                    catch (Exception dbExcp)
+                    {
+                        IncTrakErrors.LogError(_options.Value, GetLoginUser(), dbExcp, "feedback save database");
+                    }
+
+                    bool sentToSlack = false;
+                    try
+                    {
+                        SendSlackMessage(
+                            _options.Value.GetSlackFeedbackWebhookUrl(),
+                            BuildFeedbackSlackMessage(feedBack.Name, feedBack.EmailAddress, messageType, feedBack.ClientData, feedBack.Message));
+                        sentToSlack = true;
+                    }
+                    catch (Exception slackExcp)
+                    {
+                        IncTrakErrors.LogError(_options.Value, GetLoginUser(), slackExcp, "slack feedback");
+                    }
+
+                    if (savedToDatabase == false && sentToSlack == false)
+                        return Ok(new { success = false, message = "Unable to submit your message right now." });
+
+                    var response = Ok(new { success = true, message = string.Format("Thanks for the {0}{1}", messageType, who) });
+
+                    // TODO response.Headers.Add("Access-Control-Allow-Origin", incTrak);
+
+                    return response;
                 }
             }
             catch(Exception excp)
