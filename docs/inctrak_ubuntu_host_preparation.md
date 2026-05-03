@@ -5,7 +5,7 @@ PostgreSQL stack in Docker.
 
 Routine deployment and refresh steps belong in:
 
-- [inctrak_production_runbook.md](/home/joe/dotnet/inctrak_options/docs/inctrak_production_runbook.md:1)
+- [inctrak_production_runbook.md](inctrak_production_runbook.md)
 
 ## Goal
 
@@ -90,19 +90,22 @@ systemctl status docker --no-pager
 If needed, create a key on the Windows workstation in PowerShell:
 
 ```powershell
-ssh-keygen -t ed25519 -C "joe@inctrak-lab"
+$serverIp = "192.168.50.95"
+$serverUser = "deploy"
+
+ssh-keygen -t ed25519 -C "$serverUser@inctrak-lab"
 ```
 
 Copy the public key to the Ubuntu host:
 
 ```powershell
-type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh joe@192.168.50.95 "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh ${serverUser}@${serverIp} "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
 ```
 
 Verify login:
 
 ```powershell
-ssh joe@192.168.50.95
+ssh ${serverUser}@${serverIp}
 ```
 
 ## 5. Harden SSH server settings
@@ -207,7 +210,7 @@ cloudflared --version
 
 The remaining IncTrak-specific deployment steps belong in:
 
-- [inctrak_production_runbook.md](/home/joe/dotnet/inctrak_options/docs/inctrak_production_runbook.md:1)
+- [inctrak_production_runbook.md](inctrak_production_runbook.md)
 
 That runbook covers:
 

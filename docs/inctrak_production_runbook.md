@@ -5,9 +5,9 @@ Cloudflare, and validating the multi-site production setup.
 
 Related docs:
 
-- [cloudflare-pages-gateway.md](/home/joe/dotnet/inctrak_options/docs/cloudflare-pages-gateway.md:1)
-- [inctrak_ubuntu_host_preparation.md](/home/joe/dotnet/inctrak_options/docs/inctrak_ubuntu_host_preparation.md:1)
-- [inctrak_local_vscode.md](/home/joe/dotnet/inctrak_options/docs/inctrak_local_vscode.md:1)
+- [cloudflare-pages-gateway.md](cloudflare-pages-gateway.md)
+- [inctrak_ubuntu_host_preparation.md](inctrak_ubuntu_host_preparation.md)
+- [inctrak_local_vscode.md](inctrak_local_vscode.md)
 
 ## Intended production shape
 
@@ -158,7 +158,7 @@ Copy or derive these from the repo:
 From the repo root in WSL:
 
 ```bash
-cd /home/joe/dotnet/inctrak_options
+cd ~/dotnet/inctrak_options
 mkdir -p /mnt/c/transfer
 if [ -f /mnt/c/transfer/inctrak-api-latest.tar.gz ]; then mv /mnt/c/transfer/inctrak-api-latest.tar.gz /mnt/c/transfer/inctrak-api-latest.lastgood.tar.gz; fi
 docker build --platform linux/amd64 -t inctrak-api:latest ./shared.inctrak.com
@@ -246,7 +246,7 @@ Notes:
 Build the shared renderer from the public repo:
 
 ```bash
-cd /home/joe/gocode/babalu-yaml-env
+cd ~/gocode/babalu-yaml-env
 go build -o /mnt/c/transfer/render-config-env ./cmd/babalu-yaml-env
 ```
 
@@ -307,11 +307,15 @@ cp /tmp/inctrak-config.production.yaml /mnt/c/transfer/inctrak-config.production
 From Windows PowerShell, for example:
 
 ```powershell
-scp C:\transfer\inctrak-api-latest.tar.gz joe@calypsoasus:/srv/stacks/inctrak/api/
-scp C:\transfer\inctrak-config.production.yaml joe@calypsoasus:/srv/stacks/inctrak/api/config.yaml
-scp C:\transfer\render-config-env joe@calypsoasus:/srv/stacks/inctrak/api/scripts/render-config-env
-scp .\docker\inctrak\docker-compose.yml joe@calypsoasus:/srv/stacks/inctrak/api/docker-compose.yml
-scp .\scripts\inctrak\compose-inctrak.sh joe@calypsoasus:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh
+$serverIp = "192.168.50.95"
+$serverUser = "deploy"
+$server = "$serverUser@$serverIp"
+
+scp C:\transfer\inctrak-api-latest.tar.gz ${server}:/srv/stacks/inctrak/api/
+scp C:\transfer\inctrak-config.production.yaml ${server}:/srv/stacks/inctrak/api/config.yaml
+scp C:\transfer\render-config-env ${server}:/srv/stacks/inctrak/api/scripts/render-config-env
+scp .\docker\inctrak\docker-compose.yml ${server}:/srv/stacks/inctrak/api/docker-compose.yml
+scp .\scripts\inctrak\compose-inctrak.sh ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh
 ```
 
 After copy, on the Ubuntu host:

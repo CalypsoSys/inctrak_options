@@ -10,10 +10,10 @@ namespace inctrak.com.Tests
         {
             var settings = new AppSettings
             {
-                AccessLogPath = "/home/joe/dotnet/inctrak_options/access.log"
+                AccessLogPath = "/var/log/inctrak/access.log"
             };
 
-            Assert.Equal("/home/joe/dotnet/inctrak_options/access.log", settings.GetAccessLogPath());
+            Assert.Equal("/var/log/inctrak/access.log", settings.GetAccessLogPath());
         }
 
         [Fact]

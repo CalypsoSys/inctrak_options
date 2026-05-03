@@ -44,14 +44,14 @@ Recommended first model:
 Keep GGUF files outside Git in a machine-local folder such as:
 
 ```text
-/home/joe/models
+~/models
 ```
 
 Point `config.local.yaml` at the real model file:
 
 ```yaml
 AppSettings:
-  LocalAiModelPath: /home/joe/models/qwen2.5-1.5b-instruct-q4_k_m.gguf
+  LocalAiModelPath: ~/models/qwen2.5-1.5b-instruct-q4_k_m.gguf
   LocalAiContextSize: 4096
   LocalAiGpuLayerCount: 999
   LocalAiMaxTokens: 512

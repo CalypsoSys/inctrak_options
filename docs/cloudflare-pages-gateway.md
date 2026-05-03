@@ -329,5 +329,5 @@ on the Ubuntu host.
 
 ## Related docs
 
-- [inctrak_ubuntu_host_preparation.md](/home/joe/dotnet/inctrak_options/docs/inctrak_ubuntu_host_preparation.md:1)
-- [inctrak_production_runbook.md](/home/joe/dotnet/inctrak_options/docs/inctrak_production_runbook.md:1)
+- [inctrak_ubuntu_host_preparation.md](inctrak_ubuntu_host_preparation.md)
+- [inctrak_production_runbook.md](inctrak_production_runbook.md)
