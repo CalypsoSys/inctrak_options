@@ -36,7 +36,7 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | --- | --- | --- | --- |
 | API-only backend | `shared.inctrak.com` serves API traffic only | Partial | Static web assets are now disabled at the project level; frontend/API split is in place. |
 | Env-first config | Runtime config comes from env, not appsettings secrets | Partial | Gateway, logging, and local VS Code env rendering are already refactored. |
-| VS Code local stack | One launcher starts frontend + backend together | Partial | Current local launcher works, and frontend debug now uses `127.0.0.1:5174` to avoid MMA collisions. |
+| VS Code local stack | One launcher starts frontend + backend together | Partial | Current local launcher works, and the frontend debug port is pinned to `127.0.0.1:5174`. |
 | Cloudflare edge architecture | Worker serves SPA and routes wildcard subdomains | Not implemented | Current frontend still runs as a standard Vite SPA and deployment wiring has not been moved to Worker assets yet. |
 | Signup hostname | `signup.inctrak.com` hosts tenant signup and company creation | Not implemented | Signup flow and company slug reservation do not exist yet. |
 | Public vesting hostname | `vesting.inctrak.com` hosts quick vesting | Not implemented | Quick vesting exists in the SPA and API, but not yet as a dedicated public hostname/app mode. |
@@ -124,7 +124,7 @@ Recommended local ports:
 
 | Purpose | Host | Port | Notes |
 | --- | --- | --- | --- |
-| Main frontend SPA | `127.0.0.1` | `5174` | Already in use for this repo to avoid conflict with MMA on `5173`. |
+| Main frontend SPA | `127.0.0.1` | `5174` | Current local port for the main app. |
 | Local backend HTTP | `localhost` | `5000` | Already in use by `shared.inctrak.com`. |
 | Local backend HTTPS | `localhost` | `5001` | Already in use by `shared.inctrak.com`. |
 | Signup frontend mode | `127.0.0.1` | `5175` | Suggested future port when signup becomes its own app mode or dev entrypoint. |
