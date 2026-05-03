@@ -25,3 +25,17 @@ export function buildSignupAppUrl(): string {
 
   return 'https://signup.inctrak.com'
 }
+
+export function buildVestingAppUrl(): string {
+  const explicit = import.meta.env.VITE_VESTING_APP_URL?.trim()
+  if (explicit) {
+    return explicit
+  }
+
+  const host = window.location.hostname.toLowerCase()
+  if (host === '127.0.0.1' || host === 'localhost') {
+    return 'http://127.0.0.1:5176'
+  }
+
+  return 'https://vesting.inctrak.com'
+}

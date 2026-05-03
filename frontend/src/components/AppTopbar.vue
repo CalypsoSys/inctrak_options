@@ -2,7 +2,7 @@
   <header class="card-surface rounded-[2rem] px-6 py-4">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <p class="text-xs font-bold uppercase tracking-[0.28em] text-[var(--app-muted)]">{{ route.meta.title }}</p>
+        <p class="text-xs font-bold uppercase tracking-[0.28em] text-[var(--app-muted)]">{{ eyebrow }}</p>
         <h2 class="mt-2 text-2xl font-black tracking-tight text-slate-900">{{ headline }}</h2>
       </div>
       <div class="flex flex-wrap items-center gap-3">
@@ -28,20 +28,23 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
+import { getPublicHeadline } from '@/services/public-headline'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
+const eyebrow = computed(() => {
+  if (!authStore.isAuthenticated && route.name === 'home') {
+    return 'Public'
+  }
+
+  return route.meta.title
+})
+
 const headline = computed(() => {
-  if (authStore.isAdmin) {
-    return 'Modern equity operations for administrators'
-  }
-  if (authStore.isOptionee) {
-    return 'Clear participant access to grants and vesting'
-  }
-  return 'A cleaner static SPA on top of the IncTrak API'
+  return getPublicHeadline(route.name?.toString(), authStore.isAdmin, authStore.isOptionee)
 })
 
 const quickLinks = computed(() => {

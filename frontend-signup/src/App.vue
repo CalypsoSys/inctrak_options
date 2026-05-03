@@ -5,7 +5,7 @@
         <PageIntro
           eyebrow="Public Signup"
           title="Create your company workspace"
-          description="Set up a new IncTrak workspace with Supabase-backed credentials, an available company URL, and guided provisioning for the first tenant admin."
+          description="Launch your company workspace with a branded company URL and a guided setup flow for your first administrator."
         >
           <template #actions>
             <Button label="How It Works" icon="pi pi-question-circle" severity="contrast" variant="outlined" @click="helpVisible = true" />
@@ -18,22 +18,27 @@
           </template>
         </PageIntro>
 
+        <div class="mt-6 rounded-[1.5rem] border border-amber-300 bg-amber-50 px-5 py-4">
+          <h3 class="text-base font-bold text-amber-900">{{ accessGate.title }}</h3>
+          <p class="mt-2 text-sm leading-6 text-amber-900/90">{{ accessGate.message }}</p>
+        </div>
+
         <form class="mt-8 space-y-5" @submit.prevent="submitForm">
           <div class="grid gap-5 md:grid-cols-2">
             <div>
               <label class="field-label">Email Address</label>
-              <input v-model="form.email" class="field-input" type="email" />
+              <input v-model="form.email" class="field-input" type="email" :disabled="accessGate.disabled" />
             </div>
             <div>
               <label class="field-label">Password</label>
-              <Password v-model="form.password" fluid toggle-mask :feedback="false" />
+              <Password v-model="form.password" fluid toggle-mask :feedback="false" :disabled="accessGate.disabled" />
             </div>
           </div>
 
           <div class="space-y-5">
             <div>
               <label class="field-label">Company Name</label>
-              <input v-model="form.companyName" class="field-input" type="text" />
+              <input v-model="form.companyName" class="field-input" type="text" :disabled="accessGate.disabled" />
             </div>
             <div>
               <label class="field-label">Company URL</label>
@@ -42,6 +47,7 @@
                   v-model="form.tenantSlug"
                   class="field-input flex-1"
                   type="text"
+                  :disabled="accessGate.disabled"
                   autocapitalize="off"
                   spellcheck="false"
                   placeholder="your-company"
@@ -62,7 +68,7 @@
 
           <div>
             <label class="field-label">Confirm Password</label>
-            <Password v-model="form.confirmPassword" fluid toggle-mask :feedback="false" />
+            <Password v-model="form.confirmPassword" fluid toggle-mask :feedback="false" :disabled="accessGate.disabled" />
           </div>
 
           <div class="grid gap-4 md:grid-cols-[1fr_auto]">
@@ -85,8 +91,8 @@
             <Button
               type="submit"
               :loading="isBusy"
-              :disabled="!form.acceptTerms || slugAvailable !== true"
-              label="Create Workspace"
+              :disabled="accessGate.disabled || !form.acceptTerms || slugAvailable !== true"
+              :label="accessGate.disabled ? 'Coming Soon' : 'Create Workspace'"
             />
             <p v-if="submitBlockMessage" class="self-center text-sm font-semibold text-[var(--app-muted)]">
               {{ submitBlockMessage }}
@@ -236,6 +242,7 @@ import Password from 'primevue/password'
 import AppDialog from '@/components/AppDialog.vue'
 import PageIntro from '@/components/PageIntro.vue'
 import { useAsyncState } from '@/composables/useAsyncState'
+import { accessGate } from '@/services/access-gate'
 import { getApiMessage } from '@/services/api'
 import { buildMainAppLoginUrl } from '@/services/runtime-config'
 import { buildPendingSignupMessage } from '@/services/signup-messages'
@@ -266,6 +273,10 @@ const form = reactive({
 let slugAvailabilityTimer: ReturnType<typeof setTimeout> | null = null
 
 const submitBlockMessage = computed(() => {
+  if (accessGate.disabled) {
+    return accessGate.message
+  }
+
   if (!form.acceptTerms) {
     return 'Review and accept the Terms of Service before creating your account.'
   }
@@ -278,6 +289,11 @@ const submitBlockMessage = computed(() => {
 })
 
 async function submitForm(): Promise<void> {
+  if (accessGate.disabled) {
+    showMessage(accessGate.message, false)
+    return
+  }
+
   const email = form.email.trim()
   const companyName = form.companyName.trim()
   const tenantSlug = normalizeTenantSlug(form.tenantSlug)

@@ -69,51 +69,115 @@
     </template>
 
     <template v-else>
-      <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <section class="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <article class="card-surface rounded-[2rem] p-8">
           <PageIntro
             eyebrow="Public"
             title="Equity operations without spreadsheet drift"
-            description="The frontend is now a Vue 3 + TypeScript + Vite SPA, but it still exposes the same IncTrak features: quick vesting calculations, admin operations, and participant visibility."
+            description="Give finance, legal, and people teams a calmer way to manage grants, plans, participant access, and vesting from one shared workspace."
           />
           <div class="mt-8 grid gap-4 md:grid-cols-3">
-            <StatCard label="Admin Tools" value="7" hint="Stock classes, holders, plans, schedules, terminations, participants, grants" />
-            <StatCard label="Participant Views" value="3" hint="Stocks, options, and grant detail pages" />
-            <StatCard label="Auth Flows" value="5" hint="Login, register, activate, reset password, accept terms" />
+            <StatCard
+              label="Administrator Workflows"
+              value="Plans"
+              hint="Set up plans, classes, holders, grants, schedules, and participant records."
+            />
+            <StatCard
+              label="Participant Access"
+              value="Grants"
+              hint="Give participants a clean place to review equity details and vesting progress."
+            />
+            <StatCard
+              label="Public Entry Points"
+              value="Signup"
+              hint="Launch a workspace or run the standalone vesting calculator without entering the admin shell."
+            />
           </div>
         </article>
 
         <article class="card-surface rounded-[2rem] p-8">
-          <h3 class="text-lg font-bold text-slate-900">Quick vesting schedule</h3>
-          <p class="mt-2 text-sm text-[var(--app-muted)]">Run the same quick calculation flow from the old home page, now inside the SPA.</p>
-          <div class="mt-6 grid gap-4 md:grid-cols-2">
-            <div>
-              <label class="field-label">Shares Granted</label>
-              <input v-model.number="quickGrant.SHARES" class="field-input" min="1" type="number" />
+          <p class="text-xs font-bold uppercase tracking-[0.3em] text-[var(--app-accent)]">Standalone Tool</p>
+          <h3 class="mt-3 text-3xl font-black tracking-tight text-slate-900">Public vesting calculator</h3>
+          <p class="mt-4 max-w-xl text-sm leading-7 text-[var(--app-muted)] md:text-base">
+            Run quick vesting scenarios in the dedicated public calculator built for founders, operators, counsel, and participants. It stays separate from the admin workspace, so people can explore schedules without needing an account first.
+          </p>
+          <div class="mt-8 grid gap-4 sm:grid-cols-3">
+            <div class="rounded-3xl border border-[var(--app-border)] bg-white/70 p-4">
+              <p class="text-xs font-bold uppercase tracking-[0.24em] text-[var(--app-muted)]">Fast</p>
+              <p class="mt-3 text-lg font-bold text-slate-900">Plain-English setup</p>
+              <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Start from a standard vesting phrase or build each period step by step.</p>
             </div>
-            <div>
-              <label class="field-label">Vesting Start</label>
-              <input v-model="quickGrant.VESTING_START" class="field-input" type="date" />
+            <div class="rounded-3xl border border-[var(--app-border)] bg-white/70 p-4">
+              <p class="text-xs font-bold uppercase tracking-[0.24em] text-[var(--app-muted)]">Flexible</p>
+              <p class="mt-3 text-lg font-bold text-slate-900">Standalone scenarios</p>
+              <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Model cliffs, quarterly timelines, monthly vesting, and custom period mixes without logging in.</p>
+            </div>
+            <div class="rounded-3xl border border-[var(--app-border)] bg-white/70 p-4">
+              <p class="text-xs font-bold uppercase tracking-[0.24em] text-[var(--app-muted)]">Connected</p>
+              <p class="mt-3 text-lg font-bold text-slate-900">Contact the team</p>
+              <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Reach out directly from the calculator when you want help tailoring a vesting schedule.</p>
             </div>
           </div>
-          <div class="mt-6">
-            <VestingPeriodEditor
-              :amount-types="quickAmountTypes"
-              :period-types="quickPeriodTypes"
-              :periods="quickPeriods"
-              @add="addQuickPeriod"
-              @remove="removeQuickPeriod"
-            />
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a
+              :href="vestingAppUrl"
+              class="inline-flex items-center justify-center rounded-2xl bg-[var(--app-accent)] px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+            >
+              Open Vesting Calculator
+            </a>
+            <RouterLink
+              :to="{ name: 'contact' }"
+              class="inline-flex items-center justify-center rounded-2xl border border-[var(--app-border)] px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-[var(--app-accent)] hover:text-[var(--app-accent)]"
+            >
+              Talk With IncTrak
+            </RouterLink>
           </div>
-          <div class="mt-5">
-            <Button label="Calculate Vesting" :loading="isBusy" @click="submitQuickGrant" />
+          <div class="mt-8 rounded-[1.75rem] border border-[var(--app-border)] bg-slate-950/[0.03] p-5">
+            <p class="text-sm font-semibold text-slate-900">Best fit for this public experience</p>
+            <div class="mt-4 grid gap-3 md:grid-cols-2">
+              <div class="rounded-2xl bg-white/80 p-4">
+                <p class="font-semibold text-slate-900">Exploring a new vesting idea</p>
+                <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Model a standard four-year schedule, a quarterly timeline, or a more tailored vesting structure in minutes.</p>
+              </div>
+              <div class="rounded-2xl bg-white/80 p-4">
+                <p class="font-semibold text-slate-900">Preparing for a real workspace</p>
+                <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">When the rollout window opens, move from public planning into a branded company workspace for day-to-day equity administration.</p>
+              </div>
+            </div>
           </div>
         </article>
       </section>
 
-      <VestingScheduleTable v-if="quickVestSchedule.length > 0" :rows="quickVestSchedule" />
-
       <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <article class="card-surface overflow-hidden rounded-[2rem] border border-[var(--app-border)] bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(255,248,236,0.92))] p-6 xl:col-span-3">
+          <div class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-[0.3em] text-[var(--app-accent)]">Why teams switch</p>
+              <h3 class="mt-3 text-2xl font-black tracking-tight text-slate-900 md:text-3xl">A steadier operating system for equity administration</h3>
+              <p class="mt-4 text-sm leading-7 text-[var(--app-muted)] md:text-base">
+                IncTrak gives growing companies one place to move from draft vesting ideas to real plan administration, participant access, and grant visibility without living in disconnected spreadsheets.
+              </p>
+            </div>
+            <div class="grid gap-4 md:grid-cols-3">
+              <div class="rounded-3xl border border-[var(--app-border)] bg-white/75 p-5">
+                <p class="text-xs font-bold uppercase tracking-[0.24em] text-[var(--app-muted)]">Clarity</p>
+                <p class="mt-3 text-lg font-bold text-slate-900">Shared source of truth</p>
+                <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Keep plans, grants, participants, and vesting events aligned in one system.</p>
+              </div>
+              <div class="rounded-3xl border border-[var(--app-border)] bg-white/75 p-5">
+                <p class="text-xs font-bold uppercase tracking-[0.24em] text-[var(--app-muted)]">Control</p>
+                <p class="mt-3 text-lg font-bold text-slate-900">Purpose-built admin flows</p>
+                <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Support the real operational work behind option plans, participant records, and grants.</p>
+              </div>
+              <div class="rounded-3xl border border-[var(--app-border)] bg-white/75 p-5">
+                <p class="text-xs font-bold uppercase tracking-[0.24em] text-[var(--app-muted)]">Access</p>
+                <p class="mt-3 text-lg font-bold text-slate-900">Cleaner participant views</p>
+                <p class="mt-2 text-sm leading-6 text-[var(--app-muted)]">Give employees and stakeholders a straightforward view of their equity details.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
         <article v-for="card in featureCards" :key="card.title" class="card-surface overflow-hidden rounded-[2rem]">
           <img :src="card.image" :alt="card.title" class="h-56 w-full object-cover" />
           <div class="p-5">
@@ -135,19 +199,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import Button from 'primevue/button'
+import { computed, onMounted, ref } from 'vue'
 import AppDialog from '@/components/AppDialog.vue'
 import PageIntro from '@/components/PageIntro.vue'
 import StatCard from '@/components/StatCard.vue'
-import VestingPeriodEditor from '@/components/VestingPeriodEditor.vue'
-import VestingScheduleTable from '@/components/VestingScheduleTable.vue'
 import { useAsyncState } from '@/composables/useAsyncState'
-import { fetchAdminSummary, fetchOptioneeSummary, fetchQuickGrant, saveQuickGrant, type AdminSummaryResponse, type OptioneeSummaryResponse } from '@/services/dashboard-service'
-import { getApiMessage } from '@/services/api'
-import type { AmountType, Grant, Period, PeriodType, VestScheduleEntry } from '@/services/types'
+import { fetchAdminSummary, fetchOptioneeSummary, type AdminSummaryResponse, type OptioneeSummaryResponse } from '@/services/dashboard-service'
+import { buildVestingAppUrl } from '@/services/runtime-config'
 import { useAuthStore } from '@/stores/auth'
-import { formatNumber, toDateInputValue } from '@/utils/formatters'
+import { formatNumber } from '@/utils/formatters'
 import companyDashImage from '@/assets/images/company_dash.png'
 import companyGrantImage from '@/assets/images/company_grant.png'
 import companyScheduleImage from '@/assets/images/company_schedule.png'
@@ -156,33 +216,19 @@ import optioneeGrantImage from '@/assets/images/optionee_grants.png'
 import optioneeSummaryImage from '@/assets/images/optionee_summary.png'
 
 const authStore = useAuthStore()
-const { isBusy, dialogVisible, isSuccess, message, showMessage } = useAsyncState()
+const { dialogVisible, isSuccess, message } = useAsyncState()
 
 const adminSummary = ref<AdminSummaryResponse | null>(null)
 const optioneeSummary = ref<OptioneeSummaryResponse | null>(null)
-const quickGrant = reactive<Grant>({
-  GRANT_PK: '',
-  PARTICIPANT_FK: null,
-  PLAN_FK: null,
-  VESTING_SCHEDULE_FK: null,
-  TERMINATION_FK: null,
-  SHARES: 0,
-  OPTION_PRICE: 0,
-  DATE_OF_GRANT: '',
-  VESTING_START: ''
-})
-const quickPeriods = ref<Period[]>([])
-const quickPeriodTypes = ref<PeriodType[]>([])
-const quickAmountTypes = ref<AmountType[]>([])
-const quickVestSchedule = ref<VestScheduleEntry[]>([])
+const vestingAppUrl = buildVestingAppUrl()
 
 const featureCards = [
-  { eyebrow: 'Admin', title: 'Company Dashboard', description: 'See plans, remaining shares, participant counts, and grant activity from a single view.', image: companyDashImage },
-  { eyebrow: 'Participant', title: 'Optionee Dashboard', description: 'Give participants a clean view of granted, vested, and unvested equity data.', image: optioneeDashImage },
-  { eyebrow: 'Planning', title: 'Vesting Schedules', description: 'Create simple or complex vesting timelines with cliffs, stages, and computed periods.', image: companyScheduleImage },
-  { eyebrow: 'Grants', title: 'Grant Details', description: 'Inspect grant dates, vesting schedules, termination rules, and grant-level vesting events.', image: optioneeGrantImage },
-  { eyebrow: 'Operations', title: 'Issue Grants', description: 'Assign grants to participants and keep administrator workflows in one place.', image: companyGrantImage },
-  { eyebrow: 'Summary', title: 'Option Summary', description: 'Break granted, vested, and unvested balances down by plan for each participant.', image: optioneeSummaryImage }
+  { eyebrow: 'Admin', title: 'Company Dashboard', description: 'See plan capacity, participant counts, grant activity, and workspace momentum from a single operational view.', image: companyDashImage },
+  { eyebrow: 'Participant', title: 'Optionee Dashboard', description: 'Give participants a cleaner place to understand granted, vested, and unvested equity without spreadsheet handoffs.', image: optioneeDashImage },
+  { eyebrow: 'Planning', title: 'Vesting Schedules', description: 'Design standard or multi-stage vesting schedules with cliffs, stages, and calculated periods that stay tied to the underlying record.', image: companyScheduleImage },
+  { eyebrow: 'Grants', title: 'Grant Details', description: 'Inspect grant dates, vesting structure, termination rules, and timeline events from one detailed grant record.', image: optioneeGrantImage },
+  { eyebrow: 'Operations', title: 'Grant Administration', description: 'Issue grants, maintain participant records, and keep day-to-day equity operations moving from one shared workspace.', image: companyGrantImage },
+  { eyebrow: 'Summary', title: 'Participant Summaries', description: 'Break granted, vested, and unvested balances down by plan so every participant view stays grounded in the same source data.', image: optioneeSummaryImage }
 ]
 
 const optioneeOverTimeRows = computed(() =>
@@ -200,44 +246,6 @@ onMounted(async () => {
 
   if (authStore.isOptionee) {
     optioneeSummary.value = await fetchOptioneeSummary()
-    return
   }
-
-  const quickData = await fetchQuickGrant()
-  Object.assign(quickGrant, quickData.Grant, {
-    VESTING_START: toDateInputValue(quickData.Grant.VESTING_START)
-  })
-  quickPeriods.value = quickData.Periods
-  quickPeriodTypes.value = quickData.PeriodTypes
-  quickAmountTypes.value = quickData.AmountTypes
 })
-
-function addQuickPeriod(): void {
-  quickPeriods.value.push({
-    PERIOD_AMOUNT: 1,
-    PERIOD_TYPE_FK: null,
-    AMOUNT_TYPE_FK: null,
-    AMOUNT: 0,
-    INCREMENTS: 1,
-    ORDER: quickPeriods.value.length,
-    EVEN_OVER_N: 0
-  })
-}
-
-function removeQuickPeriod(index: number): void {
-  quickPeriods.value.splice(index, 1)
-}
-
-async function submitQuickGrant(): Promise<void> {
-  isBusy.value = true
-  try {
-    const response = await saveQuickGrant(quickGrant, quickPeriods.value)
-    quickVestSchedule.value = response.VestSchedule ?? []
-    showMessage(response.message ?? 'Quick vesting calculated.', response.success !== false)
-  } catch (error) {
-    showMessage(getApiMessage(error, 'Unable to calculate the quick vesting schedule.'), false)
-  } finally {
-    isBusy.value = false
-  }
-}
 </script>
