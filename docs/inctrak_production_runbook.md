@@ -198,6 +198,12 @@ vi config.yaml
 chmod 600 config.yaml
 ```
 
+Important note:
+
+- `scripts/compose-inctrak.sh` requires a renderer binary
+- the default expected path is `scripts/render-config-env` beside the wrapper
+- otherwise set `RENDER_BIN=/full/path/to/render-config-env` explicitly
+
 ## 6. Stage artifacts into `C:\transfer`
 
 Recommended transfer staging:
@@ -244,6 +250,12 @@ tail -n 30 /tmp/inctrak-compose.out
 ```
 
 If required placeholders are missing, the renderer should fail fast before Docker Compose runs.
+
+If the renderer is installed somewhere else on the host, invoke the wrapper like this:
+
+```bash
+RENDER_BIN=/opt/babalu-yaml-env/render-config-env ./scripts/compose-inctrak.sh config
+```
 
 ## 9. Load the image on the server
 

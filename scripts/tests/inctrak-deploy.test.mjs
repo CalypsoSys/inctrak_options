@@ -12,7 +12,7 @@ test('inctrak compose wrapper defaults to repo docker stack and local config fil
   assert.match(script, /DEFAULT_STACK_DIR="\$REPO_ROOT\/docker\/inctrak"/);
   assert.match(script, /DEFAULT_CONFIG_FILE="\$SCRIPT_DIR\/config\.yaml"/);
   assert.match(script, /RENDER_BIN="\$\{RENDER_BIN:-\$SCRIPT_DIR\/render-config-env\}"/);
-  assert.match(script, /RENDER_JS="\$\{RENDER_JS:-\$SCRIPT_DIR\/render-config-env\.mjs\}"/);
+  assert.match(script, /Render binary is not executable: \$RENDER_BIN/);
   assert.match(script, /docker compose -f "\$COMPOSE_FILE" --env-file "\$TEMP_ENV_FILE" "\$@"/);
 });
 

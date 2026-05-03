@@ -231,8 +231,10 @@ That binary comes from the public repo you are spinning out under:
 ~/gocode/babalu-yaml-env
 ```
 
-You can also fall back to the repo-local Node renderer in a pinch, but the preferred production path is the shared
-binary.
+There is no hardcoded home-directory fallback in the wrapper. Either:
+
+- place the binary at `/srv/stacks/inctrak/api/scripts/render-config-env`
+- or set `RENDER_BIN` explicitly before invoking the wrapper
 
 ## 12. Decide the internal runtime ports
 
