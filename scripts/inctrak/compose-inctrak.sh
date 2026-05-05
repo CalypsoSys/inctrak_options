@@ -17,7 +17,7 @@ fi
 STACK_DIR="${STACK_DIR:-$DEFAULT_STACK_DIR}"
 COMPOSE_FILE="${COMPOSE_FILE:-$STACK_DIR/docker-compose.yml}"
 CONFIG_FILE="${CONFIG_FILE:-$DEFAULT_CONFIG_FILE}"
-RENDER_BIN="${RENDER_BIN:-$SCRIPT_DIR/render-config-env}"
+RENDERER_PATH="$SCRIPT_DIR/render-config-env"
 
 if [ ! -f "$COMPOSE_FILE" ]; then
     echo "Compose file not found: $COMPOSE_FILE" >&2
@@ -35,12 +35,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [ ! -x "$RENDER_BIN" ]; then
-    echo "Render binary is not executable: $RENDER_BIN" >&2
+if [ ! -x "$RENDERER_PATH" ]; then
+    echo "Render binary is not executable: $RENDERER_PATH" >&2
     exit 1
 fi
 
-"$RENDER_BIN" --format env "$CONFIG_FILE" > "$TEMP_ENV_FILE"
+"$RENDERER_PATH" --format env "$CONFIG_FILE" > "$TEMP_ENV_FILE"
 
 COMPOSE_UNSET_ARGS=()
 while IFS='=' read -r key _; do

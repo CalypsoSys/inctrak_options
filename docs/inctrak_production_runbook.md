@@ -88,7 +88,6 @@ That binary comes from:
 There is no hardcoded home-directory fallback in the wrapper. Either:
 
 - place the binary at `/srv/stacks/inctrak/api/scripts/render-config-env`
-- or set `RENDER_BIN` explicitly before invoking the wrapper
 
 ## 3. Decide the internal runtime ports
 
@@ -247,7 +246,7 @@ Build the shared renderer from the public repo:
 
 ```bash
 cd ~/gocode/babalu-yaml-env
-go build -o /mnt/c/transfer/render-config-env ./cmd/babalu_yaml_env
+go build -o /mnt/c/transfer/render-config-env ./cmd/babalu-yaml-env
 ```
 
 That gives you:
@@ -282,9 +281,7 @@ chmod 600 config.yaml
 
 Important note:
 
-- `scripts/compose-inctrak.sh` requires a renderer binary
-- the default expected path is `scripts/render-config-env` beside the wrapper
-- otherwise set `RENDER_BIN=/full/path/to/render-config-env` explicitly
+- `scripts/compose-inctrak.sh` requires the renderer binary at `scripts/render-config-env`
 
 ## 12. Stage artifacts into `C:\transfer`
 
@@ -336,12 +333,6 @@ tail -n 30 /tmp/inctrak-compose.out
 ```
 
 If required placeholders are missing, the renderer should fail fast before Docker Compose runs.
-
-If the renderer is installed somewhere else on the host, invoke the wrapper like this:
-
-```bash
-RENDER_BIN=/opt/babalu-yaml-env/render-config-env ./scripts/compose-inctrak.sh config
-```
 
 ## 15. Load the image on the server
 
