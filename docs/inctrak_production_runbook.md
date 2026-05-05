@@ -247,7 +247,7 @@ Build the shared renderer from the public repo:
 
 ```bash
 cd ~/gocode/babalu-yaml-env
-go build -o /mnt/c/transfer/render-config-env ./cmd/babalu-yaml-env
+go build -o /mnt/c/transfer/render-config-env ./cmd/babalu_yaml_env
 ```
 
 That gives you:
