@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Collections.Specialized;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IncTrak.Data;
 using IncTrak.Models;
-using inctrak.com;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using SendGrid;
-using SendGrid.Helpers.Mail;
+using System.Web;
 
 namespace IncTrak.Controllers
 {
@@ -24,11 +25,6 @@ namespace IncTrak.Controllers
             _options = options;
         }
 
-        protected string LoginBaseUrl(string redirect)
-        {
-            return GetIncTrakApiUrl("/api/login/{0}/", redirect);
-        }
-
         protected string GetIncTrakUrl(string path, params object[] args)
         {
             return BuildUrl(_options.Value.GetIncTrakDns(), "https://shared.inctrak.com/", path, args);
@@ -36,7 +32,18 @@ namespace IncTrak.Controllers
 
         protected string GetIncTrakApiUrl(string path, params object[] args)
         {
-            return BuildUrl(_options.Value.GetIncTrakApiDns(), "https://shared.inctrak.com/", path, args);
+            return BuildUrl(GetRequestOrigin(), "https://shared.inctrak.com/", path, args);
+        }
+
+        protected string GetRequestOrigin()
+        {
+            if (Request?.Host.HasValue == true && string.IsNullOrWhiteSpace(Request.Scheme) == false)
+            {
+                string pathBase = Request.PathBase.HasValue ? Request.PathBase.Value : string.Empty;
+                return $"{Request.Scheme}://{Request.Host}{pathBase}";
+            }
+
+            return "https://shared.inctrak.com/";
         }
 
         private static string BuildUrl(string configuredUrl, string defaultUrl, string path, params object[] args)
@@ -59,35 +66,21 @@ namespace IncTrak.Controllers
 
         protected LoginRights GetLoginUser()
         {
-            return GetLoginUser(null, Guid.Empty.ToString(), true);
+            return GetLoginUser(null, true);
         }
 
-        protected LoginRights GetLoginUser(inctrakContext context, string passedUuid, bool noNull = false)
+        protected LoginRights GetLoginUser(inctrakContext context, bool noNull = false)
         {
-            Guid groupKey = Guid.Empty;
-            Guid userKey = Guid.Empty;
-            string uuidKey = passedUuid;
             try
             {
-                uuidKey = RequestAuthReader.GetUuid(Request);
-                if (passedUuid != Guid.Empty.ToString() && uuidKey != passedUuid)
-                {
-                    if (noNull)
-                        return new LoginRights(passedUuid, false, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty);
-                    else
-                        return null;
-                }
-
                 if (context != null)
                 {
-                    Users user = AccessController.GetLoginUserKey(context, uuidKey);
+                    Users user = ResolveSupabaseLoginUser(context);
                     if (user != null)
                     {
-                        if (user.Administrator)
-                            groupKey = user.GroupFk;
-                        else
-                            userKey = user.UserPk;
-                        return new LoginRights(uuidKey, user.Administrator, groupKey, userKey, user.UserPk, user.GroupFk);
+                        Guid groupKey = user.Administrator ? user.GroupFk : Guid.Empty;
+                        Guid userKey = user.Administrator ? Guid.Empty : user.UserPk;
+                        return new LoginRights(user.Administrator, groupKey, userKey, user.UserPk, user.GroupFk);
                     }
                 }
             }
@@ -96,9 +89,41 @@ namespace IncTrak.Controllers
             }
 
             if (noNull)
-                return new LoginRights(uuidKey, false, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty);
+                return new LoginRights(false, Guid.Empty, Guid.Empty, Guid.Empty, Guid.Empty);
             else
                 return null;
+        }
+
+        protected Users ResolveSupabaseLoginUser(inctrakContext context)
+        {
+            if (context == null || HttpContext == null)
+            {
+                return null;
+            }
+
+            RequestContextAccessor requestContextAccessor = HttpContext.RequestServices.GetService(typeof(RequestContextAccessor)) as RequestContextAccessor;
+            if (requestContextAccessor == null)
+            {
+                return null;
+            }
+
+            SupabaseIdentity identity = requestContextAccessor.GetSupabaseIdentity(HttpContext);
+            if (identity.IsAuthenticated() == false || string.IsNullOrWhiteSpace(identity.EmailAddress))
+            {
+                return null;
+            }
+
+            TenantContext tenantContext = requestContextAccessor.GetTenantContext(HttpContext);
+            string tenantSlug = tenantContext?.TenantSlug;
+            string normalizedEmail = identity.EmailAddress.Trim().ToLowerInvariant();
+
+            IQueryable<Users> query = context.Users.Where(u => u.EmailAddress.ToLower() == normalizedEmail);
+            if (string.IsNullOrWhiteSpace(tenantSlug) == false)
+            {
+                query = query.Where(u => u.GroupFkNavigation.GroupKey == tenantSlug);
+            }
+
+            return query.OrderByDescending(u => u.Administrator).FirstOrDefault();
         }
 
         protected const int SearchLimit = 50;
@@ -178,33 +203,86 @@ namespace IncTrak.Controllers
             return clientInfo;
         }
 
+        protected string GetSourceIpAddress()
+        {
+            if (Request?.Headers.TryGetValue("CF-Connecting-IP", out var cfConnectingIp) == true &&
+                string.IsNullOrWhiteSpace(cfConnectingIp.ToString()) == false)
+                return cfConnectingIp.ToString();
+
+            if (Request?.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor) == true &&
+                string.IsNullOrWhiteSpace(forwardedFor.ToString()) == false)
+                return forwardedFor.ToString();
+
+            return Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        }
+
         protected void SendMail(string to, string subject, string body)
         {
-            if (_options.Value.UseSNMP)
-            {
-                var client = new SmtpClient(_options.Value.GetSNMPServer(), _options.Value.SNMPPort);
-                client.UseDefaultCredentials = false;
-                client.Credentials = new NetworkCredential(_options.Value.GetSNMPAddress(), _options.Value.GetSNMPPassword());
-                client.EnableSsl = false;
-                client.DeliveryMethod = SmtpDeliveryMethod.Network;
+            // Auth/account mail flows are being retired. Keep the call sites harmless until
+            // those flows are removed or replaced with a proper delivery mechanism.
+        }
 
-                MailMessage message = new MailMessage(_options.Value.GetSNMPAddress(), to);
-                message.Subject = subject;
-                message.Body = body;
-                message.IsBodyHtml = true;
-                message.Bcc.Add(_options.Value.GetSNMPAddress());
-                client.Send(message);
-            }
-            else
-            {
-                var client = new SendGridClient(_options.Value.GetEmailApiKey());
-                var fromAddr = new EmailAddress(_options.Value.GetEmailFrom());
-                var toAddr = new EmailAddress(to);
-                var msg = MailHelper.CreateSingleEmail(fromAddr, toAddr, subject, null, body);
+        protected void SendSlackMessage(string webhookUrl, string text)
+        {
+            if (string.IsNullOrWhiteSpace(webhookUrl))
+                throw new InvalidOperationException("AppSettings:SlackFeedbackWebhookUrl must be configured for Slack notifications.");
 
-                var response = client.SendEmailAsync(msg);
-                response.Wait();
+            using (var client = new HttpClient())
+            using (var content = new StringContent(JsonSerializer.Serialize(new { text }), Encoding.UTF8, "application/json"))
+            {
+                var response = client.PostAsync(webhookUrl, content).GetAwaiter().GetResult();
+                if (response.IsSuccessStatusCode == false)
+                {
+                    string responseBody = response.Content == null
+                        ? string.Empty
+                        : response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                    throw new InvalidOperationException(string.Format(
+                        "Slack webhook rejected notification. StatusCode={0}, Body={1}",
+                        (int)response.StatusCode,
+                        string.IsNullOrWhiteSpace(responseBody) ? "(empty)" : responseBody));
+                }
             }
+        }
+
+        public static string BuildSlackMailMessage(string to, string subject, string body)
+        {
+            return string.Format(
+                "Notification\nTo: {0}\nSubject: {1}\nMessage: {2}",
+                string.IsNullOrWhiteSpace(to) ? "unknown" : to.Trim(),
+                string.IsNullOrWhiteSpace(subject) ? "none" : subject.Trim(),
+                ConvertHtmlToSlackText(body));
+        }
+
+        public static string BuildFeedbackSlackMessage(string name, string emailAddress, string messageType, string clientData, string message)
+        {
+            return string.Format(
+                "New feedback submitted\nType: {0}\nName: {1}\nEmail: {2}\nClient: {3}\nMessage: {4}",
+                string.IsNullOrWhiteSpace(messageType) ? "unknown" : messageType.Trim(),
+                string.IsNullOrWhiteSpace(name) ? "none" : name.Trim(),
+                string.IsNullOrWhiteSpace(emailAddress) ? "none" : emailAddress.Trim(),
+                FileLogWriter.SanitizeSingleLine(clientData),
+                string.IsNullOrWhiteSpace(message) ? "none" : message.Trim());
+        }
+
+        private static string ConvertHtmlToSlackText(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return "none";
+
+            string plainText = value
+                .Replace("<br/>", "\n", StringComparison.OrdinalIgnoreCase)
+                .Replace("<br />", "\n", StringComparison.OrdinalIgnoreCase)
+                .Replace("<br>", "\n", StringComparison.OrdinalIgnoreCase)
+                .Replace("</p>", "\n", StringComparison.OrdinalIgnoreCase)
+                .Replace("</div>", "\n", StringComparison.OrdinalIgnoreCase);
+
+            plainText = Regex.Replace(plainText, "<[^>]+>", string.Empty);
+            plainText = System.Net.WebUtility.HtmlDecode(plainText);
+            plainText = plainText.Replace("\r\n", "\n").Replace('\r', '\n');
+            plainText = Regex.Replace(plainText, "\n{3,}", "\n\n").Trim();
+
+            return string.IsNullOrWhiteSpace(plainText) ? "none" : plainText;
         }
     }
 }

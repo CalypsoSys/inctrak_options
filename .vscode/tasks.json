@@ -1,0 +1,209 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "backend: render local env",
+      "type": "shell",
+      "command": "node ./scripts/inctrak/render-config-env.mjs --format env --output ./.vscode/shared.inctrak-api.env ./scripts/inctrak/config.local.yaml",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "backend: build",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/shared.inctrak.com/shared.inctrak.com.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "backend: prepare local launch",
+      "dependsOn": [
+        "backend: render local env",
+        "backend: build"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: dev",
+      "type": "shell",
+      "command": "VITE_SUPABASE_URL=\"$INCTRAK_SUPABASE_URL\" VITE_SUPABASE_PUBLISHABLE_KEY=\"$INCTRAK_SUPABASE_PUBLISHABLE_KEY\" VITE_TENANT_ID=\"$INCTRAK_TENANT_ID\" VITE_TENANT_SLUG=\"$INCTRAK_TENANT_SLUG\" VITE_TENANT_DB_NAME=\"$INCTRAK_TENANT_DB_NAME\" npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*VITE.*",
+          "endsPattern": ".*Local:.*"
+        }
+      }
+    },
+    {
+      "label": "backend: wait for ready",
+      "type": "shell",
+      "command": "for attempt in $(seq 1 60); do if (echo > /dev/tcp/127.0.0.1/5000) >/dev/null 2>&1; then exit 0; fi; sleep 1; done; echo \"Backend did not become ready on http://127.0.0.1:5000 within 60 seconds.\" >&2; exit 1",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: prepare browser launch",
+      "dependsOn": [
+        "frontend: dev",
+        "backend: wait for ready"
+      ],
+      "dependsOrder": "parallel"
+    },
+    {
+      "label": "frontend: build",
+      "type": "shell",
+      "command": "VITE_SUPABASE_URL=\"$INCTRAK_SUPABASE_URL\" VITE_SUPABASE_PUBLISHABLE_KEY=\"$INCTRAK_SUPABASE_PUBLISHABLE_KEY\" VITE_TENANT_ID=\"$INCTRAK_TENANT_ID\" VITE_TENANT_SLUG=\"$INCTRAK_TENANT_SLUG\" VITE_TENANT_DB_NAME=\"$INCTRAK_TENANT_DB_NAME\" npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend-vesting: dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend-vesting",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*VITE.*",
+          "endsPattern": ".*Local:.*"
+        }
+      }
+    },
+    {
+      "label": "frontend-vesting: prepare browser launch",
+      "dependsOn": [
+        "frontend-vesting: dev",
+        "backend: wait for ready"
+      ],
+      "dependsOrder": "parallel"
+    },
+    {
+      "label": "frontend-vesting: build",
+      "type": "shell",
+      "command": "npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend-vesting",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend-signup: dev",
+      "type": "shell",
+      "command": "VITE_SUPABASE_URL=\"$INCTRAK_SUPABASE_URL\" VITE_SUPABASE_PUBLISHABLE_KEY=\"$INCTRAK_SUPABASE_PUBLISHABLE_KEY\" npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend-signup",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "pattern": {
+          "regexp": "."
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*VITE.*",
+          "endsPattern": ".*Local:.*"
+        }
+      }
+    },
+    {
+      "label": "frontend-signup: prepare browser launch",
+      "dependsOn": [
+        "frontend-signup: dev",
+        "backend: wait for ready"
+      ],
+      "dependsOrder": "parallel"
+    },
+    {
+      "label": "frontend-signup: build",
+      "type": "shell",
+      "command": "VITE_SUPABASE_URL=\"$INCTRAK_SUPABASE_URL\" VITE_SUPABASE_PUBLISHABLE_KEY=\"$INCTRAK_SUPABASE_PUBLISHABLE_KEY\" npm run build",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend-signup",
+        "shell": {
+          "executable": "/bin/bash",
+          "args": [
+            "-lc"
+          ]
+        }
+      },
+      "problemMatcher": []
+    }
+  ]
+}

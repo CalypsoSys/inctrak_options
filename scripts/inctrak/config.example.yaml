@@ -1,0 +1,57 @@
+# Copy this file to scripts/inctrak/config.local.yaml for local VS Code runs
+# or to another environment-specific file for deployment-time rendering.
+# Values written as ${VARIABLE_NAME} are resolved from the process environment.
+
+INCTRAK_API_IMAGE: inctrak-api:latest
+INCTRAK_POSTGRES_IMAGE: postgres:18
+
+ASPNETCORE_ENVIRONMENT: Development
+INCTRAK_API_HOST_BIND: 127.0.0.1
+INCTRAK_API_HOST_PORT: 8080
+INCTRAK_POSTGRES_HOST_BIND: 127.0.0.1
+INCTRAK_POSTGRES_HOST_PORT: 5432
+INCTRAK_LOGS_HOST_PATH: /srv/logs/inctrak/api
+INCTRAK_POSTGRES_LOGS_HOST_PATH: /srv/logs/inctrak/postgres
+
+POSTGRES_DB: postgres
+POSTGRES_USER: postgres
+POSTGRES_PASSWORD: ${INCTRAK_DB_PASSWORD}
+
+AppSettings:
+  AccessLogPath: /app/logs/access.log
+  ErrorLogPath: /app/logs/errors.log
+  IncTrakDns: http://127.0.0.1:5174
+  AllowedOrigins:
+    - http://127.0.0.1:5174
+    - https://inctrak.com
+    - https://www.inctrak.com
+    - https://shared.inctrak.com
+  RequireGatewaySecret: false
+  GatewaySecretHeaderName: X-Internal-Api-Key
+  GatewaySecret: ${INCTRAK_GATEWAY_SECRET}
+  RateLimit:
+    Enabled: false
+    PermitLimit: 120
+    WindowSeconds: 60
+    QueueLimit: 0
+  ControlPlaneConnection: Host=localhost;Port=5432;Database=inctrak_control;Username=postgres;Password=${INCTRAK_CONTROL_DB_PASSWORD}
+  # Real PostgreSQL template database used for CREATE DATABASE ... WITH TEMPLATE ...
+  TenantTemplateDatabaseName: inctrak_template
+  TenantDatabasePrefix: inctrak_
+  # Preferred embedded local-AI path via LlamaSharp + GGUF.
+  LocalAiModelPath: ${INCTRAK_LOCAL_AI_MODEL_PATH}
+  LocalAiContextSize: 4096
+  LocalAiGpuLayerCount: 999
+  LocalAiMaxTokens: 512
+  # Optional local AI interpreter. Example Ollama/OpenAI-compatible endpoint:
+  # http://localhost:11434/v1/chat/completions
+  LocalAiEndpoint: ${INCTRAK_LOCAL_AI_ENDPOINT}
+  LocalAiModel: ${INCTRAK_LOCAL_AI_MODEL}
+  LocalAiApiKey: ${INCTRAK_LOCAL_AI_API_KEY}
+  SupabaseUrl: ${INCTRAK_SUPABASE_URL}
+  SupabaseAnonKey: ${INCTRAK_SUPABASE_PUBLISHABLE_KEY}
+  # Optional legacy fallback for HS256 projects; leave unset for the default JWKS path.
+  SupabaseJwtSecret: ${INCTRAK_SUPABASE_JWT_SECRET}
+  IncTrakConnection: Host=localhost;Port=5432;Database=inctrak;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
+  FeedbackConnection: Host=localhost;Port=5432;Database=inctrak_feedback;Username=postgres;Password=${INCTRAK_DB_PASSWORD}
+  SlackFeedbackWebhookUrl: ${INCTRAK_SLACK_FEEDBACK_WEBHOOK_URL}

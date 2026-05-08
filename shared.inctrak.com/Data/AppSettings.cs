@@ -1,143 +1,133 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace IncTrak.Data
 {
+    public class RateLimitSettings
+    {
+        public bool Enabled { get; set; }
+        public int PermitLimit { get; set; } = 120;
+        public int WindowSeconds { get; set; } = 60;
+        public int QueueLimit { get; set; }
+    }
+
     public class AppSettings
     {
-        private const int _keysize = 256;
-
+        public string[] AllowedOrigins { get; set; } = inctrak.com.CorsOriginPolicy.DefaultAllowedOrigins;
+        public bool RequireGatewaySecret { get; set; }
+        public string GatewaySecretHeaderName { get; set; } = "X-Internal-Api-Key";
+        public string GatewaySecret { get; set; }
+        public RateLimitSettings RateLimit { get; set; } = new RateLimitSettings();
         public string IncTrakDns { get; set; }
-        public string IncTrakApiDns { get; set; }
-        public string GoogleSecretKey { get; set; }
-        public string GoogleClientId { get; set; }
-        public string ErrorsHost { get; set; }
-        public string ErrorsUsername { get; set; }
-        public string ErrorsPassword { get; set; }
         public string IncTrakConnection { get; set; }
+        public string ControlPlaneConnection { get; set; }
+        public string SupabaseUrl { get; set; }
+        public string SupabaseAnonKey { get; set; }
+        public string SupabaseJwtSecret { get; set; }
         public string FeedbackConnection { get; set; }
-        public bool UseSNMP { get; set; }
-        public string SNMPServer { get; set; }
-        public int SNMPPort { get; set; }
-        public string SNMPAddress { get; set; }
-        public string SNMPPassword { get; set; }
-        public string EmailApiKey { get; set; }
-        public string EmailFrom { get; set; }
+        public string SlackFeedbackWebhookUrl { get; set; }
+        public string AccessLogPath { get; set; } = "logs/access.log";
+        public string ErrorLogPath { get; set; } = "logs/errors.log";
+        public string TenantTemplateDatabaseName { get; set; } = "inctrak_template";
+        public string TenantDatabasePrefix { get; set; } = "inctrak_";
+        public string LocalAiEndpoint { get; set; }
+        public string LocalAiModel { get; set; }
+        public string LocalAiApiKey { get; set; }
+        public string LocalAiModelPath { get; set; }
+        public int LocalAiContextSize { get; set; } = 4096;
+        public int LocalAiGpuLayerCount { get; set; }
+        public int LocalAiMaxTokens { get; set; } = 512;
 
         public string GetIncTrakDns()
         {
-            return Decrypt(IncTrakDns);
-        }
-
-        public string GetIncTrakApiDns()
-        {
-            if (string.IsNullOrWhiteSpace(IncTrakApiDns))
-            {
-                return null;
-            }
-
-            return Decrypt(IncTrakApiDns);
-        }
-
-        public string GetGoogleSecretKey()
-        {
-            return Decrypt(GoogleSecretKey);
-        }
-        public string GetGoogleClientId()
-        {
-            return Decrypt(GoogleClientId);
-        }
-
-        public string GetErrorsHost()
-        {
-            return Decrypt(ErrorsHost);
-        }
-        public string GetErrorsUsername()
-        {
-            return Decrypt(ErrorsUsername);
-        }
-        public string GetErrorsPassword()
-        {
-            return Decrypt(ErrorsPassword);
+            return IncTrakDns;
         }
 
         public string GetIncTrakConnection()
         {
-            return Decrypt(IncTrakConnection);
+            return IncTrakConnection;
         }
+
         public string GetFeedbackConnection()
         {
-            return Decrypt(FeedbackConnection);
+            return FeedbackConnection;
         }
 
-        public string GetSNMPServer()
+        public string GetControlPlaneConnection()
         {
-            return Decrypt(SNMPServer);
-        }
-        public string GetSNMPAddress()
-        {
-            return Decrypt(SNMPAddress);
-        }
-        public string GetSNMPPassword()
-        {
-            return Decrypt(SNMPPassword);
+            return ControlPlaneConnection;
         }
 
-        public string GetEmailApiKey()
+        public string GetSupabaseUrl()
         {
-            return Decrypt(EmailApiKey);
-        }
-        public string GetEmailFrom()
-        {
-            return Decrypt(EmailFrom);
+            return SupabaseUrl;
         }
 
-        private Tuple<string, byte[]> GetAppHash()
+        public string GetSupabaseAnonKey()
         {
-            string myCode = "o1EdyJSCtJlLbth7u8HUjJ/U6bb0+17lNYbIhbhxzFoHF923nWPQTRXyq4Tma/Mo";
-            string companyDesc = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyDescriptionAttribute>().First().Description;
-            byte[] salt = new UnicodeEncoding().GetBytes(Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyCompanyAttribute>().First().Company.Substring(0, 8));
-
-            string passPhrase = Decrypt(myCode, companyDesc, salt);
-            return Tuple.Create(passPhrase, salt);
+            return SupabaseAnonKey;
         }
 
-        private string Decrypt(string cipherText)
+        public string GetSupabaseJwtSecret()
         {
-            var tup = GetAppHash();
-
-            return Decrypt(cipherText, tup.Item1, tup.Item2);
+            return SupabaseJwtSecret;
         }
-        private string Decrypt(string cipherText, string passPhrase, byte[] initVectorBytes)
-        {
-            byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
 
-            using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null))
-            {
-                byte[] keyBytes = password.GetBytes(_keysize / 8);
-                using (RijndaelManaged symmetricKey = new RijndaelManaged())
-                {
-                    symmetricKey.Mode = CipherMode.CBC;
-                    using (ICryptoTransform decryptor = symmetricKey.CreateDecryptor(keyBytes, initVectorBytes))
-                    {
-                        using (MemoryStream memoryStream = new MemoryStream(cipherTextBytes))
-                        {
-                            using (CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
-                            {
-                                byte[] plainTextBytes = new byte[cipherTextBytes.Length];
-                                int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-                                return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
-                            }
-                        }
-                    }
-                }
-            }
+        public string GetSlackFeedbackWebhookUrl()
+        {
+            return SlackFeedbackWebhookUrl;
+        }
+
+        public string GetAccessLogPath()
+        {
+            return AccessLogPath;
+        }
+
+        public string GetErrorLogPath()
+        {
+            return ErrorLogPath;
+        }
+
+        public string GetTenantTemplateDatabaseName()
+        {
+            return TenantTemplateDatabaseName;
+        }
+
+        public string GetTenantDatabasePrefix()
+        {
+            return TenantDatabasePrefix;
+        }
+
+        public string GetLocalAiEndpoint()
+        {
+            return LocalAiEndpoint;
+        }
+
+        public string GetLocalAiModel()
+        {
+            return LocalAiModel;
+        }
+
+        public string GetLocalAiApiKey()
+        {
+            return LocalAiApiKey;
+        }
+
+        public string GetLocalAiModelPath()
+        {
+            return LocalAiModelPath;
+        }
+
+        public int GetLocalAiContextSize()
+        {
+            return LocalAiContextSize;
+        }
+
+        public int GetLocalAiGpuLayerCount()
+        {
+            return LocalAiGpuLayerCount;
+        }
+
+        public int GetLocalAiMaxTokens()
+        {
+            return LocalAiMaxTokens;
         }
     }
 }

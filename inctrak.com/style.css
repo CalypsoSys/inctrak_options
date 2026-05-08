@@ -21,6 +21,11 @@ body {
   scroll-behavior: smooth;
 }
 
+section[id],
+header[id] {
+  scroll-margin-top: 110px;
+}
+
 img {
     max-width: 100%;
     display: block;
@@ -62,6 +67,7 @@ h4 {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   width: 100%;
   top: 0;
+  left: 0;
   height: 100px;
   z-index: 400;
 }
@@ -192,6 +198,9 @@ header {
 .svg {
   color: #30cbce;
   font-size: 70px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .svg2 {
@@ -217,6 +226,39 @@ header {
 .paragraph {
   font-size: 20px;
   font-weight: 300;
+}
+
+.load-reveal,
+.scroll-reveal {
+  opacity: 0;
+  visibility: hidden;
+  transition-property: opacity, transform;
+  transition-duration: 750ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.load-reveal.is-visible,
+.scroll-reveal.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0);
+}
+
+.reveal-fade-up {
+  transform: translate3d(0, 34px, 0);
+}
+
+.reveal-up {
+  transform: translate3d(0, 72px, 0);
+}
+
+.reveal-left {
+  transform: translate3d(-88px, 0, 0);
+}
+
+.reveal-right {
+  transform: translate3d(88px, 0, 0);
 }
 
 /* About us */
@@ -374,4 +416,7 @@ button {
 
 .trophy {
   fill: #30cbce;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }

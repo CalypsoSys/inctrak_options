@@ -1,0 +1,149 @@
+# IncTrak local VS Code launch
+
+Use this flow when you want `shared.inctrak.com` to run locally with the same `AppSettings__...` environment shape
+used by Cloudflare and deployment automation.
+
+## Local config file
+
+The local source of truth is:
+
+```text
+scripts/inctrak/config.local.yaml
+```
+
+Start from:
+
+```text
+scripts/inctrak/config.example.yaml
+```
+
+`config.local.yaml` is gitignored. Fill in real values directly or export the referenced environment variables before
+launch.
+
+For tenant signup and provisioning, make sure your local Postgres instance already has a real template database matching
+`AppSettings.TenantTemplateDatabaseName` in `config.local.yaml`, typically `inctrak_template`. Create or refresh that
+template by applying [inctrak.db/inctrak.sql](../inctrak.db/inctrak.sql) to a database once, then use that database as
+the clone source for tenant provisioning.
+
+## Local AI for vesting interpretation
+
+The public vesting app can use an embedded local GGUF model through `LLamaSharp`.
+
+Current interpretation order is:
+
+1. fast pattern-based interpretation
+2. built-in vesting language parser
+3. local AI only when the built-ins need help or when the UI explicitly asks for AI
+
+That keeps common vesting prompts cheap and fast, while still letting the embedded model handle fuzzier language.
+
+Recommended first model:
+
+- `Qwen2.5-1.5B-Instruct Q4_K_M`
+
+Keep GGUF files outside Git in a machine-local folder such as:
+
+```text
+~/models
+```
+
+Point `config.local.yaml` at the real model file:
+
+```yaml
+AppSettings:
+  LocalAiModelPath: ~/models/qwen2.5-1.5b-instruct-q4_k_m.gguf
+  LocalAiContextSize: 4096
+  LocalAiGpuLayerCount: 999
+  LocalAiMaxTokens: 512
+```
+
+Notes:
+
+- `LocalAiModelPath` must be the absolute path to a real `.gguf` file on disk.
+- `LocalAiGpuLayerCount: 999` is the preferred NVIDIA starting point because it tells the runtime to offload as many
+  layers as possible.
+- Restart the backend after changing any local-AI setting.
+
+If strict AI mode says no AI interpreter is configured, the backend is not seeing a usable `LocalAiModelPath` yet.
+
+Normal vesting generation does not require AI. In the current V2 flow, the backend first builds a typed `VestingDefinition`,
+validates it, normalizes it, and only then converts it into the quick-vesting period editor shape. The local model is used
+for intent extraction, not for final vesting math or final dated vesting rows.
+
+Helpful GPU sanity check while testing:
+
+```bash
+watch -n 0.5 nvidia-smi
+```
+
+That makes it easy to confirm GPU memory and utilization change when the backend loads the model and serves prompt
+interpretation requests.
+
+## How VS Code launch works
+
+The local launch entries in `.vscode/launch.json` use the `backend: prepare local launch` task.
+
+That task:
+
+1. renders `scripts/inctrak/config.local.yaml`
+2. writes the flattened environment variables to `.vscode/shared.inctrak-api.env`
+3. builds `shared.inctrak.com`
+4. launches the API with `.vscode/shared.inctrak-api.env` as the environment file
+
+The renderer preserves the same config naming used by deployment:
+
+- `AppSettings.IncTrakConnection` becomes `AppSettings__IncTrakConnection`
+- `AppSettings.AllowedOrigins[0]` becomes `AppSettings__AllowedOrigins__0`
+- `AppSettings.GatewaySecretHeaderName` becomes `AppSettings__GatewaySecretHeaderName`
+
+## Frontend local run
+
+The main debug option in VS Code is:
+
+```text
+Local: frontend + backend
+```
+
+This matches the MMA launch style:
+
+- hidden backend launch: `Backend: shared.inctrak.com (no browser)`
+- hidden frontend launch: `Frontend: Vite`
+- one visible compound launch: `Local: frontend + backend`
+
+That visible launch:
+
+- renders the backend env file
+- builds the API
+- launches the API on `http://localhost:5000` and `https://localhost:5001`
+- starts the Vite dev server
+- opens the frontend in Chrome at `http://127.0.0.1:5174`
+
+You can still run the frontend manually with:
+
+```bash
+cd frontend
+npm run dev
+```
+
+By default Vite proxies `/api/*` to `http://localhost:5000`.
+
+For the current auth flow, export these shell variables before launching the frontend. You do not need a separate frontend `.env` file when using the VS Code launch/tasks flow:
+
+```bash
+export INCTRAK_SUPABASE_URL=https://your-project-ref.supabase.co
+export INCTRAK_SUPABASE_PUBLISHABLE_KEY=sb_publishable_replace_me
+export INCTRAK_TENANT_ID=11111111-1111-1111-1111-111111111111
+export INCTRAK_TENANT_SLUG=calypsosys
+export INCTRAK_TENANT_DB_NAME=inctrak_calypsosys
+```
+
+The VS Code frontend task maps those `INCTRAK_*` variables into the `VITE_*` names Vite exposes to browser code.
+
+Those tenant values let the SPA tell the local API which tenant to resolve when you are still running on `127.0.0.1:5174` instead of a tenant-specific local hostname.
+
+Override the backend target if needed:
+
+```bash
+VITE_API_PROXY_TARGET=http://localhost:5000 npm run dev
+```
+yes ple

@@ -46,7 +46,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, Guid.Empty.ToString());
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -60,15 +60,15 @@ namespace IncTrak.Controllers
             }
         }
 
-        [Route("api/company/termination/{terminationKey}/{uuidKey}")]
-        public object GetTermination(Guid terminationKey, string uuidKey)
+        [Route("api/company/termination/{terminationKey}")]
+        public object GetTermination(Guid terminationKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -106,7 +106,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, saveTermination.UUID);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return Ok(new { success = false, login = true, message = "A security issue as occured, please login." });
                     if (saveTermination.Key != saveTermination.Data.TERMINATION_PK)
@@ -147,16 +147,16 @@ namespace IncTrak.Controllers
         }
 
 
-        [Route("api/company/termination/{terminationKey}/{uuidKey}")]
+        [Route("api/company/termination/{terminationKey}")]
         [HttpDelete]
-        public object DeleteTermination(Guid terminationKey, string uuidKey)
+        public object DeleteTermination(Guid terminationKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 

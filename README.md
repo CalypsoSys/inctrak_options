@@ -31,14 +31,74 @@ IncTrak provides an intuitive, always-accessible experience for both administrat
 
 ## Development
 
-The API now lives in `shared.inctrak.com/`. The SPA now lives in the repo-root `wwwroot/` folder as a plain static site, and the `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
+The API lives in `shared.inctrak.com/`. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, the public quick-vesting app lives in `frontend-vesting/`, and the public workspace-signup app now lives in `frontend-signup/` as separate Vue + Vite frontends. The `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
 
-- `./build.sh` builds the API project and its test project from the repo root.
+- `./build.sh` builds and tests the frontend, then builds the API project and its test project from the repo root.
+- `npm install --prefix frontend` installs frontend dependencies.
+- `npm install --prefix frontend-vesting` installs public vesting frontend dependencies.
+- `npm install --prefix frontend-signup` installs public signup frontend dependencies.
+- `npm run dev --prefix frontend` starts the Vite dev server.
+- `npm run dev --prefix frontend-vesting` starts the public vesting Vite dev server on `127.0.0.1:5176`.
+- `npm run dev --prefix frontend-signup` starts the public signup Vite dev server on `127.0.0.1:5177`.
+- `npm run build --prefix frontend` produces the generated frontend bundle in `frontend/dist/`.
+- `npm run build --prefix frontend-vesting` produces the generated public vesting bundle in `frontend-vesting/dist/`.
+- `npm run build --prefix frontend-signup` produces the generated public signup bundle in `frontend-signup/dist/`.
+- `npm run test --prefix frontend` runs the frontend unit tests.
+- `npm run test --prefix frontend-vesting` runs the public vesting frontend unit tests.
+- `npm run test --prefix frontend-signup` runs the public signup frontend unit tests.
+- `node --test scripts/tests/static-sites.test.mjs` runs the static-site regression checks.
+- `node --test scripts/tests/control-plane-schema.test.mjs` checks the control-plane bootstrap SQL.
+- `node --test scripts/tests/gitleaks-config.test.mjs` checks the Gitleaks repo configuration.
+- `node --test scripts/tests/template-bootstrap.test.mjs` checks the tenant bootstrap SQL.
 - `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
 - `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
 - `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` runs the API split tests.
 
-To serve the SPA locally, use any static file server rooted at `wwwroot/` and adjust `wwwroot/js/siteconfig.js` if the API is not running at `https://localhost:5001`.
+For local SPA work, run the Vite dev server from `frontend/`. The SPA now calls relative `/api/*` paths, and Vite proxies those requests to `VITE_API_PROXY_TARGET`, which defaults to `http://localhost:5000`.
+
+For Supabase-backed frontend auth, the local frontend run should reuse your existing shell environment. You do not need a separate committed frontend `.env` file:
+
+- `INCTRAK_SUPABASE_URL`
+- `INCTRAK_SUPABASE_PUBLISHABLE_KEY`
+
+For local tenant resolution on plain `127.0.0.1`, optionally also export:
+
+- `INCTRAK_TENANT_ID`
+- `INCTRAK_TENANT_SLUG`
+- `INCTRAK_TENANT_DB_NAME`
+
+The VS Code frontend task maps those `INCTRAK_*` values into the `VITE_*` names that the SPA can consume.
+
+For env-driven local backend runs, copy `scripts/inctrak/config.example.yaml` to `scripts/inctrak/config.local.yaml`, then use the VS Code launch flow documented in [docs/inctrak_local_vscode.md](docs/inctrak_local_vscode.md). For Cloudflare Pages proxy setup, see [docs/cloudflare-pages-gateway.md](docs/cloudflare-pages-gateway.md).
+
+For local vesting AI setup with `LLamaSharp`, GGUF model placement, and the `watch -n 0.5 nvidia-smi` GPU helper,
+see [docs/inctrak_local_vscode.md](docs/inctrak_local_vscode.md#local-ai-for-vesting-interpretation).
+
+For control-plane provisioning metadata, use [inctrak.db/control_plane.sql](inctrak.db/control_plane.sql) as the bootstrap source for the shared control-plane PostgreSQL database.
+
+For local control-plane seeding, start from [inctrak.db/control_plane.local_seed.example.sql](inctrak.db/control_plane.local_seed.example.sql) and adapt the sample tenant, domain, user, and membership values before applying it with `psql`.
+
+For tenant database provisioning, use [inctrak.db/inctrak.sql](inctrak.db/inctrak.sql) to create or refresh a real PostgreSQL template database such as `inctrak_template`. Runtime tenant provisioning should then clone from that template with `CREATE DATABASE ... WITH TEMPLATE inctrak_template` rather than replaying bootstrap SQL during signup.
+
+## Secret Scanning
+
+The repo now includes a standard local Gitleaks baseline:
+
+- [`.gitleaks.toml`](.gitleaks.toml) extends the built-in default rules
+- [`.pre-commit-config.yaml`](.pre-commit-config.yaml) adds an optional pre-commit hook
+- [`.github/workflows/gitleaks.yml`](.github/workflows/gitleaks.yml) runs the official Gitleaks GitHub Action
+
+Useful commands:
+
+```bash
+gitleaks git .
+gitleaks dir .
+pre-commit install
+```
+
+GitHub Actions note:
+
+- the official `gitleaks/gitleaks-action@v2` may require a `GITLEAKS_LICENSE` repository secret for organization-owned repositories
 
 ---
 

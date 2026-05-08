@@ -47,7 +47,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, Guid.Empty.ToString());
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -62,15 +62,15 @@ namespace IncTrak.Controllers
             }
         }
 
-        [Route("api/company/plan/{planKey}/{uuidKey}")]
-        public object GetPlan(Guid planKey, string uuidKey)
+        [Route("api/company/plan/{planKey}")]
+        public object GetPlan(Guid planKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 
@@ -108,7 +108,7 @@ namespace IncTrak.Controllers
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, savePlan.UUID);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return Ok(new { success = false, login = true, message = "A security issue as occured, please login." });
                     if (savePlan.Key != savePlan.Data.PLAN_PK)
@@ -141,16 +141,16 @@ namespace IncTrak.Controllers
             }
         }
 
-        [Route("api/company/plan/{planKey}/{uuidKey}")]
+        [Route("api/company/plan/{planKey}")]
         [HttpDelete]
-        public object DeletePlan(Guid planKey, string uuidKey)
+        public object DeletePlan(Guid planKey)
         {
             LoginRights rights = null;
             try
             {
                 using (inctrakContext context = new OptionsContext(_options.Value))
                 {
-                    rights = GetLoginUser(context, uuidKey);
+                    rights = GetLoginUser(context);
                     if (rights == null || rights.IsAdmin == false)
                         return new { success = false, login = true, message = "A security issue as occured, please login." };
 

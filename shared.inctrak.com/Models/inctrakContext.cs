@@ -16,7 +16,6 @@ namespace IncTrak.Models
         {
         }
 
-        public virtual DbSet<ActivateUuids> ActivateUuids { get; set; }
         public virtual DbSet<AmountTypes> AmountTypes { get; set; }
         public virtual DbSet<Grants> Grants { get; set; }
         public object GRANTS { get; internal set; }
@@ -37,42 +36,6 @@ namespace IncTrak.Models
         {
             modelBuilder.HasPostgresExtension("uuid-ossp")
                 .HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
-
-            modelBuilder.Entity<ActivateUuids>(entity =>
-            {
-                entity.HasKey(e => e.UuidPk)
-                    .HasName("activate_uuids_pkey");
-
-                entity.ToTable("activate_uuids");
-
-                entity.HasIndex(e => e.Uuid)
-                    .HasName("activate_uuids_uuid_key")
-                    .IsUnique();
-
-                entity.HasIndex(e => new { e.Type, e.UserFk })
-                    .HasName("activate_uuids_TYPE_user_fk_key")
-                    .IsUnique();
-
-                entity.Property(e => e.UuidPk).HasColumnName("uuid_pk");
-
-                entity.Property(e => e.Type).HasColumnName("TYPE");
-
-                entity.Property(e => e.UserFk).HasColumnName("user_fk");
-
-                entity.Property(e => e.Uuid)
-                    .IsRequired()
-                    .HasColumnName("uuid")
-                    .HasMaxLength(32);
-
-                entity.Property(e => e.ValidUntil)
-                    .HasColumnName("valid_until")
-                    .HasColumnType("timestamp with time zone");
-
-                entity.HasOne(d => d.UserFkNavigation)
-                    .WithMany(p => p.ActivateUuids)
-                    .HasForeignKey(d => d.UserFk)
-                    .HasConstraintName("activate_uuids_user_fk_fkey");
-            });
 
             modelBuilder.Entity<AmountTypes>(entity =>
             {
@@ -620,10 +583,6 @@ namespace IncTrak.Models
                     .HasColumnName("user_pk")
                     .HasDefaultValueSql("uuid_generate_v4()");
 
-                entity.Property(e => e.AcceptTerms).HasColumnName("accept_terms");
-
-                entity.Property(e => e.Activated).HasColumnName("activated");
-
                 entity.Property(e => e.Administrator).HasColumnName("administrator");
 
                 entity.Property(e => e.Created)
@@ -636,14 +595,7 @@ namespace IncTrak.Models
                     .HasColumnName("email_address")
                     .HasMaxLength(256);
 
-                entity.Property(e => e.GoogleLogon).HasColumnName("google_logon");
-
                 entity.Property(e => e.GroupFk).HasColumnName("group_fk");
-
-                entity.Property(e => e.Password)
-                    .IsRequired()
-                    .HasColumnName("password")
-                    .HasMaxLength(512);
 
                 entity.Property(e => e.Updated)
                     .HasColumnName("updated")

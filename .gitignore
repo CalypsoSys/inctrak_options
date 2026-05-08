@@ -26,8 +26,8 @@ bld/
 
 # Visual Studio 2015 cache/options directory
 .vs/
-# Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
+# Uncomment if you have tasks that create built frontend files in frontend/dist
+#frontend/dist/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -187,8 +187,13 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
+frontend/dist/
+frontend-vesting/dist/
+frontend-signup/dist/
 .codex
 orleans.codegen.cs
+.vscode/shared.inctrak-api.env
+scripts/inctrak/config.local.yaml
 
 # RIA/Silverlight projects
 Generated_Code/
