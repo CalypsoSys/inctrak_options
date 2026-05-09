@@ -39,7 +39,7 @@ services:
       inctrak-postgres:
         condition: service_healthy
     ports:
-      - "${INCTRAK_API_HOST_BIND:-127.0.0.1}:${INCTRAK_API_HOST_PORT:-8080}:8080"
+      - "${INCTRAK_API_HOST_BIND:-127.0.0.1}:${INCTRAK_API_HOST_PORT:-8082}:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ASPNETCORE_HTTP_PORTS: 8080

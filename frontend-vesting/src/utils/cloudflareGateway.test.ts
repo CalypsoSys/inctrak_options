@@ -2,16 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { buildGatewayForwardHeaders, buildGatewayUpstreamUrl } from '@/utils/cloudflareGateway'
 
 describe('buildGatewayUpstreamUrl', () => {
-  it('maps relative api paths to the upstream api base url', () => {
+  it('maps vesting api paths to the upstream api base url', () => {
     expect(buildGatewayUpstreamUrl(
-      'https://frontend.example.com/api/company/summary/?x=1',
-      'https://shared.inctrak.com/api'
-    )).toBe('https://shared.inctrak.com/api/company/summary/?x=1')
+      'https://vesting.inctrak.com/api/vesting/quick/calculate?preview=true',
+      'https://api.inctrak.com/api'
+    )).toBe('https://api.inctrak.com/api/vesting/quick/calculate?preview=true')
   })
 
-  it('forwards the original tenant host to the upstream api', () => {
+  it('forwards the original request host to the upstream api', () => {
     const headers = buildGatewayForwardHeaders(
-      'https://joe.inctrak.com/api/company/summary/',
+      'https://vesting.inctrak.com/api/vesting/quick/calculate',
       {
         Host: 'attacker.example.com',
         Authorization: 'Bearer token'
@@ -19,7 +19,7 @@ describe('buildGatewayUpstreamUrl', () => {
       'gateway-secret'
     )
 
-    expect(headers.get('X-Forwarded-Host')).toBe('joe.inctrak.com')
+    expect(headers.get('X-Forwarded-Host')).toBe('vesting.inctrak.com')
     expect(headers.get('X-Forwarded-Proto')).toBe('https')
     expect(headers.get('X-Internal-Api-Key')).toBe('gateway-secret')
     expect(headers.get('Authorization')).toBe('Bearer token')

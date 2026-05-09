@@ -1,15 +1,16 @@
 # IncTrak production runbook
 
-This runbook is the single operational document for deploying the IncTrak API in your lab, wiring it to
-Cloudflare, and validating the multi-site production setup.
+This runbook is the single operational document for deploying, validating, rolling back, and maintaining the IncTrak
+API and PostgreSQL stack in the lab.
 
 Related docs:
 
 - [cloudflare-pages-gateway.md](cloudflare-pages-gateway.md)
 - [inctrak_ubuntu_host_preparation.md](inctrak_ubuntu_host_preparation.md)
+- [caddy_host_setup.md](caddy_host_setup.md)
 - [inctrak_local_vscode.md](inctrak_local_vscode.md)
 
-## Intended production shape
+## Steady-state topology
 
 Public sites on Cloudflare:
 
@@ -20,33 +21,31 @@ Public sites on Cloudflare:
 - `docs.inctrak.com`
 - `blog.inctrak.com`
 
-Private-ish lab origin behind Cloudflare Tunnel:
+Private lab origin behind Cloudflare Tunnel:
 
-- `api-origin.inctrak.com`
+- `api.inctrak.com`
 
-Server-side stack in the lab:
+Recommended request path:
 
-- PostgreSQL in Docker
-- `shared.inctrak.com` API in Docker
-- `cloudflared` service on the host
+- browser -> Cloudflare Pages
+- `/api/*` -> Cloudflare Pages Functions
+- Pages Functions -> Cloudflare Tunnel hostname for the API origin
+- Cloudflare Tunnel -> host-installed Caddy on the Ubuntu host
+- Caddy -> `inctrak-api`
 
-## 0. Create the server directory layout
+At minimum, host Caddy should include:
 
-Run on the Ubuntu host:
+```caddy
+{
+    auto_https off
+}
 
-```bash
-sudo mkdir -p /srv/stacks/inctrak/api
-sudo mkdir -p /srv/backups/inctrak/incoming
-sudo mkdir -p /srv/backups/postgres
-sudo mkdir -p /srv/logs/inctrak/api
-sudo mkdir -p /srv/logs/inctrak/postgres
-
-sudo chown -R $USER:$USER /srv/stacks/inctrak
-sudo chown -R $USER:$USER /srv/backups/inctrak
-sudo chown -R $USER:$USER /srv/logs/inctrak
+http://api.inctrak.com {
+    reverse_proxy 127.0.0.1:8082
+}
 ```
 
-## 1. Confirm the directory layout on the server
+## Server layout
 
 Expected structure:
 
@@ -55,85 +54,37 @@ Expected structure:
 /srv/stacks/inctrak/api
   docker-compose.yml
   config.yaml
+  inctrak-api-latest.tar
   scripts/
     compose-inctrak.sh
     render-config-env
+    inctrak.logrotate
 
 /srv/backups/inctrak/incoming
 /srv/backups/postgres
 /srv/logs/inctrak/api
 /srv/logs/inctrak/postgres
+/srv/logs/caddy
 ```
 
-## 2. Install the shared YAML-to-env renderer
+Create the required directories if they do not already exist:
 
-The IncTrak deployment pattern expects the shared renderer binary:
+```bash
+sudo mkdir -p /srv/stacks/inctrak/api/scripts
+sudo mkdir -p /srv/backups/inctrak/incoming
+sudo mkdir -p /srv/backups/postgres
+sudo mkdir -p /srv/logs/inctrak/api
+sudo mkdir -p /srv/logs/inctrak/postgres
+sudo mkdir -p /srv/logs/caddy
 
-```text
-babalu-yaml-env
+sudo chown -R $USER:$USER /srv/stacks/inctrak
+sudo chown -R $USER:$USER /srv/backups/inctrak
+sudo chown -R $USER:$USER /srv/logs/inctrak
+sudo chown -R caddy:caddy /srv/logs/caddy
+sudo chown 999:999 /srv/logs/inctrak/postgres
 ```
 
-Recommended server target path:
-
-```text
-/srv/stacks/inctrak/api/scripts/render-config-env
-```
-
-That binary comes from:
-
-```text
-~/gocode/babalu-yaml-env
-```
-
-There is no hardcoded home-directory fallback in the wrapper. Either:
-
-- place the binary at `/srv/stacks/inctrak/api/scripts/render-config-env`
-
-## 3. Decide the internal runtime ports
-
-Recommended host-local bindings:
-
-- PostgreSQL: `127.0.0.1:5432`
-- API: `127.0.0.1:8080`
-
-The API origin exposed to Cloudflare Tunnel will then be:
-
-```text
-http://127.0.0.1:8080
-```
-
-## 4. Plan the PostgreSQL databases
-
-The Docker Compose stack uses a named Docker volume for PostgreSQL data persistence:
-
-```text
-inctrak_postgres_data
-```
-
-The host still keeps PostgreSQL logs under:
-
-```text
-/srv/logs/inctrak/postgres
-```
-
-Recommended production database names:
-
-- `inctrak_control`
-- `inctrak_feedback`
-- `inctrak_template`
-
-The application will create tenant databases with prefix:
-
-```text
-inctrak_
-```
-
-Examples:
-
-- `inctrak_acme`
-- `inctrak_contoso`
-
-## 5. Files that come from this repo
+## Files from this repo
 
 Copy or derive these from the repo:
 
@@ -141,23 +92,43 @@ Copy or derive these from the repo:
 - `docker/inctrak/docker-compose.yml`
 - `scripts/inctrak/compose-inctrak.sh`
 - `scripts/inctrak/config.example.yaml`
+- `scripts/inctrak/inctrak.logrotate`
+- `scripts/caddy/caddy.logrotate`
 - `inctrak.db/control_plane.sql`
 - `inctrak.db/inctrak.sql`
 - `inctrak.db/inctrak_feedback.sql`
 - the built API image tarball you create locally
 
-## 6. Server-local files that should not come from git
+Server-local files that must not come from git:
 
 - `/srv/stacks/inctrak/api/config.yaml`
 - Cloudflare Tunnel credentials
 - real secrets and passwords
 
-## 7. Build the API image locally in WSL
+## Required secret inputs
+
+Keep real values in the host shell environment, a password manager, or the server-local `config.yaml`. Do not commit
+them.
+
+| Name | Purpose |
+| --- | --- |
+| `INCTRAK_DB_PASSWORD` | PostgreSQL password used by production connection strings |
+| `INCTRAK_CONTROL_DB_PASSWORD` | Optional separate local/control-plane password for development-style configs |
+| `INCTRAK_GATEWAY_SECRET` | Internal API key injected by Cloudflare Pages Functions |
+| `INCTRAK_SUPABASE_URL` | Supabase project URL |
+| `INCTRAK_SUPABASE_PUBLISHABLE_KEY` | Supabase browser-safe publishable key |
+| `INCTRAK_SUPABASE_JWT_SECRET` | Optional legacy HS256 fallback secret |
+| `INCTRAK_SLACK_FEEDBACK_WEBHOOK_URL` | Feedback and public-usage Slack webhook |
+| `INCTRAK_LOCAL_AI_MODEL_PATH` | Optional local GGUF model path |
+| `INCTRAK_LOCAL_AI_ENDPOINT` | Optional OpenAI-compatible local AI endpoint |
+| `INCTRAK_LOCAL_AI_MODEL` | Optional local AI model name |
+| `INCTRAK_LOCAL_AI_API_KEY` | Optional local AI endpoint key |
+
+## Build the API image locally
 
 From the repo root in WSL:
 
 ```bash
-cd ~/dotnet/inctrak_options
 mkdir -p /mnt/c/transfer
 if [ -f /mnt/c/transfer/inctrak-api-latest.tar.gz ]; then mv /mnt/c/transfer/inctrak-api-latest.tar.gz /mnt/c/transfer/inctrak-api-latest.lastgood.tar.gz; fi
 docker build --platform linux/amd64 -t inctrak-api:latest ./shared.inctrak.com
@@ -171,7 +142,24 @@ That leaves:
 C:\transfer\inctrak-api-latest.tar.gz
 ```
 
-## 8. Prepare the production config.yaml
+## Build the shared YAML-to-env renderer
+
+Build the shared renderer from its repo in WSL/Linux so the server receives a Linux binary:
+
+```bash
+cd ~/gocode/babalu-yaml-env
+mkdir -p /mnt/c/transfer
+if [ -f /mnt/c/transfer/render-config-env ]; then mv /mnt/c/transfer/render-config-env /mnt/c/transfer/render-config-env.lastgood; fi
+go build -o /mnt/c/transfer/render-config-env ./cmd/babalu_yaml_env
+```
+
+That gives you:
+
+```text
+C:\transfer\render-config-env
+```
+
+## Prepare production config.yaml
 
 On your workstation, copy the example config as a starting point:
 
@@ -179,7 +167,7 @@ On your workstation, copy the example config as a starting point:
 cp scripts/inctrak/config.example.yaml /tmp/inctrak-config.production.yaml
 ```
 
-Then adapt it for production. Recommended example:
+Then adapt it for production:
 
 ```yaml
 INCTRAK_API_IMAGE: inctrak-api:latest
@@ -187,7 +175,7 @@ INCTRAK_POSTGRES_IMAGE: postgres:18
 
 ASPNETCORE_ENVIRONMENT: Production
 INCTRAK_API_HOST_BIND: 127.0.0.1
-INCTRAK_API_HOST_PORT: 8080
+INCTRAK_API_HOST_PORT: 8082
 INCTRAK_POSTGRES_HOST_BIND: 127.0.0.1
 INCTRAK_POSTGRES_HOST_PORT: 5432
 INCTRAK_LOGS_HOST_PATH: /srv/logs/inctrak/api
@@ -235,71 +223,11 @@ AppSettings:
 
 Notes:
 
-- PostgreSQL data persistence now lives in the named Docker volume `inctrak_postgres_data`
-- `IncTrakConnection` is still present, but for production it is safest to point it at the real template database,
-  not a dead `inctrak` database
-- if you do not want local AI enabled on the server, leave those values blank
+- PostgreSQL data persistence lives in the named Docker volume `inctrak_postgres_data`
+- `IncTrakConnection` should point at the real template database in production
+- if local AI is not enabled on the server, leave those values blank
 
-## 9. Build the shared YAML-to-env renderer
-
-Build the shared renderer from the public repo:
-
-```bash
-cd ~/gocode/babalu-yaml-env
-go build -o /mnt/c/transfer/render-config-env ./cmd/babalu-yaml-env
-```
-
-That gives you:
-
-```text
-C:\transfer\render-config-env
-```
-
-## 10. Create the Docker Compose stack file
-
-On the Ubuntu host, create:
-
-```text
-/srv/stacks/inctrak/api/docker-compose.yml
-```
-
-Recommended source file from this repo:
-
-```text
-docker/inctrak/docker-compose.yml
-```
-
-## 11. Create the server `config.yaml`
-
-On the Ubuntu host:
-
-```bash
-cd /srv/stacks/inctrak/api
-vi config.yaml
-chmod 600 config.yaml
-```
-
-Important note:
-
-- `scripts/compose-inctrak.sh` requires the renderer binary at `scripts/render-config-env`
-
-## 12. Stage artifacts into `C:\transfer`
-
-Recommended transfer staging:
-
-```text
-C:\transfer\inctrak-api-latest.tar.gz
-C:\transfer\inctrak-config.production.yaml
-C:\transfer\render-config-env
-```
-
-Copy the production config reference into transfer if you prepared it in WSL:
-
-```bash
-cp /tmp/inctrak-config.production.yaml /mnt/c/transfer/inctrak-config.production.yaml
-```
-
-## 13. Copy artifacts to the server
+## Copy artifacts to the server
 
 From Windows PowerShell, for example:
 
@@ -313,6 +241,8 @@ scp C:\transfer\inctrak-config.production.yaml ${server}:/srv/stacks/inctrak/api
 scp C:\transfer\render-config-env ${server}:/srv/stacks/inctrak/api/scripts/render-config-env
 scp .\docker\inctrak\docker-compose.yml ${server}:/srv/stacks/inctrak/api/docker-compose.yml
 scp .\scripts\inctrak\compose-inctrak.sh ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh
+scp .\scripts\inctrak\inctrak.logrotate ${server}:/srv/stacks/inctrak/api/scripts/inctrak.logrotate
+scp .\scripts\caddy\caddy.logrotate ${server}:/srv/stacks/inctrak/api/scripts/caddy.logrotate
 ```
 
 After copy, on the Ubuntu host:
@@ -320,21 +250,52 @@ After copy, on the Ubuntu host:
 ```bash
 chmod +x /srv/stacks/inctrak/api/scripts/compose-inctrak.sh
 chmod +x /srv/stacks/inctrak/api/scripts/render-config-env
+chmod 600 /srv/stacks/inctrak/api/config.yaml
 ```
 
-## 14. Validate the rendered compose config
+Install logrotate policies:
 
-On the Ubuntu host:
+```bash
+sudo cp /srv/stacks/inctrak/api/scripts/inctrak.logrotate /etc/logrotate.d/inctrak
+sudo cp /srv/stacks/inctrak/api/scripts/caddy.logrotate /etc/logrotate.d/inctrak-caddy
+sudo chmod 644 /etc/logrotate.d/inctrak /etc/logrotate.d/inctrak-caddy
+sudo logrotate -d /etc/logrotate.d/inctrak
+sudo logrotate -d /etc/logrotate.d/inctrak-caddy
+```
+
+## Preflight checks on the server
+
+Run on the Ubuntu host:
 
 ```bash
 cd /srv/stacks/inctrak/api
+docker version
+docker compose version
+test -f config.yaml && echo "config.yaml present"
+test -f docker-compose.yml && echo "compose file present"
+test -x scripts/compose-inctrak.sh && echo "compose wrapper present"
+test -x scripts/render-config-env && echo "render binary present"
+sudo caddy validate --config /etc/caddy/Caddyfile
+systemctl status caddy --no-pager
+systemctl status cloudflared --no-pager
+```
+
+Validate the rendered compose config:
+
+```bash
+export INCTRAK_DB_PASSWORD=replace_me
+export INCTRAK_GATEWAY_SECRET=replace_me
+export INCTRAK_SUPABASE_URL=https://replace.supabase.co
+export INCTRAK_SUPABASE_PUBLISHABLE_KEY=replace_me
+export INCTRAK_SUPABASE_JWT_SECRET=replace_me
+export INCTRAK_SLACK_FEEDBACK_WEBHOOK_URL=https://hooks.slack.com/services/replace/me
 ./scripts/compose-inctrak.sh config >/tmp/inctrak-compose.out
 tail -n 30 /tmp/inctrak-compose.out
 ```
 
-If required placeholders are missing, the renderer should fail fast before Docker Compose runs.
+Use real values in the active shell session before running the wrapper for deployment.
 
-## 15. Load the image on the server
+## Load the API image
 
 On the Ubuntu host:
 
@@ -344,84 +305,61 @@ gunzip -f inctrak-api-latest.tar.gz
 docker load -i inctrak-api-latest.tar
 ```
 
-## 16. Bootstrap PostgreSQL the first time
+## Bring up PostgreSQL
 
-### Control-plane database
+Start the stack so PostgreSQL can become healthy:
 
-On the host, assuming the `postgres` container is already running:
+```bash
+cd /srv/stacks/inctrak/api
+./scripts/compose-inctrak.sh up -d inctrak-postgres
+./scripts/compose-inctrak.sh ps
+./scripts/compose-inctrak.sh logs inctrak-postgres --tail=100
+```
+
+## Bootstrap PostgreSQL the first time
+
+Copy the SQL files to a server-local staging location or pipe them over SSH from your workstation.
+
+Control-plane database:
 
 ```bash
 docker exec -i inctrak-postgres psql -U postgres -c "CREATE DATABASE inctrak_control;"
 docker exec -i inctrak-postgres psql -U postgres -d inctrak_control < /path/to/repo/inctrak.db/control_plane.sql
 ```
 
-### Feedback database
-
-`inctrak_feedback.sql` includes its own `CREATE DATABASE`, so run it from the default database:
+Feedback database:
 
 ```bash
 docker exec -i inctrak-postgres psql -U postgres -d postgres < /path/to/repo/inctrak.db/inctrak_feedback.sql
 ```
 
-### Template database
-
-Create the real PostgreSQL template database and load `inctrak.sql`:
+Template database:
 
 ```bash
 docker exec -i inctrak-postgres psql -U postgres -c "CREATE DATABASE inctrak_template;"
 docker exec -i inctrak-postgres psql -U postgres -d inctrak_template < /path/to/repo/inctrak.db/inctrak.sql
-```
-
-Then mark it as a template:
-
-```bash
 docker exec -i inctrak-postgres psql -U postgres -d postgres -c "UPDATE pg_database SET datistemplate = true WHERE datname = 'inctrak_template';"
 ```
 
-Note:
+`TenantSignupProvisioner` expects a real PostgreSQL template database.
 
-- `TenantSignupProvisioner` now expects a real PostgreSQL template database.
+## Verify PostgreSQL log-directory ownership
 
-## 16.1 Verify PostgreSQL log-directory ownership
-
-This stack bind-mounts PostgreSQL logs to:
-
-```text
-/srv/logs/inctrak/postgres
-```
-
-The official PostgreSQL container commonly writes those files as container user/group `999:999`.
-Check the host directory ownership:
+The official PostgreSQL container commonly writes logs as container user/group `999:999`.
 
 ```bash
 stat -c '%u:%g %n' /srv/logs/inctrak/postgres
-```
-
-Check the running container user:
-
-```bash
 docker exec inctrak-postgres id
-```
-
-Check the log directory inside the container:
-
-```bash
 docker exec inctrak-postgres stat -c '%u:%g %n' /var/log/postgresql
 ```
 
-If needed, fix the host log directory:
+If needed:
 
 ```bash
 sudo chown 999:999 /srv/logs/inctrak/postgres
 ```
 
-If ownership is wrong, you will usually see permission errors in:
-
-```bash
-docker logs inctrak-postgres
-```
-
-## 17. Bring up the stack
+## Bring up the full stack
 
 On the Ubuntu host:
 
@@ -435,12 +373,18 @@ cd /srv/stacks/inctrak/api
 Check the API directly on the host:
 
 ```bash
-curl -i http://127.0.0.1:8080/api/optionee/quick/
+curl -i http://127.0.0.1:8082/api/optionee/quick/
 ```
 
-If gateway-secret enforcement is enabled, direct requests without the internal header should return `401`.
+If gateway-secret enforcement is enabled, direct requests without `X-Internal-Api-Key` should return `401`.
 
-## 12. Bring up the Cloudflare Tunnel
+Check the Caddy path:
+
+```bash
+curl -i -H "Host: api.inctrak.com" http://127.0.0.1:80/api/optionee/quick/
+```
+
+## Cloudflare Tunnel
 
 Recommended ingress shape:
 
@@ -449,8 +393,8 @@ tunnel: <your-tunnel-id>
 credentials-file: /etc/cloudflared/<your-tunnel-id>.json
 
 ingress:
-  - hostname: api-origin.inctrak.com
-    service: http://127.0.0.1:8080
+  - hostname: api.inctrak.com
+    service: http://127.0.0.1:80
   - service: http_status:404
 ```
 
@@ -461,7 +405,7 @@ sudo systemctl restart cloudflared
 sudo systemctl status cloudflared --no-pager
 ```
 
-## 13. Configure Cloudflare Pages projects
+## Cloudflare Pages projects
 
 ### `shared.inctrak.com`
 
@@ -470,7 +414,7 @@ sudo systemctl status cloudflared --no-pager
 - Output: `dist`
 - Custom domain: `shared.inctrak.com`
 - Variables:
-  - `API_BASE_URL=https://api-origin.inctrak.com/api`
+  - `API_BASE_URL=https://api.inctrak.com/api`
   - `INTERNAL_API_KEY=<same as AppSettings__GatewaySecret>`
   - `VITE_SIGNUP_APP_URL=https://signup.inctrak.com`
   - `VITE_VESTING_APP_URL=https://vesting.inctrak.com`
@@ -482,7 +426,8 @@ sudo systemctl status cloudflared --no-pager
 - Output: `dist`
 - Custom domain: `signup.inctrak.com`
 - Variables:
-  - `VITE_API_BASE_URL=https://shared.inctrak.com/api`
+  - `API_BASE_URL=https://api.inctrak.com/api`
+  - `INTERNAL_API_KEY=<same as AppSettings__GatewaySecret>`
   - `VITE_MAIN_APP_LOGIN_URL=https://shared.inctrak.com/login`
 
 ### `vesting.inctrak.com`
@@ -492,7 +437,8 @@ sudo systemctl status cloudflared --no-pager
 - Output: `dist`
 - Custom domain: `vesting.inctrak.com`
 - Variables:
-  - `VITE_API_BASE_URL=https://shared.inctrak.com/api`
+  - `API_BASE_URL=https://api.inctrak.com/api`
+  - `INTERNAL_API_KEY=<same as AppSettings__GatewaySecret>`
 
 ### `inctrak.com`
 
@@ -515,7 +461,7 @@ sudo systemctl status cloudflared --no-pager
 - No build command
 - Output: `.`
 
-## 14. Smoke-test checklist
+## Smoke-test checklist
 
 ### API and gateway
 
@@ -545,40 +491,73 @@ sudo systemctl status cloudflared --no-pager
 
 1. Visit `https://signup.inctrak.com`.
 2. Confirm the public shell loads.
-3. Visit `https://shared.inctrak.com`.
-4. Confirm the temporary lockout state shows as expected if that is still enabled.
+3. Submit the signup form through `https://signup.inctrak.com/api`.
+4. Visit `https://shared.inctrak.com`.
+5. Confirm the login or temporary lockout state shows as expected.
 
-## 15. Safe redeploy flow
+## Safe redeploy flow
 
 For normal API-only redeploys:
 
 1. Build new image locally in WSL.
 2. Stage new `inctrak-api-latest.tar.gz` to `C:\transfer`.
 3. Copy to `/srv/stacks/inctrak/api/`.
-4. `docker load -i ...`
-5. `./scripts/compose-inctrak.sh up -d`
-6. Check logs.
-7. Re-test:
-   - `shared.inctrak.com`
-   - `inctrak.com` contact form
-   - `vesting.inctrak.com` interpret/calculate/contact
+4. Keep the prior image tarball as `inctrak-api-latest.lastgood.tar.gz`.
+5. Load the image with `docker load -i inctrak-api-latest.tar`.
+6. Run `./scripts/compose-inctrak.sh up -d`.
+7. Check API, Caddy, and app logs.
+8. Re-test `shared.inctrak.com`, `signup.inctrak.com`, `vesting.inctrak.com`, and the `inctrak.com` contact form.
 
-## 16. Notes about current repo behavior
+Before tenant-affecting schema or provisioning changes, take a PostgreSQL backup and confirm the restore target:
 
-These details matter when you do the first live deploy:
+```bash
+mkdir -p /srv/backups/postgres
+docker exec inctrak-postgres pg_dumpall -U postgres | gzip > /srv/backups/postgres/inctrak-predeploy-$(date +%Y%m%d-%H%M%S).sql.gz
+```
 
-- `frontend/` already has a Pages Function API gateway
-- `frontend-signup/` and `frontend-vesting/` currently rely on `VITE_API_BASE_URL` in production
+## Rollback flow
+
+If the new API image fails after deployment:
+
+```bash
+cd /srv/stacks/inctrak/api
+docker load -i inctrak-api-latest.lastgood.tar
+./scripts/compose-inctrak.sh up -d
+./scripts/compose-inctrak.sh logs inctrak-api --tail=100
+```
+
+If the `.lastgood` image is still compressed:
+
+```bash
+gunzip -k inctrak-api-latest.lastgood.tar.gz
+docker load -i inctrak-api-latest.lastgood.tar
+./scripts/compose-inctrak.sh up -d
+```
+
+Database rollback should be handled deliberately from the backup made before the deploy. Do not restore over a live
+database until you have confirmed the target environment and impact.
+
+## Operational logs
+
+Useful commands:
+
+```bash
+cd /srv/stacks/inctrak/api
+./scripts/compose-inctrak.sh logs inctrak-api --tail=200
+./scripts/compose-inctrak.sh logs inctrak-postgres --tail=200
+sudo tail -n 100 /srv/logs/caddy/caddy.log
+sudo journalctl -u caddy -n 100 --no-pager
+sudo journalctl -u cloudflared -n 100 --no-pager
+```
+
+## Notes about current repo behavior
+
+- all three Vue apps can use Cloudflare Pages Functions as their `/api/*` gateway
 - `inctrak.com` currently posts its contact form directly to `https://shared.inctrak.com/api/feedback/save_message/`
 - the backend expects a real PostgreSQL template database named by `TenantTemplateDatabaseName`
 - the quick vesting endpoint no longer depends on a dead `inctrak` runtime database
 
-## Recommended next hardening after first production cut
+## Later hardening
 
-After the first real deploy is stable, the next nice cleanup would be:
-
-1. add the same Pages Function gateway pattern to `frontend-signup/`
-2. add the same Pages Function gateway pattern to `frontend-vesting/`
-3. optionally move the marketing contact form off the hardcoded `shared.inctrak.com/api/...` URL and onto a dedicated Pages Function or a shared config value
-
-That is not required for the first production deployment, but it would make the site family more uniform.
+After the first real deploy is stable, consider moving the marketing contact form off the hardcoded
+`shared.inctrak.com/api/...` URL and onto a dedicated Pages Function or a shared config value.

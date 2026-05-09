@@ -15,16 +15,17 @@ shape is:
 ```text
 Browser
   -> Cloudflare Pages site
-  -> shared.inctrak.com/api/* Pages Function gateway
+  -> same-origin /api/* Pages Function gateway
   -> Cloudflare Tunnel hostname
+  -> host-installed Caddy
   -> Dockerized ASP.NET Core API in the lab
 ```
 
 For this repo as it exists today, that is the cleanest deployable pattern because:
 
-- `frontend/` already has a Pages Function API gateway
+- `frontend/`, `frontend-signup/`, and `frontend-vesting/` have Pages Function API gateways
 - `inctrak.com` already posts its contact form to `https://shared.inctrak.com/api/...`
-- `frontend-signup/` and `frontend-vesting/` can point at `https://shared.inctrak.com/api` without additional code changes
+- Caddy gives the lab host one stable local ingress layer behind Cloudflare Tunnel
 
 ## Recommended production topology
 
@@ -40,9 +41,48 @@ Use these public hostnames:
 
 Use one tunnel-backed hostname for the real API origin, for example:
 
-- `api-origin.inctrak.com`
+- `api.inctrak.com`
 
 That hostname is not where users browse the product. It is the upstream origin used by the Cloudflare Pages gateway.
+
+## Wildcard tenant subdomains
+
+Tenant workspaces use hostnames like:
+
+```text
+joe.inctrak.com
+apple.inctrak.com
+```
+
+Cloudflare Pages custom domains and Worker custom domains do not support one wildcard custom domain for all tenant
+subdomains. Use a proxied wildcard DNS record plus a Worker route or tunnel route instead.
+
+Recommended Cloudflare DNS shape:
+
+```text
+*.inctrak.com CNAME <your-tunnel-id>.cfargotunnel.com Proxied
+```
+
+Recommended Worker route shape when a Worker sits in front of tenant traffic:
+
+```text
+*.inctrak.com/*
+```
+
+Exact hostnames such as `shared.inctrak.com`, `signup.inctrak.com`, `vesting.inctrak.com`, `docs.inctrak.com`, and
+`blog.inctrak.com` should remain explicit records/routes so they can keep their current Pages projects and static-site
+behavior.
+
+When tenant traffic reaches the API through a gateway, the gateway must preserve the original tenant host with:
+
+```text
+X-Forwarded-Host: <tenant>.inctrak.com
+X-Forwarded-Proto: https
+```
+
+The API uses `X-Forwarded-Host` through ASP.NET Core forwarded headers, resolves the host in `cp_tenant_domains`, and
+then selects the tenant database from `cp_tenants.tenant_db_name`. Do not rely on browser-supplied tenant database
+headers in production.
 
 ## Site matrix
 
@@ -75,16 +115,16 @@ frontend/functions/api/[[path]].ts
 
 Required Pages environment variables:
 
-- `API_BASE_URL=https://api-origin.inctrak.com/api`
+- `API_BASE_URL=https://api.inctrak.com/api`
 - `INTERNAL_API_KEY=<same value as AppSettings__GatewaySecret on the API>`
 - `VITE_SIGNUP_APP_URL=https://signup.inctrak.com`
 - `VITE_VESTING_APP_URL=https://vesting.inctrak.com`
 
 Notes:
 
-- This site is the primary browser-facing API gateway.
+- This site has a browser-facing API gateway.
 - Requests to `/api/*` are proxied to the lab API and get `X-Internal-Api-Key` automatically.
-- This is also the current cross-origin API target for the marketing site, signup site, and vesting site.
+- The marketing site still posts its contact form to this gateway.
 
 ### 2. Public signup app
 
@@ -109,16 +149,14 @@ Build settings:
 
 Required Pages environment variables:
 
-- `VITE_API_BASE_URL=https://shared.inctrak.com/api`
+- `API_BASE_URL=https://api.inctrak.com/api`
+- `INTERNAL_API_KEY=<same value as AppSettings__GatewaySecret on the API>`
 - `VITE_MAIN_APP_LOGIN_URL=https://shared.inctrak.com/login`
 
 Notes:
 
-- This app does not currently include its own Pages Function gateway.
-- In the current repo, the simplest production setup is to call the shared gateway at
-  `https://shared.inctrak.com/api`.
-- If you later want same-origin `/api/*` on this app too, copy the existing gateway function pattern from
-  `frontend/`.
+- This app includes its own Pages Function gateway at `frontend-signup/functions/api/[[path]].ts`.
+- Leave `VITE_API_BASE_URL` unset in production so browser calls remain same-origin under `/api/*`.
 
 ### 3. Public vesting app
 
@@ -143,11 +181,13 @@ Build settings:
 
 Required Pages environment variables:
 
-- `VITE_API_BASE_URL=https://shared.inctrak.com/api`
+- `API_BASE_URL=https://api.inctrak.com/api`
+- `INTERNAL_API_KEY=<same value as AppSettings__GatewaySecret on the API>`
 
 Notes:
 
-- Like signup, this app currently uses the shared gateway in production.
+- This app includes its own Pages Function gateway at `frontend-vesting/functions/api/[[path]].ts`.
+- Leave `VITE_API_BASE_URL` unset in production so browser calls remain same-origin under `/api/*`.
 - Public vesting interpret, calculate, and contact submissions all end up at the backend API.
 
 ### 4. Marketing site
@@ -261,11 +301,11 @@ Recommended production behavior:
 - keep `GatewaySecretHeaderName=X-Internal-Api-Key`
 - configure the same secret value in:
   - backend `AppSettings__GatewaySecret`
-  - Cloudflare Pages `INTERNAL_API_KEY` for `shared.inctrak.com`
+  - Cloudflare Pages `INTERNAL_API_KEY` for every Pages project that has a `/api/*` function
 
 ## CORS expectations
 
-Because some sites call `https://shared.inctrak.com/api` cross-origin, the API must allow these origins in
+Because the Pages gateways forward browser request headers to the backend, the API must allow these origins in
 production:
 
 - `https://inctrak.com`
@@ -297,29 +337,33 @@ tunnel: <your-tunnel-id>
 credentials-file: /etc/cloudflared/<your-tunnel-id>.json
 
 ingress:
-  - hostname: api-origin.inctrak.com
-    service: http://127.0.0.1:8080
+  - hostname: api.inctrak.com
+    service: http://127.0.0.1:80
   - service: http_status:404
 ```
 
-This assumes the Dockerized API listens on:
+This assumes host-installed Caddy listens on:
 
 ```text
-http://127.0.0.1:8080
+http://127.0.0.1:80
 ```
 
-on the Ubuntu host.
+and proxies `api.inctrak.com` to the Dockerized API at:
+
+```text
+http://127.0.0.1:8082
+```
 
 ## Recommended first production sequence
 
 1. Bring up the Dockerized API and PostgreSQL stack in the lab.
-2. Bring up the Cloudflare Tunnel hostname `api-origin.inctrak.com`.
-3. Configure `shared.inctrak.com` Pages with:
-   - `API_BASE_URL=https://api-origin.inctrak.com/api`
+2. Bring up host-installed Caddy with `api.inctrak.com` proxying to `127.0.0.1:8082`.
+3. Bring up the Cloudflare Tunnel hostname `api.inctrak.com` pointing to `127.0.0.1:80`.
+4. Configure `shared.inctrak.com` Pages with:
+   - `API_BASE_URL=https://api.inctrak.com/api`
    - `INTERNAL_API_KEY=<gateway secret>`
-4. Deploy `shared.inctrak.com`.
-5. Deploy `signup.inctrak.com` with `VITE_API_BASE_URL=https://shared.inctrak.com/api`.
-6. Deploy `vesting.inctrak.com` with `VITE_API_BASE_URL=https://shared.inctrak.com/api`.
+5. Configure `signup.inctrak.com` and `vesting.inctrak.com` Pages with the same `API_BASE_URL` and `INTERNAL_API_KEY`.
+6. Deploy `shared.inctrak.com`, `signup.inctrak.com`, and `vesting.inctrak.com`.
 7. Deploy `inctrak.com`, `docs.inctrak.com`, and `blog.inctrak.com`.
 8. Smoke-test:
    - marketing contact form

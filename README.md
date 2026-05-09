@@ -71,6 +71,12 @@ The VS Code frontend task maps those `INCTRAK_*` values into the `VITE_*` names 
 
 For env-driven local backend runs, copy `scripts/inctrak/config.example.yaml` to `scripts/inctrak/config.local.yaml`, then use the VS Code launch flow documented in [docs/inctrak_local_vscode.md](docs/inctrak_local_vscode.md). For Cloudflare Pages proxy setup, see [docs/cloudflare-pages-gateway.md](docs/cloudflare-pages-gateway.md).
 
+For production-style deployment, use [docs/inctrak_production_runbook.md](docs/inctrak_production_runbook.md). The
+current operating model is Cloudflare Pages Functions for `/api/*`, Cloudflare Tunnel to host-installed Caddy, and
+Caddy proxying `api.inctrak.com` to the Dockerized API on `127.0.0.1:8082`. One-time host setup lives in
+[docs/inctrak_ubuntu_host_preparation.md](docs/inctrak_ubuntu_host_preparation.md), and the dedicated Caddy setup is
+in [docs/caddy_host_setup.md](docs/caddy_host_setup.md).
+
 For local vesting AI setup with `LLamaSharp`, GGUF model placement, and the `watch -n 0.5 nvidia-smi` GPU helper,
 see [docs/inctrak_local_vscode.md](docs/inctrak_local_vscode.md#local-ai-for-vesting-interpretation).
 
