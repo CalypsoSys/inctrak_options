@@ -13,7 +13,7 @@ function exists(path) {
 test('inctrak.com loads the matrixease-style site runtime', () => {
   const html = read('../../inctrak.com/index.html');
 
-  assert.match(html, /<script src="js\/site\.js"><\/script>/);
+  assert.match(html, /<script src="js\/site\.js(?:\?v=\d+)?"><\/script>/);
   assert.match(html, /class="display-3 load-reveal reveal-fade-up"/);
   assert.match(html, /class="display-4 scroll-reveal reveal-up"/);
   assert.doesNotMatch(html, /jquery-2\.2\.3\.min\.js/);
@@ -85,6 +85,8 @@ test('inctrak.com blog nav opens a coming soon modal with quick vesting CTA', ()
   assert.match(html, />Coming Soon</);
   assert.match(html, /href="https:\/\/vesting\.inctrak\.com"/);
   assert.match(script, /function initBlogComingSoonModal\(\)/);
+  assert.match(script, /modal\.classList\.add\("show"\)/);
+  assert.match(script, /modal-backdrop fade show/);
   assert.match(script, /initBlogComingSoonModal\(\);/);
   assert.match(css, /\.blog-modal__panel/);
 });

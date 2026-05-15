@@ -266,11 +266,35 @@
 
     var closeControls = modal.querySelectorAll("[data-blog-modal-close]");
     var closeButton = modal.querySelector(".blog-modal__close");
+    var backdrop = null;
+
+    function ensureBackdrop() {
+      if (backdrop) {
+        return;
+      }
+
+      backdrop = global.document.createElement("div");
+      backdrop.className = "modal-backdrop fade show";
+      backdrop.addEventListener("click", closeModal);
+      global.document.body.appendChild(backdrop);
+    }
+
+    function removeBackdrop() {
+      if (!backdrop) {
+        return;
+      }
+
+      backdrop.remove();
+      backdrop = null;
+    }
 
     function openModal(event) {
       event.preventDefault();
       modal.hidden = false;
-      global.document.body.classList.add("blog-modal-open");
+      modal.style.display = "block";
+      modal.classList.add("show");
+      global.document.body.classList.add("modal-open");
+      ensureBackdrop();
       if (closeButton) {
         closeButton.focus();
       }
@@ -278,7 +302,10 @@
 
     function closeModal() {
       modal.hidden = true;
-      global.document.body.classList.remove("blog-modal-open");
+      modal.style.display = "";
+      modal.classList.remove("show");
+      global.document.body.classList.remove("modal-open");
+      removeBackdrop();
       blogLink.focus();
     }
 

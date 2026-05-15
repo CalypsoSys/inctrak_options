@@ -402,30 +402,13 @@ button {
   display: none;
 }
 
-.blog-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.blog-modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(8, 40, 42, 0.68);
-}
-
 .blog-modal__panel {
   position: relative;
-  width: min(520px, 100%);
   border: 1px solid rgba(48, 203, 206, 0.28);
   border-radius: 18px;
   background: #fff;
   color: #233237;
-  padding: 34px;
+  padding: 18px;
   -webkit-box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
 }
@@ -501,10 +484,6 @@ button {
   border: 1px solid rgba(25, 116, 117, 0.25);
   background: #fff;
   color: #197475;
-}
-
-body.blog-modal-open {
-  overflow: hidden;
 }
 
 .footer {
