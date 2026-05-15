@@ -118,6 +118,9 @@
           <Button label="Calculate Vesting" :loading="isBusy" @click="submitQuickGrant" />
           <p class="text-sm text-[var(--app-muted)]">This app stays public and uses the shared API only for quick vesting.</p>
         </div>
+        <div class="mt-5 border-t border-[var(--app-border)] pt-4 text-xs text-[var(--app-muted)]">
+          Frontend {{ FRONTEND_VERSION }} · API {{ backendVersion }}
+        </div>
       </article>
     </section>
 
@@ -290,6 +293,7 @@ import PageIntro from '@/components/PageIntro.vue'
 import VestingPeriodEditor from '@/components/VestingPeriodEditor.vue'
 import VestingScheduleTable from '@/components/VestingScheduleTable.vue'
 import { getApiMessage } from '@/services/api'
+import { FRONTEND_VERSION, getBackendVersion } from '@/services/app-version'
 import { canSubmitContactForm } from '@/services/contact-form'
 import { sendContactMessage } from '@/services/contact-service'
 import {
@@ -302,7 +306,7 @@ import {
 import { buildPromptGrantPatch, getPromptAmountTypes, getPromptPeriods, getPromptPeriodTypes } from '@/services/prompt-interpret'
 import { getQuickGrantValidationMessage } from '@/services/quick-grant-validation'
 import { normalizeQuickStartDate } from '@/services/quick-vesting'
-import { fetchQuickGrant, interpretQuickPrompt, saveQuickGrant } from '@/services/vesting-service'
+import { fetchBackendVersion, fetchQuickGrant, interpretQuickPrompt, saveQuickGrant } from '@/services/vesting-service'
 import type { AmountType, FeedbackForm, Grant, Period, PeriodType, VestScheduleEntry } from '@/services/types'
 
 const isBusy = ref(false)
@@ -316,6 +320,7 @@ const helpVisible = ref(false)
 const isSendingContact = ref(false)
 const timelineSection = ref<HTMLElement | null>(null)
 const promptText = ref('I want a standard four-year time-based vesting schedule with a one-year cliff, monthly after.')
+const backendVersion = ref('checking...')
 const interpretSummary = ref('')
 const interpretProvider = ref('')
 const interpretRequiresAi = ref(false)
@@ -351,6 +356,7 @@ const contactForm = reactive<FeedbackForm>({
 })
 
 onMounted(async () => {
+  void loadBackendVersion()
   const quickData = await fetchQuickGrant()
   Object.assign(quickGrant, quickData.Grant, {
     VESTING_START: normalizeQuickStartDate(quickData.Grant.VESTING_START)
@@ -359,6 +365,14 @@ onMounted(async () => {
   quickPeriodTypes.value = Array.isArray(quickData.PeriodTypes) ? quickData.PeriodTypes : []
   quickAmountTypes.value = Array.isArray(quickData.AmountTypes) ? quickData.AmountTypes : []
 })
+
+async function loadBackendVersion(): Promise<void> {
+  try {
+    backendVersion.value = getBackendVersion(await fetchBackendVersion())
+  } catch {
+    backendVersion.value = 'unavailable'
+  }
+}
 
 watch(
   () => [quickGrant.SHARES, quickGrant.VESTING_START],

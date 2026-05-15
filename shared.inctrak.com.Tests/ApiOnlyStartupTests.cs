@@ -168,6 +168,20 @@ namespace inctrak.com.Tests
         }
 
         [Fact]
+        public async Task ApiOnlyHost_Version_ReturnsBackendVersion()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+
+            HttpResponseMessage response = await client.GetAsync("/api/version/");
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"success\":true", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("\"backendVersion\":\"v1.0.0\"", body, System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
         public async Task ApiOnlyHost_CanInterpretStandardQuickVestingPrompt()
         {
             using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
