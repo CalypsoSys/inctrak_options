@@ -406,12 +406,6 @@ async function generateFromPromptCore(strictAi: boolean, preferredProvider?: str
   isInterpreting.value = true
   try {
     const response = await interpretQuickPrompt(promptText.value, strictAi, preferredProvider)
-    if (response.success === false)
-    {
-      showDialog(response.message ?? 'Unable to interpret that vesting description yet.', false)
-      return
-    }
-
     const responsePeriods = Array.isArray(response.Periods) ? response.Periods : []
     quickPeriods.value = responsePeriods
     Object.assign(quickGrant, buildPromptGrantPatch(response))
@@ -419,14 +413,25 @@ async function generateFromPromptCore(strictAi: boolean, preferredProvider?: str
     quickAmountTypes.value = Array.isArray(response.AmountTypes) ? response.AmountTypes : quickAmountTypes.value
     interpretProvider.value = response.provider ?? ''
     interpretAlternateProvider.value = response.alternateProvider ?? ''
-    interpretRequiresAi.value = response.requiresAi === true && strictAi === false
-    revealAiChoice.value = strictAi
+    interpretRequiresAi.value = (response.requiresAi === true || response.success === false) && strictAi === false
+    revealAiChoice.value = strictAi || (response.success === false && strictAi === false)
     const providerLabel = getInterpretProviderLabel(response.provider)
     const confidenceLabel = typeof response.confidence === 'number'
       ? `Confidence: ${Math.round(response.confidence * 100)}%.`
       : ''
     const summary = response.summary ?? 'Built a suggested vesting schedule from your description.'
     interpretSummary.value = [providerLabel, confidenceLabel, summary].filter(Boolean).join(' ')
+
+    if (response.success === false)
+    {
+      const message = response.message ?? 'Unable to interpret that vesting description yet.'
+      if (strictAi) {
+        showDialog(message, false)
+      } else {
+        interpretSummary.value = [providerLabel, message, 'Use AI Instead to try the AI interpreter.'].filter(Boolean).join(' ')
+      }
+      return
+    }
 
     if (responsePeriods.length === 0) {
       showDialog(response.message ?? 'Unable to build editable vesting periods from that description.', false)

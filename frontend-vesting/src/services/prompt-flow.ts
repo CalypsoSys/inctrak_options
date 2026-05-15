@@ -3,7 +3,7 @@ export function canAutoCalculateFromPromptResult(sharesGranted: number, vestingS
 }
 
 export function isAiProvider(provider?: string): boolean {
-  return provider === 'llamasharp' || provider === 'local-http'
+  return provider === 'llamasharp' || provider === 'local-http' || provider === 'strict-ai'
 }
 
 export function shouldShowTryAlternate(alternateProvider?: string): boolean {

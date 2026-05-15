@@ -18,6 +18,7 @@ describe('prompt-flow', () => {
   it('recognizes AI and non-AI providers for prompt actions', () => {
     expect(isAiProvider('llamasharp')).toBe(true)
     expect(isAiProvider('local-http')).toBe(true)
+    expect(isAiProvider('strict-ai')).toBe(true)
     expect(isAiProvider('parser')).toBe(false)
     expect(shouldShowStillNotRight('parser')).toBe(true)
     expect(shouldShowStillNotRight('llamasharp')).toBe(false)
