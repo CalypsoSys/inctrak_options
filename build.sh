@@ -3,18 +3,18 @@
 set -euo pipefail
 
 pushd frontend >/dev/null
-npm run build
-npm run test
+pnpm build
+pnpm test
 popd >/dev/null
 
 pushd frontend-vesting >/dev/null
-npm run build
-npm run test
+pnpm build
+pnpm test
 popd >/dev/null
 
 pushd frontend-signup >/dev/null
-npm run build
-npm run test
+pnpm build
+pnpm test
 popd >/dev/null
 
 dotnet build shared.inctrak.com/shared.inctrak.com.csproj

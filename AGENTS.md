@@ -13,10 +13,10 @@ live in `docker/inctrak/`, `scripts/inctrak/`, and `scripts/caddy/`; production 
 Run commands from the repository root unless noted.
 
 - `./build.sh` builds the API project and its test project from the repo root.
-- `npm run build --prefix frontend` and `npm run test --prefix frontend` build and test the main SPA.
-- `npm run build --prefix frontend-vesting` and `npm run test --prefix frontend-vesting` build and test the public
+- `pnpm --dir frontend build` and `pnpm --dir frontend test` build and test the main SPA.
+- `pnpm --dir frontend-vesting build` and `pnpm --dir frontend-vesting test` build and test the public
   vesting app.
-- `npm run build --prefix frontend-signup` and `npm run test --prefix frontend-signup` build and test the public
+- `pnpm --dir frontend-signup build` and `pnpm --dir frontend-signup test` build and test the public
   signup app.
 - `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
 - `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.

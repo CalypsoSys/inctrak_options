@@ -104,7 +104,7 @@ Build settings:
 
 - Root directory: `frontend`
 - Framework preset: `None`
-- Build command: `npm ci && npm run build`
+- Build command: `pnpm install --frozen-lockfile && pnpm run build`
 - Build output directory: `dist`
 
 Pages Function:
@@ -144,7 +144,7 @@ Build settings:
 
 - Root directory: `frontend-signup`
 - Framework preset: `None`
-- Build command: `npm ci && npm run build`
+- Build command: `pnpm install --frozen-lockfile && pnpm run build`
 - Build output directory: `dist`
 
 Required Pages environment variables:
@@ -176,7 +176,7 @@ Build settings:
 
 - Root directory: `frontend-vesting`
 - Framework preset: `None`
-- Build command: `npm ci && npm run build`
+- Build command: `pnpm install --frozen-lockfile && pnpm run build`
 - Build output directory: `dist`
 
 Required Pages environment variables:

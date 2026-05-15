@@ -571,7 +571,7 @@ systemctl is-active --quiet cloudflared && echo "cloudflared running"
 ### `shared.inctrak.com`
 
 - Root directory: `frontend`
-- Build command: `npm ci && npm run build`
+- Build command: `pnpm install --frozen-lockfile && pnpm run build`
 - Output: `dist`
 - Custom domain: `shared.inctrak.com`
 - Variables:
@@ -583,7 +583,7 @@ systemctl is-active --quiet cloudflared && echo "cloudflared running"
 ### `signup.inctrak.com`
 
 - Root directory: `frontend-signup`
-- Build command: `npm ci && npm run build`
+- Build command: `pnpm install --frozen-lockfile && pnpm run build`
 - Output: `dist`
 - Custom domain: `signup.inctrak.com`
 - Variables:
@@ -594,7 +594,7 @@ systemctl is-active --quiet cloudflared && echo "cloudflared running"
 ### `vesting.inctrak.com`
 
 - Root directory: `frontend-vesting`
-- Build command: `npm ci && npm run build`
+- Build command: `pnpm install --frozen-lockfile && pnpm run build`
 - Output: `dist`
 - Custom domain: `vesting.inctrak.com`
 - Variables:

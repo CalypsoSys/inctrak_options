@@ -122,7 +122,7 @@ You can still run the frontend manually with:
 
 ```bash
 cd frontend
-npm run dev
+pnpm dev
 ```
 
 By default Vite proxies `/api/*` to `http://localhost:5000`.
@@ -144,6 +144,5 @@ Those tenant values let the SPA tell the local API which tenant to resolve when 
 Override the backend target if needed:
 
 ```bash
-VITE_API_PROXY_TARGET=http://localhost:5000 npm run dev
+VITE_API_PROXY_TARGET=http://localhost:5000 pnpm dev
 ```
-yes ple
