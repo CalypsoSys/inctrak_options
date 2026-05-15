@@ -4,10 +4,10 @@ import { buildQuickGrantSavePayload } from '@/services/quick-grant-payload'
 import type { AmountType, ApiResponse, Grant, Period, PeriodType, QuickInterpretResponse, VestScheduleEntry } from '@/services/types'
 
 export type QuickGrantResponse = ApiResponse & {
-  Grant: Grant
-  Periods: Period[]
-  PeriodTypes: PeriodType[]
-  AmountTypes: AmountType[]
+  Grant?: Grant
+  Periods?: Period[]
+  PeriodTypes?: PeriodType[]
+  AmountTypes?: AmountType[]
   VestSchedule?: VestScheduleEntry[]
 }
 

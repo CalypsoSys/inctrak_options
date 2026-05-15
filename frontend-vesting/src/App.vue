@@ -304,8 +304,8 @@ import {
   shouldOfferAiAfterEmptyPeriods
 } from '@/services/prompt-flow'
 import { buildPromptGrantPatch, getPromptAmountTypes, getPromptPeriods, getPromptPeriodTypes } from '@/services/prompt-interpret'
+import { buildQuickGrantDefaults } from '@/services/quick-grant-defaults'
 import { getQuickGrantValidationMessage } from '@/services/quick-grant-validation'
-import { normalizeQuickStartDate } from '@/services/quick-vesting'
 import { fetchBackendVersion, fetchQuickGrant, interpretQuickPrompt, saveQuickGrant } from '@/services/vesting-service'
 import type { AmountType, FeedbackForm, Grant, Period, PeriodType, VestScheduleEntry } from '@/services/types'
 
@@ -357,13 +357,7 @@ const contactForm = reactive<FeedbackForm>({
 
 onMounted(async () => {
   void loadBackendVersion()
-  const quickData = await fetchQuickGrant()
-  Object.assign(quickGrant, quickData.Grant, {
-    VESTING_START: normalizeQuickStartDate(quickData.Grant.VESTING_START)
-  })
-  quickPeriods.value = Array.isArray(quickData.Periods) ? quickData.Periods : []
-  quickPeriodTypes.value = Array.isArray(quickData.PeriodTypes) ? quickData.PeriodTypes : []
-  quickAmountTypes.value = Array.isArray(quickData.AmountTypes) ? quickData.AmountTypes : []
+  await loadQuickGrantDefaults()
 })
 
 async function loadBackendVersion(): Promise<void> {
@@ -371,6 +365,19 @@ async function loadBackendVersion(): Promise<void> {
     backendVersion.value = getBackendVersion(await fetchBackendVersion())
   } catch {
     backendVersion.value = 'unavailable'
+  }
+}
+
+async function loadQuickGrantDefaults(): Promise<void> {
+  try {
+    const quickData = await fetchQuickGrant()
+    const defaults = buildQuickGrantDefaults(quickData)
+    Object.assign(quickGrant, defaults.grantPatch)
+    quickPeriods.value = defaults.periods
+    quickPeriodTypes.value = defaults.periodTypes
+    quickAmountTypes.value = defaults.amountTypes
+  } catch {
+    interpretSummary.value = 'Quick vesting defaults are unavailable from the API right now.'
   }
 }
 
