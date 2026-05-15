@@ -296,8 +296,13 @@ test -x scripts/compose-inctrak.sh && echo "compose wrapper present"
 test -x scripts/render-config-env && echo "render binary present"
 sudo caddy validate --config /etc/caddy/Caddyfile
 systemctl status caddy --no-pager
-systemctl status cloudflared --no-pager
+systemctl is-active --quiet cloudflared && echo "cloudflared running"
 ```
+
+If this reports that `cloudflared` is not running, or if a direct status check reports
+`Unit cloudflared.service could not be found`, complete the Cloudflare Tunnel service setup in
+[inctrak_ubuntu_host_preparation.md](inctrak_ubuntu_host_preparation.md) before continuing. Avoid pasting
+cloudflared status output into tickets or docs because it can expose the tunnel token in the process arguments.
 
 Validate the rendered compose config:
 
@@ -421,7 +426,7 @@ Run or restart the tunnel:
 
 ```bash
 sudo systemctl restart cloudflared
-sudo systemctl status cloudflared --no-pager
+systemctl is-active --quiet cloudflared && echo "cloudflared running"
 ```
 
 ## Cloudflare Pages projects

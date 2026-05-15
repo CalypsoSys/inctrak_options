@@ -86,10 +86,25 @@ test('production runbook stages WSL repo files for PowerShell scp', () => {
   assert.ok(runbook.includes('/mnt/c/transfer/inctrak-deploy/docker/inctrak'));
   assert.ok(runbook.includes('cp docker/inctrak/docker-compose.yml /mnt/c/transfer/inctrak-deploy/docker/inctrak/docker-compose.yml'));
   assert.ok(runbook.includes(String.raw`$transfer = "C:\transfer\inctrak-deploy"`));
-  assert.ok(runbook.includes('scp -i $pem "$transfer\\docker\\inctrak\\docker-compose.yml" ${server}:/srv/stacks/inctrak/api/docker-compose.yml'));
-  assert.ok(runbook.includes('scp -i $pem "$transfer\\scripts\\inctrak\\compose-inctrak.sh" ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh'));
+  assert.ok(runbook.includes('scp "$transfer\\docker\\inctrak\\docker-compose.yml" ${server}:/srv/stacks/inctrak/api/docker-compose.yml'));
+  assert.ok(runbook.includes('scp "$transfer\\scripts\\inctrak\\compose-inctrak.sh" ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh'));
+  assert.equal(runbook.includes('scp -i'), false);
+  assert.equal(runbook.includes('$pem'), false);
   assert.equal(runbook.includes(String.raw`scp .\docker\inctrak`), false);
   assert.equal(runbook.includes(String.raw`scp .\scripts\inctrak`), false);
+});
+
+test('cloudflared service checks avoid exposing tunnel token', () => {
+  const runbook = read('../../docs/inctrak_production_runbook.md');
+  const hostPrep = read('../../docs/inctrak_ubuntu_host_preparation.md');
+
+  assert.match(hostPrep, /sudo cloudflared service install <paste-tunnel-token-from-cloudflare>/);
+  assert.match(hostPrep, /systemctl is-active --quiet cloudflared/);
+  assert.match(hostPrep, /Unit cloudflared\.service could not be found/);
+  assert.match(runbook, /systemctl is-active --quiet cloudflared/);
+  assert.match(runbook, /Avoid pasting\s+cloudflared status output/);
+  assert.doesNotMatch(runbook, /systemctl status cloudflared --no-pager/);
+  assert.doesNotMatch(hostPrep, /systemctl status cloudflared --no-pager/);
 });
 
 test('logrotate policies exist for caddy, api, and postgres logs', () => {

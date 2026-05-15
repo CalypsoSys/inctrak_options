@@ -194,6 +194,18 @@ sudo apt install -y cloudflared
 cloudflared --version
 ```
 
+Then install the tunnel as a systemd service using the token from Cloudflare Zero Trust. Treat the tunnel token as a
+secret: do not commit it, paste it into shared notes, or leave it in reusable scripts.
+
+```bash
+sudo cloudflared service install <paste-tunnel-token-from-cloudflare>
+sudo systemctl enable --now cloudflared
+systemctl is-active --quiet cloudflared && echo "cloudflared running"
+```
+
+If a direct service status check reports `Unit cloudflared.service could not be found`, the package may be installed but
+the tunnel service has not been installed yet. Run the service install step above before continuing.
+
 In the recommended steady state, Cloudflare Tunnel fronts Caddy rather than pointing directly at `inctrak-api`.
 
 ## 10. Prepare host-installed Caddy
@@ -285,6 +297,7 @@ docker compose version
 systemctl status docker --no-pager
 systemctl status ssh --no-pager
 systemctl status caddy --no-pager
+systemctl is-active --quiet cloudflared && echo "cloudflared running"
 sudo ufw status verbose
 cloudflared --version
 sudo caddy validate --config /etc/caddy/Caddyfile
