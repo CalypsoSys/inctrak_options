@@ -147,7 +147,7 @@ C:\transfer\inctrak-api-latest.tar.gz
 Build the shared renderer from its repo in WSL/Linux so the server receives a Linux binary:
 
 ```bash
-cd ~/gocode/babalu-yaml-env
+cd ~/work/calypsosys-workbench/repos/babalu-yaml-env
 mkdir -p /mnt/c/transfer
 if [ -f /mnt/c/transfer/render-config-env ]; then mv /mnt/c/transfer/render-config-env /mnt/c/transfer/render-config-env.lastgood; fi
 go build -o /mnt/c/transfer/render-config-env ./cmd/babalu_yaml_env
