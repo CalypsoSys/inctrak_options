@@ -354,9 +354,9 @@ onMounted(async () => {
   Object.assign(quickGrant, quickData.Grant, {
     VESTING_START: normalizeQuickStartDate(quickData.Grant.VESTING_START)
   })
-  quickPeriods.value = quickData.Periods
-  quickPeriodTypes.value = quickData.PeriodTypes
-  quickAmountTypes.value = quickData.AmountTypes
+  quickPeriods.value = Array.isArray(quickData.Periods) ? quickData.Periods : []
+  quickPeriodTypes.value = Array.isArray(quickData.PeriodTypes) ? quickData.PeriodTypes : []
+  quickAmountTypes.value = Array.isArray(quickData.AmountTypes) ? quickData.AmountTypes : []
 })
 
 watch(
@@ -412,10 +412,11 @@ async function generateFromPromptCore(strictAi: boolean, preferredProvider?: str
       return
     }
 
-    quickPeriods.value = response.Periods
+    const responsePeriods = Array.isArray(response.Periods) ? response.Periods : []
+    quickPeriods.value = responsePeriods
     Object.assign(quickGrant, buildPromptGrantPatch(response))
-    quickPeriodTypes.value = response.PeriodTypes
-    quickAmountTypes.value = response.AmountTypes
+    quickPeriodTypes.value = Array.isArray(response.PeriodTypes) ? response.PeriodTypes : quickPeriodTypes.value
+    quickAmountTypes.value = Array.isArray(response.AmountTypes) ? response.AmountTypes : quickAmountTypes.value
     interpretProvider.value = response.provider ?? ''
     interpretAlternateProvider.value = response.alternateProvider ?? ''
     interpretRequiresAi.value = response.requiresAi === true && strictAi === false
@@ -426,6 +427,11 @@ async function generateFromPromptCore(strictAi: boolean, preferredProvider?: str
       : ''
     const summary = response.summary ?? 'Built a suggested vesting schedule from your description.'
     interpretSummary.value = [providerLabel, confidenceLabel, summary].filter(Boolean).join(' ')
+
+    if (responsePeriods.length === 0) {
+      showDialog(response.message ?? 'Unable to build editable vesting periods from that description.', false)
+      return
+    }
 
     if (canAutoCalculate()) {
       await submitQuickGrant()
@@ -531,7 +537,8 @@ async function submitContactForm(): Promise<void> {
 }
 
 function canAutoCalculate(): boolean {
-  return canAutoCalculateFromPromptResult(quickGrant.SHARES, quickGrant.VESTING_START, quickPeriods.value.length)
+  const periodCount = Array.isArray(quickPeriods.value) ? quickPeriods.value.length : 0
+  return canAutoCalculateFromPromptResult(quickGrant.SHARES, quickGrant.VESTING_START, periodCount)
 }
 
 const showTryAlternate = computed(() => shouldShowTryAlternateForProvider(interpretAlternateProvider.value))

@@ -1,7 +1,7 @@
 import { shouldShowAmountPerStep, shouldShowNumberOfSteps } from '@/services/period-editor'
 import type { Grant, Period } from '@/services/types'
 
-export function getQuickGrantValidationMessage(grant: Grant, periods: Period[]): string {
+export function getQuickGrantValidationMessage(grant: Grant, periods: Period[] | null | undefined): string {
   if (isPositiveNumber(grant.SHARES) === false) {
     return 'Enter a Shares Granted value greater than zero before calculating vesting.'
   }
@@ -10,11 +10,13 @@ export function getQuickGrantValidationMessage(grant: Grant, periods: Period[]):
     return 'Enter a Vesting Start date before calculating vesting.'
   }
 
-  if (periods.length === 0) {
+  const safePeriods = Array.isArray(periods) ? periods : []
+
+  if (safePeriods.length === 0) {
     return 'Add at least one vesting period before calculating vesting.'
   }
 
-  for (const [index, period] of periods.entries()) {
+  for (const [index, period] of safePeriods.entries()) {
     const periodLabel = `Period ${index + 1}`
 
     if (isPositiveInteger(period.PERIOD_AMOUNT) === false) {

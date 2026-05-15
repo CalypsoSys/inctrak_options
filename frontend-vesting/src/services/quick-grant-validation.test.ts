@@ -16,6 +16,10 @@ describe('quick grant validation', () => {
     ])).toBe('Enter a Vesting Start date before calculating vesting.')
   })
 
+  it('treats a missing periods collection as no vesting periods', () => {
+    expect(getQuickGrantValidationMessage(validGrant(), undefined)).toBe('Add at least one vesting period before calculating vesting.')
+  })
+
   it('rejects missing period selections before posting to the api', () => {
     expect(getQuickGrantValidationMessage(validGrant(), [
       validPeriod({ PERIOD_TYPE_FK: null })
