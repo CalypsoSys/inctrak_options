@@ -5,6 +5,7 @@
 *.suo
 *.user
 *.userosscache
+*.lscache
 *.sln.docstates
 AppSettings.config
 ConnectionStrings.config
