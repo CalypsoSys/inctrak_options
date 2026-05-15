@@ -17,3 +17,7 @@ export function shouldShowStillNotRight(provider?: string): boolean {
 export function shouldShowUseAiInstead(revealAiChoice: boolean, provider?: string): boolean {
   return revealAiChoice && shouldShowStillNotRight(provider)
 }
+
+export function shouldOfferAiAfterEmptyPeriods(strictAi: boolean, periodCount: number): boolean {
+  return strictAi === false && periodCount === 0
+}

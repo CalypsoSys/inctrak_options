@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   canAutoCalculateFromPromptResult,
   isAiProvider,
+  shouldOfferAiAfterEmptyPeriods,
   shouldShowStillNotRight,
   shouldShowTryAlternate,
   shouldShowUseAiInstead
@@ -30,5 +31,11 @@ describe('prompt-flow', () => {
     expect(shouldShowUseAiInstead(true, 'parser')).toBe(true)
     expect(shouldShowUseAiInstead(false, 'parser')).toBe(false)
     expect(shouldShowUseAiInstead(true, 'llamasharp')).toBe(false)
+  })
+
+  it('offers AI escalation for empty normal-mode period responses', () => {
+    expect(shouldOfferAiAfterEmptyPeriods(false, 0)).toBe(true)
+    expect(shouldOfferAiAfterEmptyPeriods(false, 1)).toBe(false)
+    expect(shouldOfferAiAfterEmptyPeriods(true, 0)).toBe(false)
   })
 })

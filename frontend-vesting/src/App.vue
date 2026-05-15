@@ -296,7 +296,8 @@ import {
   canAutoCalculateFromPromptResult,
   shouldShowStillNotRight as shouldShowStillNotRightForProvider,
   shouldShowTryAlternate as shouldShowTryAlternateForProvider,
-  shouldShowUseAiInstead as shouldShowUseAiInsteadForProvider
+  shouldShowUseAiInstead as shouldShowUseAiInsteadForProvider,
+  shouldOfferAiAfterEmptyPeriods
 } from '@/services/prompt-flow'
 import { buildPromptGrantPatch, getPromptAmountTypes, getPromptPeriods, getPromptPeriodTypes } from '@/services/prompt-interpret'
 import { getQuickGrantValidationMessage } from '@/services/quick-grant-validation'
@@ -367,12 +368,16 @@ watch(
 )
 
 watch(promptText, () => {
+  resetPromptInterpretationState()
+})
+
+function resetPromptInterpretationState(): void {
   interpretSummary.value = ''
   interpretProvider.value = ''
   interpretAlternateProvider.value = ''
   interpretRequiresAi.value = false
   revealAiChoice.value = false
-})
+}
 
 watch(
   quickPeriods,
@@ -404,6 +409,7 @@ async function generateFromPromptWithMode(strictAi: boolean): Promise<void> {
 
 async function generateFromPromptCore(strictAi: boolean, preferredProvider?: string): Promise<void> {
   isInterpreting.value = true
+  resetPromptInterpretationState()
   try {
     const response = await interpretQuickPrompt(promptText.value, strictAi, preferredProvider, false)
     const responsePeriods = getPromptPeriods(response)
@@ -421,8 +427,6 @@ async function generateFromPromptCore(strictAi: boolean, preferredProvider?: str
     const confidenceLabel = typeof response.confidence === 'number'
       ? `Confidence: ${Math.round(response.confidence * 100)}%.`
       : ''
-    const summary = response.summary ?? 'Built a suggested vesting schedule from your description.'
-    interpretSummary.value = [providerLabel, confidenceLabel, summary].filter(Boolean).join(' ')
 
     if (response.success === false)
     {
@@ -436,9 +440,18 @@ async function generateFromPromptCore(strictAi: boolean, preferredProvider?: str
     }
 
     if (responsePeriods.length === 0) {
-      showDialog(response.message ?? 'Unable to build editable vesting periods from that description.', false)
+      const message = response.message ?? 'Unable to build editable vesting periods from that description.'
+      if (shouldOfferAiAfterEmptyPeriods(strictAi, responsePeriods.length)) {
+        interpretRequiresAi.value = true
+        revealAiChoice.value = true
+        interpretSummary.value = [message, 'Use AI Instead to try the AI interpreter.'].filter(Boolean).join(' ')
+      }
+      showDialog(message, false)
       return
     }
+
+    const summary = response.summary ?? 'Built a suggested vesting schedule from your description.'
+    interpretSummary.value = [providerLabel, confidenceLabel, summary].filter(Boolean).join(' ')
 
     if (canAutoCalculate()) {
       await submitQuickGrant()
