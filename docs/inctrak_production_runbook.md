@@ -234,19 +234,34 @@ Notes:
 - `IncTrakConnection` should point at the real template database in production
 - if local AI is not enabled on the server, leave those values blank
 
-## Copy artifacts to the server
+## Stage and copy artifacts to the server
 
-From Windows PowerShell, for example:
+The Inctrak repo lives in WSL for this workflow, while Windows PowerShell owns the SSH key context. Stage the repo
+files that PowerShell must copy into a Windows-visible transfer subfolder from WSL:
+
+```bash
+mkdir -p /mnt/c/transfer/inctrak-deploy/docker/inctrak
+mkdir -p /mnt/c/transfer/inctrak-deploy/scripts/inctrak
+mkdir -p /mnt/c/transfer/inctrak-deploy/scripts/caddy
+
+cp docker/inctrak/docker-compose.yml /mnt/c/transfer/inctrak-deploy/docker/inctrak/docker-compose.yml
+cp scripts/inctrak/compose-inctrak.sh /mnt/c/transfer/inctrak-deploy/scripts/inctrak/compose-inctrak.sh
+cp scripts/inctrak/inctrak.logrotate /mnt/c/transfer/inctrak-deploy/scripts/inctrak/inctrak.logrotate
+cp scripts/caddy/caddy.logrotate /mnt/c/transfer/inctrak-deploy/scripts/caddy/caddy.logrotate
+```
+
+Then copy from Windows PowerShell:
 
 ```powershell
 $server = "joe@192.168.50.95"
+$transfer = "C:\transfer\inctrak-deploy"
 
 scp C:\transfer\inctrak-api-latest.tar.gz ${server}:/srv/stacks/inctrak/api/
 scp C:\transfer\render-config-env ${server}:/srv/stacks/inctrak/api/scripts/render-config-env
-scp .\docker\inctrak\docker-compose.yml ${server}:/srv/stacks/inctrak/api/docker-compose.yml
-scp .\scripts\inctrak\compose-inctrak.sh ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh
-scp .\scripts\inctrak\inctrak.logrotate ${server}:/srv/stacks/inctrak/api/scripts/inctrak.logrotate
-scp .\scripts\caddy\caddy.logrotate ${server}:/srv/stacks/inctrak/api/scripts/caddy.logrotate
+scp "$transfer\docker\inctrak\docker-compose.yml" ${server}:/srv/stacks/inctrak/api/docker-compose.yml
+scp "$transfer\scripts\inctrak\compose-inctrak.sh" ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh
+scp "$transfer\scripts\inctrak\inctrak.logrotate" ${server}:/srv/stacks/inctrak/api/scripts/inctrak.logrotate
+scp "$transfer\scripts\caddy\caddy.logrotate" ${server}:/srv/stacks/inctrak/api/scripts/caddy.logrotate
 ```
 
 After copying artifacts and editing `config.yaml`, on the Ubuntu host:

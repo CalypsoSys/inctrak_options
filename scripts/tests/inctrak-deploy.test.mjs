@@ -79,6 +79,19 @@ test('production runbook keeps config.yaml server-local', () => {
   assert.doesNotMatch(runbook, /scp .*inctrak-config\.production\.yaml.*config\.yaml/);
 });
 
+test('production runbook stages WSL repo files for PowerShell scp', () => {
+  const runbook = read('../../docs/inctrak_production_runbook.md');
+
+  assert.match(runbook, /## Stage and copy artifacts to the server/);
+  assert.ok(runbook.includes('/mnt/c/transfer/inctrak-deploy/docker/inctrak'));
+  assert.ok(runbook.includes('cp docker/inctrak/docker-compose.yml /mnt/c/transfer/inctrak-deploy/docker/inctrak/docker-compose.yml'));
+  assert.ok(runbook.includes(String.raw`$transfer = "C:\transfer\inctrak-deploy"`));
+  assert.ok(runbook.includes('scp -i $pem "$transfer\\docker\\inctrak\\docker-compose.yml" ${server}:/srv/stacks/inctrak/api/docker-compose.yml'));
+  assert.ok(runbook.includes('scp -i $pem "$transfer\\scripts\\inctrak\\compose-inctrak.sh" ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh'));
+  assert.equal(runbook.includes(String.raw`scp .\docker\inctrak`), false);
+  assert.equal(runbook.includes(String.raw`scp .\scripts\inctrak`), false);
+});
+
 test('logrotate policies exist for caddy, api, and postgres logs', () => {
   assert.equal(exists('../caddy/caddy.logrotate'), true);
   assert.equal(exists('../inctrak/inctrak.logrotate'), true);
