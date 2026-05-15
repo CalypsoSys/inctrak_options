@@ -43,7 +43,7 @@ AppSettings:
   # For Docker runs, this is the container path below INCTRAK_LOCAL_AI_MODELS_HOST_PATH mounted at /models.
   LocalAiModelPath: /models/qwen2.5-1.5b-instruct-q4_k_m.gguf
   LocalAiContextSize: 4096
-  LocalAiGpuLayerCount: 999
+  LocalAiGpuLayerCount: 0
   LocalAiMaxTokens: 512
   # Optional local AI interpreter. Example Ollama/OpenAI-compatible endpoint:
   # http://localhost:11434/v1/chat/completions

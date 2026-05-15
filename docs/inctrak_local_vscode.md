@@ -53,15 +53,14 @@ Point `config.local.yaml` at the real model file:
 AppSettings:
   LocalAiModelPath: ~/models/qwen2.5-1.5b-instruct-q4_k_m.gguf
   LocalAiContextSize: 4096
-  LocalAiGpuLayerCount: 999
+  LocalAiGpuLayerCount: 0
   LocalAiMaxTokens: 512
 ```
 
 Notes:
 
 - `LocalAiModelPath` must be the absolute path to a real `.gguf` file on disk.
-- `LocalAiGpuLayerCount: 999` is the preferred NVIDIA starting point because it tells the runtime to offload as many
-  layers as possible.
+- `LocalAiGpuLayerCount: 0` keeps embedded LlamaSharp inference on CPU, which matches the API image backend.
 - Restart the backend after changing any local-AI setting.
 
 If strict AI mode says no AI interpreter is configured, the backend is not seeing a usable `LocalAiModelPath` yet.
@@ -69,15 +68,6 @@ If strict AI mode says no AI interpreter is configured, the backend is not seein
 Normal vesting generation does not require AI. In the current V2 flow, the backend first builds a typed `VestingDefinition`,
 validates it, normalizes it, and only then converts it into the quick-vesting period editor shape. The local model is used
 for intent extraction, not for final vesting math or final dated vesting rows.
-
-Helpful GPU sanity check while testing:
-
-```bash
-watch -n 0.5 nvidia-smi
-```
-
-That makes it easy to confirm GPU memory and utilization change when the backend loads the model and serves prompt
-interpretation requests.
 
 ## How VS Code launch works
 

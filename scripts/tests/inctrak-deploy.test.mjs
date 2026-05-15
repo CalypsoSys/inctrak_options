@@ -46,6 +46,7 @@ test('inctrak config example includes top-level docker host settings and postgre
   assert.match(config, /^INCTRAK_POSTGRES_HOST_PORT: 5432/m);
   assert.match(config, /^INCTRAK_LOCAL_AI_MODELS_HOST_PATH: \/srv\/models\/inctrak/m);
   assert.match(config, /^  LocalAiModelPath: \/models\/qwen2\.5-1\.5b-instruct-q4_k_m\.gguf/m);
+  assert.match(config, /^  LocalAiGpuLayerCount: 0/m);
   assert.match(config, /^  LocalAiEndpoint: ""/m);
   assert.match(config, /^  LocalAiModel: ""/m);
   assert.match(config, /^  LocalAiApiKey: ""/m);

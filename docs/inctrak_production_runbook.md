@@ -227,7 +227,7 @@ AppSettings:
   TenantDatabasePrefix: inctrak_
   LocalAiModelPath: /models/qwen2.5-1.5b-instruct-q4_k_m.gguf
   LocalAiContextSize: 4096
-  LocalAiGpuLayerCount: 999
+  LocalAiGpuLayerCount: 0
   LocalAiMaxTokens: 512
   LocalAiEndpoint: ""
   LocalAiModel: ""
@@ -262,11 +262,13 @@ There are two supported local AI styles:
   `/home/joe/models/qwen2.5-1.5b-instruct-q4_k_m.gguf` works because the API runs directly on the host. In production,
   put GGUF files in `INCTRAK_LOCAL_AI_MODELS_HOST_PATH` on the host. Docker Compose mounts that directory read-only at
   `/models`, so set `AppSettings.LocalAiModelPath` to the container path, for example
-  `/models/qwen2.5-1.5b-instruct-q4_k_m.gguf`.
+  `/models/qwen2.5-1.5b-instruct-q4_k_m.gguf`. Embedded GGUF inference uses the CPU backend in the API image, so keep
+  `LocalAiGpuLayerCount` at `0`.
 - OpenAI-compatible local endpoint: set `LocalAiEndpoint` and `LocalAiModel`. `LocalAiEndpoint` is the full chat
   completions URL, such as `http://ollama:11434/v1/chat/completions` when the endpoint is reachable from the API
   container on the Docker network. `LocalAiModel` is the model name that endpoint expects. `LocalAiApiKey` is optional;
-  leave it blank for endpoints that do not require bearer-token auth.
+  leave it blank for endpoints that do not require bearer-token auth. Use this endpoint style for GPU-backed inference
+  through a separate Ollama or llama.cpp service.
 
 If local AI is disabled, put blank values directly in `/srv/stacks/inctrak/api/config.yaml`:
 

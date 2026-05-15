@@ -41,11 +41,8 @@ Recommended baseline:
 - enough disk for PostgreSQL + tenant databases + Docker images
 - enough RAM for PostgreSQL + the API + optional local AI model
 
-If you intend to keep embedded AI enabled on the host, check GPU visibility too:
-
-```bash
-nvidia-smi
-```
+Embedded GGUF local AI runs on the API image's CPU backend by default. If you later use a separate GPU-backed Ollama or
+llama.cpp service, validate GPU visibility as part of that service setup.
 
 ## 2. Install official Docker Engine
 
