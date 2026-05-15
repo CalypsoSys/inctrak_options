@@ -159,15 +159,22 @@ That gives you:
 C:\transfer\render-config-env
 ```
 
-## Prepare production config.yaml
+## Create the server config.yaml
 
-On your workstation, copy the example config as a starting point:
+Before any stack command, create the server-local `config.yaml` using
+`scripts/inctrak/config.example.yaml` as the reference, then fill in the real production values. Use
+`${VARIABLE_NAME}` for secrets so the YAML remains the single source of truth while secrets still come from the
+host environment at runtime.
+
+Then run on the Ubuntu host:
 
 ```bash
-cp scripts/inctrak/config.example.yaml /tmp/inctrak-config.production.yaml
+cd /srv/stacks/inctrak/api
+vi config.yaml
+chmod 600 config.yaml
 ```
 
-Then adapt it for production:
+Minimum structure:
 
 ```yaml
 INCTRAK_API_IMAGE: inctrak-api:latest
@@ -237,7 +244,6 @@ $serverUser = "deploy"
 $server = "$serverUser@$serverIp"
 
 scp C:\transfer\inctrak-api-latest.tar.gz ${server}:/srv/stacks/inctrak/api/
-scp C:\transfer\inctrak-config.production.yaml ${server}:/srv/stacks/inctrak/api/config.yaml
 scp C:\transfer\render-config-env ${server}:/srv/stacks/inctrak/api/scripts/render-config-env
 scp .\docker\inctrak\docker-compose.yml ${server}:/srv/stacks/inctrak/api/docker-compose.yml
 scp .\scripts\inctrak\compose-inctrak.sh ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh
@@ -245,7 +251,7 @@ scp .\scripts\inctrak\inctrak.logrotate ${server}:/srv/stacks/inctrak/api/script
 scp .\scripts\caddy\caddy.logrotate ${server}:/srv/stacks/inctrak/api/scripts/caddy.logrotate
 ```
 
-After copy, on the Ubuntu host:
+After copying artifacts and editing `config.yaml`, on the Ubuntu host:
 
 ```bash
 chmod +x /srv/stacks/inctrak/api/scripts/compose-inctrak.sh

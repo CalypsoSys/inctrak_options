@@ -68,6 +68,17 @@ test('production docs route Cloudflare Tunnel through host Caddy', () => {
   assert.doesNotMatch(gateway, /service: http:\/\/127\.0\.0\.1:8082/);
 });
 
+test('production runbook keeps config.yaml server-local', () => {
+  const runbook = read('../../docs/inctrak_production_runbook.md');
+
+  assert.match(runbook, /## Create the server config\.yaml/);
+  assert.match(runbook, /cd \/srv\/stacks\/inctrak\/api\nvi config\.yaml\nchmod 600 config\.yaml/);
+  assert.match(runbook, /scripts\/inctrak\/config\.example\.yaml/);
+  assert.match(runbook, /Use\s+`\$\{VARIABLE_NAME\}` for secrets/);
+  assert.doesNotMatch(runbook, /\/tmp\/inctrak-config\.production\.yaml/);
+  assert.doesNotMatch(runbook, /scp .*inctrak-config\.production\.yaml.*config\.yaml/);
+});
+
 test('logrotate policies exist for caddy, api, and postgres logs', () => {
   assert.equal(exists('../caddy/caddy.logrotate'), true);
   assert.equal(exists('../inctrak/inctrak.logrotate'), true);
