@@ -12,6 +12,7 @@ INCTRAK_POSTGRES_HOST_BIND: 127.0.0.1
 INCTRAK_POSTGRES_HOST_PORT: 5432
 INCTRAK_LOGS_HOST_PATH: /srv/logs/inctrak/api
 INCTRAK_POSTGRES_LOGS_HOST_PATH: /srv/logs/inctrak/postgres
+INCTRAK_LOCAL_AI_MODELS_HOST_PATH: /srv/models/inctrak
 
 POSTGRES_DB: postgres
 POSTGRES_USER: postgres
@@ -39,15 +40,16 @@ AppSettings:
   TenantTemplateDatabaseName: inctrak_template
   TenantDatabasePrefix: inctrak_
   # Preferred embedded local-AI path via LlamaSharp + GGUF.
-  LocalAiModelPath: ${INCTRAK_LOCAL_AI_MODEL_PATH}
+  # For Docker runs, this is the container path below INCTRAK_LOCAL_AI_MODELS_HOST_PATH mounted at /models.
+  LocalAiModelPath: /models/qwen2.5-1.5b-instruct-q4_k_m.gguf
   LocalAiContextSize: 4096
   LocalAiGpuLayerCount: 999
   LocalAiMaxTokens: 512
   # Optional local AI interpreter. Example Ollama/OpenAI-compatible endpoint:
   # http://localhost:11434/v1/chat/completions
-  LocalAiEndpoint: ${INCTRAK_LOCAL_AI_ENDPOINT}
-  LocalAiModel: ${INCTRAK_LOCAL_AI_MODEL}
-  LocalAiApiKey: ${INCTRAK_LOCAL_AI_API_KEY}
+  LocalAiEndpoint: ""
+  LocalAiModel: ""
+  LocalAiApiKey: ""
   SupabaseUrl: ${INCTRAK_SUPABASE_URL}
   SupabaseAnonKey: ${INCTRAK_SUPABASE_PUBLISHABLE_KEY}
   # Optional legacy fallback for HS256 projects; leave unset for the default JWKS path.

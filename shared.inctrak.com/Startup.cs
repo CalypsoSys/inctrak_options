@@ -121,6 +121,7 @@ namespace inctrak.com
             AppSettings appSettings = appSettingsOptions.Value;
 
             app.UseForwardedHeaders();
+            app.UseMiddleware<UnhandledExceptionLogMiddleware>();
 
             if (env.IsDevelopment())
             {

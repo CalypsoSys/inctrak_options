@@ -23,7 +23,8 @@ test('inctrak compose wrapper defaults to repo docker stack and local config fil
 test('inctrak docker compose consumes flattened AppSettings environment variables', () => {
   const compose = read('../../docker/inctrak/docker-compose.yml');
 
-  assert.match(compose, /- inctrak_postgres_data:\/var\/lib\/postgresql\/data/);
+  assert.match(compose, /- inctrak_postgres_data:\/var\/lib\/postgresql/);
+  assert.doesNotMatch(compose, /\/var\/lib\/postgresql\/data/);
   assert.match(compose, /volumes:\s+inctrak_postgres_data:/s);
   assert.match(compose, /AppSettings__IncTrakDns: \$\{AppSettings__IncTrakDns\}/);
   assert.match(compose, /AppSettings__AllowedOrigins__0: \$\{AppSettings__AllowedOrigins__0\}/);
@@ -32,6 +33,7 @@ test('inctrak docker compose consumes flattened AppSettings environment variable
   assert.match(compose, /AppSettings__IncTrakConnection: \$\{AppSettings__IncTrakConnection\}/);
   assert.match(compose, /AppSettings__TenantTemplateDatabaseName: \$\{AppSettings__TenantTemplateDatabaseName\}/);
   assert.match(compose, /AppSettings__LocalAiModelPath: \$\{AppSettings__LocalAiModelPath\}/);
+  assert.match(compose, /\$\{INCTRAK_LOCAL_AI_MODELS_HOST_PATH:-\/srv\/models\/inctrak\}:\/models:ro/);
   assert.match(compose, /\$\{INCTRAK_API_HOST_BIND:-127\.0\.0\.1\}:\$\{INCTRAK_API_HOST_PORT:-8082\}:8080/);
 });
 
@@ -42,6 +44,11 @@ test('inctrak config example includes top-level docker host settings and postgre
   assert.match(config, /^INCTRAK_POSTGRES_IMAGE: postgres:18/m);
   assert.match(config, /^INCTRAK_API_HOST_PORT: 8082/m);
   assert.match(config, /^INCTRAK_POSTGRES_HOST_PORT: 5432/m);
+  assert.match(config, /^INCTRAK_LOCAL_AI_MODELS_HOST_PATH: \/srv\/models\/inctrak/m);
+  assert.match(config, /^  LocalAiModelPath: \/models\/qwen2\.5-1\.5b-instruct-q4_k_m\.gguf/m);
+  assert.match(config, /^  LocalAiEndpoint: ""/m);
+  assert.match(config, /^  LocalAiModel: ""/m);
+  assert.match(config, /^  LocalAiApiKey: ""/m);
   assert.doesNotMatch(config, /^INCTRAK_POSTGRES_DATA_HOST_PATH:/m);
   assert.match(config, /^POSTGRES_PASSWORD: \$\{INCTRAK_DB_PASSWORD\}/m);
   assert.match(config, /^  ControlPlaneConnection: Host=localhost;Port=5432;Database=inctrak_control;Username=postgres;Password=\$\{INCTRAK_CONTROL_DB_PASSWORD\}/m);
@@ -75,8 +82,25 @@ test('production runbook keeps config.yaml server-local', () => {
   assert.match(runbook, /cd \/srv\/stacks\/inctrak\/api\nvi config\.yaml\nchmod 600 config\.yaml/);
   assert.match(runbook, /scripts\/inctrak\/config\.example\.yaml/);
   assert.match(runbook, /Use\s+`\$\{VARIABLE_NAME\}` for secrets/);
+  assert.match(runbook, /ControlPlaneConnection: Host=inctrak-postgres;Port=5432;Database=inctrak_control/);
+  assert.match(runbook, /FeedbackConnection: Host=inctrak-postgres;Port=5432;Database=inctrak_feedback/);
+  assert.match(runbook, /IncTrakConnection: Host=inctrak-postgres;Port=5432;Database=inctrak_template/);
+  const renderCheck = runbook.match(/Validate the rendered compose config:\n\n```bash\n([\s\S]*?)\n```/);
+  assert.ok(renderCheck);
+  assert.match(renderCheck[1], /export INCTRAK_DB_PASSWORD=replace_me/);
+  assert.match(renderCheck[1], /export INCTRAK_SUPABASE_URL=https:\/\/replace\.supabase\.co/);
+  assert.match(renderCheck[1], /export INCTRAK_SUPABASE_PUBLISHABLE_KEY=replace_me/);
   assert.doesNotMatch(runbook, /\/tmp\/inctrak-config\.production\.yaml/);
   assert.doesNotMatch(runbook, /scp .*inctrak-config\.production\.yaml.*config\.yaml/);
+});
+
+test('production runbook smoke tests API with internal gateway key', () => {
+  const runbook = read('../../docs/inctrak_production_runbook.md');
+
+  assert.match(runbook, /gatewaySecret="replace_with_real_gateway_secret"/);
+  assert.match(runbook, /curl -i -H "X-Internal-Api-Key: \$\{gatewaySecret\}" http:\/\/127\.0\.0\.1:8082\/api\/optionee\/quick\//);
+  assert.match(runbook, /curl -i -H "Host: api\.inctrak\.com" -H "X-Internal-Api-Key: \$\{gatewaySecret\}" http:\/\/127\.0\.0\.1:80\/api\/optionee\/quick\//);
+  assert.match(runbook, /compose-inctrak\.sh logs inctrak-api --tail=200/);
 });
 
 test('production runbook stages WSL repo files for PowerShell scp', () => {
@@ -84,10 +108,22 @@ test('production runbook stages WSL repo files for PowerShell scp', () => {
 
   assert.match(runbook, /## Stage and copy artifacts to the server/);
   assert.ok(runbook.includes('/mnt/c/transfer/inctrak-deploy/docker/inctrak'));
+  assert.ok(runbook.includes('/mnt/c/transfer/inctrak-deploy/inctrak.db'));
   assert.ok(runbook.includes('cp docker/inctrak/docker-compose.yml /mnt/c/transfer/inctrak-deploy/docker/inctrak/docker-compose.yml'));
+  assert.ok(runbook.includes('cp inctrak.db/control_plane.sql /mnt/c/transfer/inctrak-deploy/inctrak.db/control_plane.sql'));
+  assert.ok(runbook.includes('cp inctrak.db/inctrak_feedback.sql /mnt/c/transfer/inctrak-deploy/inctrak.db/inctrak_feedback.sql'));
+  assert.ok(runbook.includes('cp inctrak.db/inctrak.sql /mnt/c/transfer/inctrak-deploy/inctrak.db/inctrak.sql'));
+  assert.ok(runbook.includes('/mnt/c/transfer/inctrak-models'));
+  assert.ok(runbook.includes('cp /home/joe/models/qwen2.5-1.5b-instruct-q4_k_m.gguf /mnt/c/transfer/inctrak-models/qwen2.5-1.5b-instruct-q4_k_m.gguf'));
   assert.ok(runbook.includes(String.raw`$transfer = "C:\transfer\inctrak-deploy"`));
+  assert.ok(runbook.includes(String.raw`$modelTransfer = "C:\transfer\inctrak-models"`));
   assert.ok(runbook.includes('scp "$transfer\\docker\\inctrak\\docker-compose.yml" ${server}:/srv/stacks/inctrak/api/docker-compose.yml'));
+  assert.ok(runbook.includes('scp "$transfer\\inctrak.db\\control_plane.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/control_plane.sql'));
+  assert.ok(runbook.includes('scp "$transfer\\inctrak.db\\inctrak_feedback.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/inctrak_feedback.sql'));
+  assert.ok(runbook.includes('scp "$transfer\\inctrak.db\\inctrak.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/inctrak.sql'));
   assert.ok(runbook.includes('scp "$transfer\\scripts\\inctrak\\compose-inctrak.sh" ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh'));
+  assert.ok(runbook.includes('scp "$modelTransfer\\qwen2.5-1.5b-instruct-q4_k_m.gguf" ${server}:/srv/models/inctrak/'));
+  assert.equal(runbook.includes('/path/to/repo/inctrak.db'), false);
   assert.equal(runbook.includes('scp -i'), false);
   assert.equal(runbook.includes('$pem'), false);
   assert.equal(runbook.includes(String.raw`scp .\docker\inctrak`), false);
