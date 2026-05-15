@@ -398,6 +398,115 @@ button {
   text-align: center;
 }
 
+.blog-modal[hidden] {
+  display: none;
+}
+
+.blog-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.blog-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 40, 42, 0.68);
+}
+
+.blog-modal__panel {
+  position: relative;
+  width: min(520px, 100%);
+  border: 1px solid rgba(48, 203, 206, 0.28);
+  border-radius: 18px;
+  background: #fff;
+  color: #233237;
+  padding: 34px;
+  -webkit-box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.26);
+}
+
+.blog-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(25, 116, 117, 0.25);
+  border-radius: 50%;
+  background: #fff;
+  color: #197475;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.blog-modal__eyebrow {
+  margin-bottom: 8px;
+  color: #197475;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.blog-modal h2 {
+  margin-bottom: 12px;
+  color: #102a2d;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.blog-modal p {
+  color: #4b5a5f;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.blog-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.blog-modal__primary,
+.blog-modal__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.blog-modal__primary {
+  background: #197475;
+  color: #fff;
+}
+
+.blog-modal__primary:hover,
+.blog-modal__primary:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+.blog-modal__secondary {
+  border: 1px solid rgba(25, 116, 117, 0.25);
+  background: #fff;
+  color: #197475;
+}
+
+body.blog-modal-open {
+  overflow: hidden;
+}
+
 .footer {
   background-color: #30cbce;
   color: #fff;

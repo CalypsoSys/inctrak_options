@@ -75,6 +75,20 @@ test('inctrak.com contact form uses the marketing contact-us message type and ne
   assert.doesNotMatch(script, /https:\/\/shared\.inctrak\.com\/api\/feedback\/save_message\//);
 });
 
+test('inctrak.com blog nav opens a coming soon modal with quick vesting CTA', () => {
+  const html = read('../../inctrak.com/index.html');
+  const script = read('../../inctrak.com/js/site.js');
+  const css = read('../../inctrak.com/style.css');
+
+  assert.match(html, /data-blog-coming-soon/);
+  assert.match(html, /id="blog-coming-soon-modal"/);
+  assert.match(html, />Coming Soon</);
+  assert.match(html, /href="https:\/\/vesting\.inctrak\.com"/);
+  assert.match(script, /function initBlogComingSoonModal\(\)/);
+  assert.match(script, /initBlogComingSoonModal\(\);/);
+  assert.match(css, /\.blog-modal__panel/);
+});
+
 test('inctrak.com has a Pages Function gateway for marketing contact submissions', () => {
   const gateway = read('../../inctrak.com/functions/api/[[path]].js');
 

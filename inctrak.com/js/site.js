@@ -257,6 +257,42 @@
     });
   }
 
+  function initBlogComingSoonModal() {
+    var modal = global.document.getElementById("blog-coming-soon-modal");
+    var blogLink = global.document.querySelector("[data-blog-coming-soon]");
+    if (!modal || !blogLink) {
+      return;
+    }
+
+    var closeControls = modal.querySelectorAll("[data-blog-modal-close]");
+    var closeButton = modal.querySelector(".blog-modal__close");
+
+    function openModal(event) {
+      event.preventDefault();
+      modal.hidden = false;
+      global.document.body.classList.add("blog-modal-open");
+      if (closeButton) {
+        closeButton.focus();
+      }
+    }
+
+    function closeModal() {
+      modal.hidden = true;
+      global.document.body.classList.remove("blog-modal-open");
+      blogLink.focus();
+    }
+
+    blogLink.addEventListener("click", openModal);
+    closeControls.forEach(function (control) {
+      control.addEventListener("click", closeModal);
+    });
+    global.document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && modal.hidden === false) {
+        closeModal();
+      }
+    });
+  }
+
   function init() {
     if (!global.document) {
       return;
@@ -267,6 +303,7 @@
     initSmoothScroll();
     initAnimations();
     initContactForm();
+    initBlogComingSoonModal();
   }
 
   if (typeof module !== "undefined" && module.exports) {

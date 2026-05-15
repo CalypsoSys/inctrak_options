@@ -83,7 +83,7 @@
               <a class="nav-link" href="https://docs.inctrak.com" target="_blank">Documentation</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="https://blog.inctrak.com" target="_blank">Blog</a>
+              <a class="nav-link" href="https://blog.inctrak.com" target="_blank" data-blog-coming-soon>Blog</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="https://shared.inctrak.com" target="_blank">Product</a>
@@ -308,6 +308,33 @@
     <footer class="footer text-center mt-5">
       <p class="footCon">&copy; 2019. All Rights Reserved IncTrak.</p>
     </footer>
+
+    <div
+      id="blog-coming-soon-modal"
+      class="blog-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="blog-coming-soon-title"
+      aria-describedby="blog-coming-soon-copy"
+      hidden
+    >
+      <div class="blog-modal__backdrop" data-blog-modal-close></div>
+      <div class="blog-modal__panel" role="document">
+        <button class="blog-modal__close" type="button" aria-label="Close blog notice" data-blog-modal-close>&times;</button>
+        <p class="blog-modal__eyebrow">IncTrak Blog</p>
+        <h2 id="blog-coming-soon-title">Coming Soon</h2>
+        <p id="blog-coming-soon-copy">
+          We are preparing practical equity notes for founders, operators, and teams. In the meantime, try the public
+          vesting calculator.
+        </p>
+        <div class="blog-modal__actions">
+          <a class="blog-modal__primary" href="https://vesting.inctrak.com" target="_blank" rel="noopener noreferrer">
+            Try Quick Vesting
+          </a>
+          <button class="blog-modal__secondary" type="button" data-blog-modal-close>Close</button>
+        </div>
+      </div>
+    </div>
 
   </body>
   <script src="js/site.js"></script>
