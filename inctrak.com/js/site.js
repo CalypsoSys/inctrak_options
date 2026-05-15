@@ -229,7 +229,7 @@
       });
 
       global
-        .fetch("https://shared.inctrak.com/api/feedback/save_message/", {
+        .fetch("/api/feedback/save_message/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json;charset=UTF-8"

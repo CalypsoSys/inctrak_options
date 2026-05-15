@@ -609,6 +609,9 @@ systemctl is-active --quiet cloudflared && echo "cloudflared running"
 - Custom domains:
   - `inctrak.com`
   - `www.inctrak.com`
+- Variables:
+  - `API_BASE_URL=https://api.inctrak.com/api`
+  - `INTERNAL_API_KEY=<same as AppSettings__GatewaySecret>`
 
 ### `docs.inctrak.com`
 
@@ -713,12 +716,12 @@ sudo journalctl -u cloudflared -n 100 --no-pager
 
 ## Notes about current repo behavior
 
-- all three Vue apps can use Cloudflare Pages Functions as their `/api/*` gateway
-- `inctrak.com` currently posts its contact form directly to `https://shared.inctrak.com/api/feedback/save_message/`
+- all public Pages apps can use Cloudflare Pages Functions as their `/api/*` gateway
+- `inctrak.com` posts its contact form through its own same-origin `/api/*` Pages Function gateway
 - the backend expects a real PostgreSQL template database named by `TenantTemplateDatabaseName`
 - the quick vesting endpoint no longer depends on a dead `inctrak` runtime database
 
 ## Later hardening
 
-After the first real deploy is stable, consider moving the marketing contact form off the hardcoded
-`shared.inctrak.com/api/...` URL and onto a dedicated Pages Function or a shared config value.
+After the first real deploy is stable, keep each public browser app on same-origin `/api/*` unless there is a specific
+reason to expose a separate browser-facing API domain.

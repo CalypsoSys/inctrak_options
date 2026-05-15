@@ -23,8 +23,8 @@ Browser
 
 For this repo as it exists today, that is the cleanest deployable pattern because:
 
-- `frontend/`, `frontend-signup/`, and `frontend-vesting/` have Pages Function API gateways
-- `inctrak.com` already posts its contact form to `https://shared.inctrak.com/api/...`
+- `frontend/`, `frontend-signup/`, `frontend-vesting/`, and `inctrak.com` have Pages Function API gateways
+- public browser code calls same-origin `/api/*`, and Pages Functions inject the internal API key server-side
 - Caddy gives the lab host one stable local ingress layer behind Cloudflare Tunnel
 
 ## Recommended production topology
@@ -212,14 +212,14 @@ Recommended Pages settings:
 
 Notes:
 
-- The marketing contact form already posts directly to:
+- The marketing contact form posts to same-origin `/api/feedback/save_message/`.
+- This site includes its own Pages Function gateway at `inctrak.com/functions/api/[[path]].js`.
+- Required Pages environment variables:
 
 ```text
-https://shared.inctrak.com/api/feedback/save_message/
+API_BASE_URL=https://api.inctrak.com/api
+INTERNAL_API_KEY=<same value as AppSettings__GatewaySecret on the API>
 ```
-
-- That means the marketing site depends on the shared SPA gateway being live.
-- No extra Pages Function is needed in `inctrak.com/` unless you want to make that site fully independent later.
 
 ### 5. Docs site
 
@@ -362,9 +362,9 @@ http://127.0.0.1:8082
 4. Configure `shared.inctrak.com` Pages with:
    - `API_BASE_URL=https://api.inctrak.com/api`
    - `INTERNAL_API_KEY=<gateway secret>`
-5. Configure `signup.inctrak.com` and `vesting.inctrak.com` Pages with the same `API_BASE_URL` and `INTERNAL_API_KEY`.
-6. Deploy `shared.inctrak.com`, `signup.inctrak.com`, and `vesting.inctrak.com`.
-7. Deploy `inctrak.com`, `docs.inctrak.com`, and `blog.inctrak.com`.
+5. Configure `signup.inctrak.com`, `vesting.inctrak.com`, and `inctrak.com` Pages with the same `API_BASE_URL` and `INTERNAL_API_KEY`.
+6. Deploy `shared.inctrak.com`, `signup.inctrak.com`, `vesting.inctrak.com`, and `inctrak.com`.
+7. Deploy `docs.inctrak.com` and `blog.inctrak.com`.
 8. Smoke-test:
    - marketing contact form
    - vesting interpret/calculate/contact

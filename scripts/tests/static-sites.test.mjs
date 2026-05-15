@@ -57,6 +57,7 @@ test('inctrak.com reveal animations match matrixease transition behavior', () =>
 });
 
 test('inctrak.com contact form uses the marketing contact-us message type and neutral success copy', async () => {
+  const script = read('../../inctrak.com/js/site.js');
   const runtime = await import(new URL('../../inctrak.com/js/site.js', import.meta.url));
   const payload = runtime.buildFeedbackPayload({
     emailAddress: 'founder@example.test',
@@ -70,6 +71,17 @@ test('inctrak.com contact form uses the marketing contact-us message type and ne
     runtime.getFeedbackSuccessMessage({ success: true, message: 'Thanks for the compliment, Founder' }),
     'Your message has been sent. We will reach out soon.'
   );
+  assert.match(script, /fetch\("\/api\/feedback\/save_message\/"/);
+  assert.doesNotMatch(script, /https:\/\/shared\.inctrak\.com\/api\/feedback\/save_message\//);
+});
+
+test('inctrak.com has a Pages Function gateway for marketing contact submissions', () => {
+  const gateway = read('../../inctrak.com/functions/api/[[path]].js');
+
+  assert.match(gateway, /API_BASE_URL/);
+  assert.match(gateway, /INTERNAL_API_KEY/);
+  assert.match(gateway, /X-Internal-Api-Key/);
+  assert.match(gateway, /X-Api-Gateway/);
 });
 
 test('docs pages load the shared vanilla docs script', () => {

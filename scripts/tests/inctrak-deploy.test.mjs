@@ -158,12 +158,13 @@ test('logrotate policies exist for caddy, api, and postgres logs', () => {
   assert.match(inctrakLogrotate, /copytruncate/);
 });
 
-test('all Vue apps have Pages API gateway functions', () => {
-  const mainGateway = read('../../frontend/functions/api/[[path]].ts');
-  const signupGateway = read('../../frontend-signup/functions/api/[[path]].ts');
-  const vestingGateway = read('../../frontend-vesting/functions/api/[[path]].ts');
+test('public Pages apps have API gateway functions', () => {
+  const marketingGateway = read('../../inctrak.com/functions/api/[[path]].js');
+  const mainGateway = read('../../frontend/functions/api/[[path]].ts') + read('../../frontend/src/utils/cloudflareGateway.ts');
+  const signupGateway = read('../../frontend-signup/functions/api/[[path]].ts') + read('../../frontend-signup/src/utils/cloudflareGateway.ts');
+  const vestingGateway = read('../../frontend-vesting/functions/api/[[path]].ts') + read('../../frontend-vesting/src/utils/cloudflareGateway.ts');
 
-  for (const gateway of [mainGateway, signupGateway, vestingGateway]) {
+  for (const gateway of [marketingGateway, mainGateway, signupGateway, vestingGateway]) {
     assert.match(gateway, /API_BASE_URL/);
     assert.match(gateway, /INTERNAL_API_KEY/);
     assert.match(gateway, /X-Internal-Api-Key/);
