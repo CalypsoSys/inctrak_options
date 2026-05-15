@@ -239,9 +239,7 @@ Notes:
 From Windows PowerShell, for example:
 
 ```powershell
-$serverIp = "192.168.50.95"
-$serverUser = "deploy"
-$server = "$serverUser@$serverIp"
+$server = "joe@192.168.50.95"
 
 scp C:\transfer\inctrak-api-latest.tar.gz ${server}:/srv/stacks/inctrak/api/
 scp C:\transfer\render-config-env ${server}:/srv/stacks/inctrak/api/scripts/render-config-env
