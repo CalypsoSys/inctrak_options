@@ -205,6 +205,25 @@ namespace inctrak.com.Tests
         }
 
         [Fact]
+        public async Task ApiOnlyHost_CanInterpretQuarterlyQuickVestingPrompt()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/api/optionee/quick/interpret/", new
+            {
+                Prompt = "Create a three-year quarterly vesting schedule."
+            });
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"success\":true", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("\"provider\":\"parser\"", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("\"PERIOD_AMOUNT\":3", body);
+            Assert.Contains("\"INCREMENTS\":12", body);
+        }
+
+        [Fact]
         public async Task ApiOnlyHost_QuickInterpret_StrictAiMode_DoesNotFallBackToRules()
         {
             using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());

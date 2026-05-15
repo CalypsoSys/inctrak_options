@@ -445,8 +445,9 @@ async function generateFromPromptCore(strictAi: boolean, preferredProvider?: str
         interpretRequiresAi.value = true
         revealAiChoice.value = true
         interpretSummary.value = [message, 'Use AI Instead to try the AI interpreter.'].filter(Boolean).join(' ')
+      } else {
+        showDialog(message, false)
       }
-      showDialog(message, false)
       return
     }
 
