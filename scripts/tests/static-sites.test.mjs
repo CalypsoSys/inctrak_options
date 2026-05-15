@@ -1,9 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 function read(path) {
   return readFileSync(new URL(path, import.meta.url), 'utf8');
+}
+
+function exists(path) {
+  return existsSync(new URL(path, import.meta.url));
 }
 
 test('inctrak.com loads the matrixease-style site runtime', () => {
@@ -88,5 +92,109 @@ test('docs pages load the shared vanilla docs script', () => {
     assert.doesNotMatch(html, /matchHeight/);
     assert.doesNotMatch(html, /ekko-lightbox/);
     assert.doesNotMatch(html, /prism/);
+  }
+});
+
+test('public IncTrak sites publish SEO metadata, robots, and sitemaps', () => {
+  const pages = [
+    {
+      htmlPath: '../../inctrak.com/index.html',
+      robotsPath: '../../inctrak.com/robots.txt',
+      sitemapPath: '../../inctrak.com/sitemap.xml',
+      canonical: 'https://inctrak.com/',
+      sitemapHost: 'https://inctrak.com/'
+    },
+    {
+      htmlPath: '../../docs.inctrak.com/index.html',
+      robotsPath: '../../docs.inctrak.com/robots.txt',
+      sitemapPath: '../../docs.inctrak.com/sitemap.xml',
+      canonical: 'https://docs.inctrak.com/',
+      sitemapHost: 'https://docs.inctrak.com/'
+    },
+    {
+      htmlPath: '../../frontend/index.html',
+      robotsPath: '../../frontend/public/robots.txt',
+      sitemapPath: '../../frontend/public/sitemap.xml',
+      canonical: 'https://shared.inctrak.com/',
+      sitemapHost: 'https://shared.inctrak.com/'
+    },
+    {
+      htmlPath: '../../frontend-signup/index.html',
+      robotsPath: '../../frontend-signup/public/robots.txt',
+      sitemapPath: '../../frontend-signup/public/sitemap.xml',
+      canonical: 'https://signup.inctrak.com/',
+      sitemapHost: 'https://signup.inctrak.com/'
+    },
+    {
+      htmlPath: '../../frontend-vesting/index.html',
+      robotsPath: '../../frontend-vesting/public/robots.txt',
+      sitemapPath: '../../frontend-vesting/public/sitemap.xml',
+      canonical: 'https://vesting.inctrak.com/',
+      sitemapHost: 'https://vesting.inctrak.com/'
+    },
+    {
+      htmlPath: '../../blog.inctrak.com/index.html',
+      robotsPath: '../../blog.inctrak.com/robots.txt',
+      sitemapPath: '../../blog.inctrak.com/sitemap.xml',
+      canonical: 'https://blog.inctrak.com/',
+      sitemapHost: 'https://blog.inctrak.com/'
+    }
+  ];
+
+  for (const page of pages) {
+    const html = read(page.htmlPath);
+    const robots = read(page.robotsPath);
+    const sitemap = read(page.sitemapPath);
+
+    assert.match(html, /<meta\s+[^>]*name="description"[^>]*content="[^"]+"|<meta\s+[^>]*content="[^"]+"[^>]*name="description"/s);
+    assert.match(html, /<meta name="robots" content="index, follow"/);
+    assert.match(html, new RegExp(`<link rel="canonical" href="${page.canonical.replace(/\./g, '\\.')}"`));
+    assert.match(html, /<meta property="og:title" content="[^"]+"/);
+    assert.match(html, /<meta property="og:url" content="https:\/\/[^"]+"/);
+    assert.match(html, /<meta name="twitter:card" content="summary_large_image"/);
+    assert.match(robots, /User-agent: \*/);
+    assert.match(robots, /Sitemap: https:\/\//);
+    assert.match(sitemap, new RegExp(`<loc>${page.sitemapHost.replace(/\./g, '\\.')}`));
+  }
+});
+
+test('docs pages have page-specific canonical metadata without blank descriptions', () => {
+  const pages = [
+    ['../../docs.inctrak.com/quick.html', 'https://docs.inctrak.com/quick.html'],
+    ['../../docs.inctrak.com/components.html', 'https://docs.inctrak.com/components.html'],
+    ['../../docs.inctrak.com/faqs.html', 'https://docs.inctrak.com/faqs.html'],
+    ['../../docs.inctrak.com/showcase.html', 'https://docs.inctrak.com/showcase.html'],
+    ['../../docs.inctrak.com/videos.html', 'https://docs.inctrak.com/videos.html'],
+    ['../../docs.inctrak.com/license.html', 'https://docs.inctrak.com/license.html']
+  ];
+
+  for (const [path, canonical] of pages) {
+    const html = read(path);
+
+    assert.match(html, new RegExp(`<link rel="canonical" href="${canonical.replace(/\./g, '\\.')}"`));
+    assert.doesNotMatch(html, /<meta name="description" content="">/);
+    assert.match(html, /<meta property="og:image" content="https:\/\/inctrak\.com\/img\/dashboard\.jpg">/);
+  }
+});
+
+test('SEO files exist for the public IncTrak host roots', () => {
+  const paths = [
+    '../../inctrak.com/robots.txt',
+    '../../inctrak.com/sitemap.xml',
+    '../../docs.inctrak.com/robots.txt',
+    '../../docs.inctrak.com/sitemap.xml',
+    '../../frontend/public/robots.txt',
+    '../../frontend/public/sitemap.xml',
+    '../../frontend-signup/public/robots.txt',
+    '../../frontend-signup/public/sitemap.xml',
+    '../../frontend-vesting/public/robots.txt',
+    '../../frontend-vesting/public/sitemap.xml',
+    '../../blog.inctrak.com/index.html',
+    '../../blog.inctrak.com/robots.txt',
+    '../../blog.inctrak.com/sitemap.xml'
+  ];
+
+  for (const path of paths) {
+    assert.equal(exists(path), true);
   }
 });
