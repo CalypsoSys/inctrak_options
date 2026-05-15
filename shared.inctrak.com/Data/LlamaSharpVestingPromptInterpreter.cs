@@ -17,6 +17,7 @@ namespace IncTrak.Data
         private readonly IVestingDefinitionValidator _validator;
         private readonly object _sync = new object();
         private LLamaWeights _weights;
+        private bool _nativeRuntimeUnavailable;
 
         public LlamaSharpVestingPromptInterpreter(
             IOptions<AppSettings> options,
@@ -38,7 +39,8 @@ namespace IncTrak.Data
 
         public bool IsConfigured()
         {
-            return string.IsNullOrWhiteSpace(_settings.GetLocalAiModelPath()) == false;
+            return _nativeRuntimeUnavailable == false &&
+                   string.IsNullOrWhiteSpace(_settings.GetLocalAiModelPath()) == false;
         }
 
         public QuickVestingInterpretResult TryInterpret(QuickVestingInterpretRequest request)
@@ -98,14 +100,35 @@ namespace IncTrak.Data
             }
             catch (Exception excp)
             {
+                if (IsNativeRuntimeException(excp))
+                {
+                    _nativeRuntimeUnavailable = true;
+                }
+
+                IncTrakErrors.LogError(_settings, null, excp, "embedded local ai");
                 return new QuickVestingInterpretResult
                 {
                     Success = false,
                     Provider = Name,
-                    Message = $"Embedded local AI failed: {excp.Message}",
+                    Message = "Embedded local AI is unavailable on this server. Check the API error log or configure a local AI HTTP endpoint.",
                     Periods = Array.Empty<PERIOD_UI>()
                 };
             }
+        }
+
+        private static bool IsNativeRuntimeException(Exception excp)
+        {
+            for (Exception current = excp; current != null; current = current.InnerException)
+            {
+                if (current is TypeInitializationException ||
+                    current is DllNotFoundException ||
+                    current is BadImageFormatException)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private string RunPrompt(LLamaWeights weights, ModelParams parameters, string systemPrompt, string userPrompt, float temperature)

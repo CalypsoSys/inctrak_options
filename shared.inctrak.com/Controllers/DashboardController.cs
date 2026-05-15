@@ -302,7 +302,7 @@ namespace IncTrak.Controllers
                     feedBack.EmailAddress = "quick@inctrak.com";
                     feedBack.Message = message;
                     feedBack.Subject = "Quick Vesting";
-                    feedBack.Created = DateTime.Now;
+                    feedBack.Created = DateTime.UtcNow;
                     feedBack.ClientData = GetClientInfo();
                     context.Feedback.Add(feedBack);
                     context.SaveChanges();

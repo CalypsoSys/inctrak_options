@@ -254,5 +254,54 @@ namespace inctrak.com.Tests
             Assert.Contains("\"success\":false", body, System.StringComparison.OrdinalIgnoreCase);
             Assert.Contains("Shares Granted", body);
         }
+
+        [Fact]
+        public async Task ApiOnlyHost_QuickVesting_CanCalculateValidSchedule()
+        {
+            using var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            using HttpClient client = server.CreateClient();
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/api/optionee/quick/", new
+            {
+                Data = new
+                {
+                    GRANT_PK = "00000000-0000-0000-0000-000000000000",
+                    GROUP_FK = "00000000-0000-0000-0000-000000000000",
+                    PARTICIPANT_FK = (string?)null,
+                    VESTING_SCHEDULE_FK = (string?)null,
+                    SHARES = 4800,
+                    OPTION_PRICE = 0,
+                    VESTING_START = "2026-01-01",
+                    TERMINATION_FK = (string?)null,
+                    CREATED = "0001-01-01T00:00:00",
+                    UPDATED = "0001-01-01T00:00:00",
+                    DATE_OF_GRANT = "0001-01-01T00:00:00",
+                    PLAN_FK = (string?)null
+                },
+                Children = new[]
+                {
+                    new
+                    {
+                        PERIOD_PK = "00000000-0000-0000-0000-000000000000",
+                        GROUP_FK = "00000000-0000-0000-0000-000000000000",
+                        SCHEDULE_FK = "00000000-0000-0000-0000-000000000000",
+                        PERIOD_AMOUNT = 1,
+                        PERIOD_TYPE_FK = 2,
+                        AMOUNT_TYPE_FK = 2,
+                        AMOUNT = 25,
+                        INCREMENTS = 4,
+                        ORDER = 0,
+                        EVEN_OVER_N = 0,
+                        CREATED = "0001-01-01T00:00:00",
+                        UPDATED = "0001-01-01T00:00:00"
+                    }
+                }
+            });
+            string body = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("\"success\":true", body, System.StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("VestSchedule", body);
+        }
     }
 }
