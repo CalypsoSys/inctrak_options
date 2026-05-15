@@ -4,7 +4,7 @@
       <article class="card-surface rounded-[2rem] p-8">
         <PageIntro
           eyebrow="Vesting Calculator"
-          title="Model an equity vesting schedule in minutes"
+          title="Model an equity vesting schedule in seconds"
           description="Estimate how shares vest over time with a simple public calculator built for founders, operators, and participants."
         >
           <template #actions>
@@ -299,6 +299,7 @@ import {
   shouldShowUseAiInstead as shouldShowUseAiInsteadForProvider
 } from '@/services/prompt-flow'
 import { buildPromptGrantPatch } from '@/services/prompt-interpret'
+import { getQuickGrantValidationMessage } from '@/services/quick-grant-validation'
 import { normalizeQuickStartDate } from '@/services/quick-vesting'
 import { fetchQuickGrant, interpretQuickPrompt, saveQuickGrant } from '@/services/vesting-service'
 import type { AmountType, FeedbackForm, Grant, Period, PeriodType, VestScheduleEntry } from '@/services/types'
@@ -449,15 +450,9 @@ function applyAlternateInterpretation(): Promise<void> {
 }
 
 async function submitQuickGrant(): Promise<void> {
-  if (quickGrant.SHARES <= 0)
-  {
-    showDialog('Enter a Shares Granted value greater than zero before calculating vesting.', false)
-    return
-  }
-
-  if (quickPeriods.value.length === 0)
-  {
-    showDialog('Add at least one vesting period before calculating vesting.', false)
+  const validationMessage = getQuickGrantValidationMessage(quickGrant, quickPeriods.value)
+  if (validationMessage) {
+    showDialog(validationMessage, false)
     return
   }
 

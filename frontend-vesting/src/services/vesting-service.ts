@@ -1,4 +1,5 @@
 import { apiGet, apiPost } from '@/services/api'
+import { buildQuickGrantSavePayload } from '@/services/quick-grant-payload'
 import type { AmountType, ApiResponse, Grant, Period, PeriodType, QuickInterpretResponse, VestScheduleEntry } from '@/services/types'
 
 export type QuickGrantResponse = ApiResponse & {
@@ -14,10 +15,7 @@ export function fetchQuickGrant(): Promise<QuickGrantResponse> {
 }
 
 export function saveQuickGrant(grant: Grant, periods: Period[]): Promise<QuickGrantResponse> {
-  return apiPost<QuickGrantResponse>('/api/optionee/quick/', {
-    Data: grant,
-    Children: periods
-  })
+  return apiPost<QuickGrantResponse>('/api/optionee/quick/', buildQuickGrantSavePayload(grant, periods))
 }
 
 export function interpretQuickPrompt(prompt: string, strictAi = false, preferredProvider?: string): Promise<QuickInterpretResponse> {

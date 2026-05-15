@@ -36,6 +36,8 @@ export type AmountType = {
 
 export type Period = {
   PERIOD_PK?: string
+  GROUP_FK?: string
+  SCHEDULE_FK?: string
   PERIOD_AMOUNT: number
   PERIOD_TYPE_FK: number | null
   AMOUNT_TYPE_FK: number | null
@@ -43,10 +45,14 @@ export type Period = {
   INCREMENTS: number
   ORDER: number
   EVEN_OVER_N: number
+  CREATED?: string
+  UPDATED?: string
+  GroupKeyCheck?: string
 }
 
 export type Grant = {
   GRANT_PK: string
+  GROUP_FK?: string
   PARTICIPANT_FK: string | null
   PLAN_FK: string | null
   VESTING_SCHEDULE_FK: string | null
@@ -55,6 +61,9 @@ export type Grant = {
   OPTION_PRICE: number
   DATE_OF_GRANT: string
   VESTING_START: string
+  CREATED?: string
+  UPDATED?: string
+  GroupKeyCheck?: string
 }
 
 export type VestScheduleEntry = {
