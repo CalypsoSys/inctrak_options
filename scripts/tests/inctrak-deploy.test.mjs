@@ -55,6 +55,16 @@ test('inctrak config example includes top-level docker host settings and postgre
   assert.match(config, /^  ControlPlaneConnection: Host=localhost;Port=5432;Database=inctrak_control;Username=postgres;Password=\$\{INCTRAK_CONTROL_DB_PASSWORD\}/m);
 });
 
+test('api Dockerfile includes CPU local AI native runtime support', () => {
+  const dockerfile = read('../../shared.inctrak.com/Dockerfile');
+
+  assert.match(dockerfile, /apt-get install -y --no-install-recommends libgomp1 libstdc\+\+6/);
+  assert.match(dockerfile, /libggml-base\.so\.0/);
+  assert.match(dockerfile, /libggml-cpu\.so\.0/);
+  assert.match(dockerfile, /libggml\.so\.0/);
+  assert.match(dockerfile, /libllama\.so\.0/);
+});
+
 test('production docs route Cloudflare Tunnel through host Caddy', () => {
   const runbook = read('../../docs/inctrak_production_runbook.md');
   const hostPrep = read('../../docs/inctrak_ubuntu_host_preparation.md');

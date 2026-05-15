@@ -19,6 +19,7 @@ namespace IncTrak.Data
         public QuickVestingInterpretResult Interpret(QuickVestingInterpretRequest request)
         {
             bool strictAi = request?.StrictAi == true;
+            bool allowAiFallback = request?.AllowAiFallback == true;
             string preferredProvider = request?.PreferredProvider?.Trim();
             QuickVestingInterpretResult lastAiFailure = null;
             bool sawAiProvider = false;
@@ -44,6 +45,21 @@ namespace IncTrak.Data
                 {
                     return bestBuiltIn;
                 }
+            }
+
+            if (allowAiFallback == false)
+            {
+                if (bestBuiltIn != null)
+                {
+                    return bestBuiltIn;
+                }
+
+                return new QuickVestingInterpretResult
+                {
+                    Success = false,
+                    Message = "I could not build a vesting schedule from that description yet.",
+                    Periods = Array.Empty<PERIOD_UI>()
+                };
             }
 
             foreach (IVestingPromptInterpreterProvider provider in _providers.Where(provider => provider.IsAiProvider))

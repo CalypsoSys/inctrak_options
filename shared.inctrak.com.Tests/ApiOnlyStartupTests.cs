@@ -181,7 +181,8 @@ namespace inctrak.com.Tests
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains("\"success\":true", body, System.StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("Periods", body);
+            Assert.Contains("\"Periods\":[{", body);
+            Assert.Contains("\"INCREMENTS\":36", body);
             Assert.Contains("Summary", body, System.StringComparison.OrdinalIgnoreCase);
         }
 

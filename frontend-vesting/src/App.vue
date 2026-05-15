@@ -298,7 +298,7 @@ import {
   shouldShowTryAlternate as shouldShowTryAlternateForProvider,
   shouldShowUseAiInstead as shouldShowUseAiInsteadForProvider
 } from '@/services/prompt-flow'
-import { buildPromptGrantPatch } from '@/services/prompt-interpret'
+import { buildPromptGrantPatch, getPromptAmountTypes, getPromptPeriods, getPromptPeriodTypes } from '@/services/prompt-interpret'
 import { getQuickGrantValidationMessage } from '@/services/quick-grant-validation'
 import { normalizeQuickStartDate } from '@/services/quick-vesting'
 import { fetchQuickGrant, interpretQuickPrompt, saveQuickGrant } from '@/services/vesting-service'
@@ -405,12 +405,14 @@ async function generateFromPromptWithMode(strictAi: boolean): Promise<void> {
 async function generateFromPromptCore(strictAi: boolean, preferredProvider?: string): Promise<void> {
   isInterpreting.value = true
   try {
-    const response = await interpretQuickPrompt(promptText.value, strictAi, preferredProvider)
-    const responsePeriods = Array.isArray(response.Periods) ? response.Periods : []
+    const response = await interpretQuickPrompt(promptText.value, strictAi, preferredProvider, false)
+    const responsePeriods = getPromptPeriods(response)
     quickPeriods.value = responsePeriods
     Object.assign(quickGrant, buildPromptGrantPatch(response))
-    quickPeriodTypes.value = Array.isArray(response.PeriodTypes) ? response.PeriodTypes : quickPeriodTypes.value
-    quickAmountTypes.value = Array.isArray(response.AmountTypes) ? response.AmountTypes : quickAmountTypes.value
+    const responsePeriodTypes = getPromptPeriodTypes(response)
+    const responseAmountTypes = getPromptAmountTypes(response)
+    quickPeriodTypes.value = responsePeriodTypes.length > 0 ? responsePeriodTypes : quickPeriodTypes.value
+    quickAmountTypes.value = responseAmountTypes.length > 0 ? responseAmountTypes : quickAmountTypes.value
     interpretProvider.value = response.provider ?? ''
     interpretAlternateProvider.value = response.alternateProvider ?? ''
     interpretRequiresAi.value = (response.requiresAi === true || response.success === false) && strictAi === false
@@ -428,7 +430,7 @@ async function generateFromPromptCore(strictAi: boolean, preferredProvider?: str
       if (strictAi) {
         showDialog(message, false)
       } else {
-        interpretSummary.value = [providerLabel, message, 'Use AI Instead to try the AI interpreter.'].filter(Boolean).join(' ')
+        interpretSummary.value = [message, 'Use AI Instead to try the AI interpreter.'].filter(Boolean).join(' ')
       }
       return
     }

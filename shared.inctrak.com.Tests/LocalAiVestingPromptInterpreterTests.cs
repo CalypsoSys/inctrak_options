@@ -257,6 +257,69 @@ namespace inctrak.com.Tests
             Assert.Equal("2023-01-01", result.VestingStart);
         }
 
+        [Fact]
+        public void HybridInterpreter_DoesNotUseAiFallbackUnlessRequested()
+        {
+            IVestingPromptInterpreterProvider[] providers =
+            {
+                new StubPromptInterpreterProvider("parser", 100, false, new QuickVestingInterpretResult
+                {
+                    Success = false,
+                    Provider = "parser",
+                    Message = "Built-in parser needs AI for this phrase.",
+                    RequiresAi = true,
+                    Periods = Array.Empty<IncTrak.data.PERIOD_UI>()
+                }),
+                new StubPromptInterpreterProvider("local-http", 200, true, new QuickVestingInterpretResult
+                {
+                    Success = true,
+                    Provider = "local-http",
+                    Periods = new[] { new IncTrak.data.PERIOD_UI(Guid.Empty) { PERIOD_AMOUNT = 1, PERIOD_TYPE_FK = 2, AMOUNT_TYPE_FK = 2, AMOUNT = 2.083333m, INCREMENTS = 36 } }
+                })
+            };
+            var interpreter = new HybridVestingPromptInterpreter(providers);
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "loose vesting phrase"
+            });
+
+            Assert.False(result.Success);
+            Assert.Equal("parser", result.Provider);
+        }
+
+        [Fact]
+        public void HybridInterpreter_UsesAiFallbackWhenRequested()
+        {
+            IVestingPromptInterpreterProvider[] providers =
+            {
+                new StubPromptInterpreterProvider("parser", 100, false, new QuickVestingInterpretResult
+                {
+                    Success = false,
+                    Provider = "parser",
+                    Message = "Built-in parser needs AI for this phrase.",
+                    RequiresAi = true,
+                    Periods = Array.Empty<IncTrak.data.PERIOD_UI>()
+                }),
+                new StubPromptInterpreterProvider("local-http", 200, true, new QuickVestingInterpretResult
+                {
+                    Success = true,
+                    Provider = "local-http",
+                    Periods = new[] { new IncTrak.data.PERIOD_UI(Guid.Empty) { PERIOD_AMOUNT = 1, PERIOD_TYPE_FK = 2, AMOUNT_TYPE_FK = 2, AMOUNT = 2.083333m, INCREMENTS = 36 } }
+                })
+            };
+            var interpreter = new HybridVestingPromptInterpreter(providers);
+
+            QuickVestingInterpretResult result = interpreter.Interpret(new QuickVestingInterpretRequest
+            {
+                Prompt = "loose vesting phrase",
+                AllowAiFallback = true
+            });
+
+            Assert.True(result.Success);
+            Assert.Equal("local-http", result.Provider);
+        }
+
         private sealed class StubHttpClientFactory : IHttpClientFactory
         {
             private readonly string _responseBody;

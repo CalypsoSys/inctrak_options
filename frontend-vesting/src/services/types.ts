@@ -19,9 +19,12 @@ export type QuickInterpretResponse = ApiResponse & {
   requiresAi?: boolean
   sharesGranted?: number
   vestingStart?: string
-  Periods: Period[]
-  PeriodTypes: PeriodType[]
-  AmountTypes: AmountType[]
+  Periods?: Period[]
+  PeriodTypes?: PeriodType[]
+  AmountTypes?: AmountType[]
+  periods?: Period[]
+  periodTypes?: PeriodType[]
+  amountTypes?: AmountType[]
 }
 
 export type PeriodType = {
