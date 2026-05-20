@@ -4,7 +4,7 @@
     {
       "label": "backend: render local env",
       "type": "shell",
-      "command": "node ./scripts/inctrak/render-config-env.mjs --format env --output ./.vscode/shared.inctrak-api.env ./scripts/inctrak/config.local.yaml",
+      "command": "node ./scripts/inctrak/render-config-env.mjs --format env --output ./.vscode/inctrak-api.env ./scripts/inctrak/config.local.yaml",
       "options": {
         "cwd": "${workspaceFolder}",
         "shell": {
@@ -25,7 +25,7 @@
       "command": "dotnet",
       "args": [
         "build",
-        "${workspaceFolder}/shared.inctrak.com/shared.inctrak.com.csproj",
+        "${workspaceFolder}/IncTrak.Api/IncTrak.Api.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\shared.inctrak.com\shared.inctrak.com.csproj" />
+    <ProjectReference Include="..\IncTrak.Api\IncTrak.Api.csproj" />
   </ItemGroup>
 
 </Project>

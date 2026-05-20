@@ -93,7 +93,7 @@ sudo chown 999:999 /srv/logs/inctrak/postgres
 
 Copy or derive these from the repo:
 
-- `shared.inctrak.com/Dockerfile`
+- `IncTrak.Api/Dockerfile`
 - `docker/inctrak/docker-compose.yml`
 - `scripts/inctrak/compose-inctrak.sh`
 - `scripts/inctrak/config.example.yaml`
@@ -136,7 +136,7 @@ From the repo root in WSL:
 ```bash
 mkdir -p /mnt/c/transfer
 if [ -f /mnt/c/transfer/inctrak-api-latest.tar.gz ]; then mv /mnt/c/transfer/inctrak-api-latest.tar.gz /mnt/c/transfer/inctrak-api-latest.lastgood.tar.gz; fi
-docker build --platform linux/amd64 -t inctrak-api:latest ./shared.inctrak.com
+docker build --platform linux/amd64 -t inctrak-api:latest ./IncTrak.Api
 docker save inctrak-api:latest -o /mnt/c/transfer/inctrak-api-latest.tar
 gzip -f /mnt/c/transfer/inctrak-api-latest.tar
 ```

@@ -11,7 +11,7 @@ Routine deployment and refresh steps belong in:
 
 Prepare the Ubuntu host to run:
 
-- the Dockerized `shared.inctrak.com` API
+- the Dockerized `IncTrak.Api` API
 - a PostgreSQL instance that hosts:
   - the control-plane database
   - the feedback database

@@ -193,6 +193,7 @@ frontend-vesting/dist/
 frontend-signup/dist/
 .codex
 orleans.codegen.cs
+.vscode/inctrak-api.env
 .vscode/shared.inctrak-api.env
 scripts/inctrak/config.local.yaml
 

@@ -1,6 +1,6 @@
 # IncTrak local VS Code launch
 
-Use this flow when you want `shared.inctrak.com` to run locally with the same `AppSettings__...` environment shape
+Use this flow when you want `IncTrak.Api` to run locally with the same `AppSettings__...` environment shape
 used by Cloudflare and deployment automation.
 
 ## Local config file
@@ -76,9 +76,9 @@ The local launch entries in `.vscode/launch.json` use the `backend: prepare loca
 That task:
 
 1. renders `scripts/inctrak/config.local.yaml`
-2. writes the flattened environment variables to `.vscode/shared.inctrak-api.env`
-3. builds `shared.inctrak.com`
-4. launches the API with `.vscode/shared.inctrak-api.env` as the environment file
+2. writes the flattened environment variables to `.vscode/inctrak-api.env`
+3. builds `IncTrak.Api`
+4. launches the API with `.vscode/inctrak-api.env` as the environment file
 
 The renderer preserves the same config naming used by deployment:
 
@@ -96,7 +96,7 @@ Local: frontend + backend
 
 This matches the MMA launch style:
 
-- hidden backend launch: `Backend: shared.inctrak.com (no browser)`
+- hidden backend launch: `Backend: IncTrak.Api (no browser)`
 - hidden frontend launch: `Frontend: Vite`
 - one visible compound launch: `Local: frontend + backend`
 

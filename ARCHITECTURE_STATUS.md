@@ -11,7 +11,7 @@ Supporting detailed design documents:
 IncTrak is moving toward a multi-tenant SaaS model with:
 
 - a Vue + Vite frontend
-- an API-only ASP.NET backend in `shared.inctrak.com/`
+- an API-only ASP.NET backend in `IncTrak.Api/`
 - Cloudflare edge routing for public and tenant hostnames
 - a control-plane Postgres database for tenants, domains, memberships, and provisioning
 - separate tenant Postgres databases created from a shared PostgreSQL template database
@@ -22,7 +22,7 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 | Area | Decision | Status | Notes |
 | --- | --- | --- | --- |
 | Frontend hosting | Move toward Cloudflare Worker-hosted frontend and wildcard routing rather than Cloudflare Pages | Planned | Pages is not a good fit for `*.inctrak.com` tenant subdomains. |
-| Backend hosting | Keep `shared.inctrak.com` API-only | Partial | API split and env-first config are already in place. |
+| Backend hosting | Keep `IncTrak.Api` API-only | Partial | API split and env-first config are already in place. |
 | Tenant routing | Use `signup.inctrak.com`, `vesting.inctrak.com`, and `*.inctrak.com` | Planned | Worker should resolve hostnames and forward trusted tenant context. |
 | Tenant site model | Use one tenant site per company rather than separate admin and participant hostnames | Planned | Admins and participants should both use `<tenant>.inctrak.com`, with role-based routing and authorization. |
 | Tenant isolation | Use separate tenant databases rather than Postgres RLS initially | Planned | Safer fit for the current legacy/transition codebase. |
@@ -34,7 +34,7 @@ IncTrak is moving toward a multi-tenant SaaS model with:
 
 | Group / Feature / Section | Target State | Current Status | Notes |
 | --- | --- | --- | --- |
-| API-only backend | `shared.inctrak.com` serves API traffic only | Partial | Static web assets are now disabled at the project level; frontend/API split is in place. |
+| API-only backend | `IncTrak.Api` serves API traffic only | Partial | Static web assets are now disabled at the project level; frontend/API split is in place. |
 | Env-first config | Runtime config comes from env, not appsettings secrets | Partial | Gateway, logging, and local VS Code env rendering are already refactored. |
 | VS Code local stack | One launcher starts frontend + backend together | Partial | Current local launcher works, and the frontend debug port is pinned to `127.0.0.1:5174`. |
 | Cloudflare edge architecture | Worker serves SPA and routes wildcard subdomains | Not implemented | Current frontend still runs as a standard Vite SPA and deployment wiring has not been moved to Worker assets yet. |
@@ -125,8 +125,8 @@ Recommended local ports:
 | Purpose | Host | Port | Notes |
 | --- | --- | --- | --- |
 | Main frontend SPA | `127.0.0.1` | `5174` | Current local port for the main app. |
-| Local backend HTTP | `localhost` | `5000` | Already in use by `shared.inctrak.com`. |
-| Local backend HTTPS | `localhost` | `5001` | Already in use by `shared.inctrak.com`. |
+| Local backend HTTP | `localhost` | `5000` | Already in use by `IncTrak.Api`. |
+| Local backend HTTPS | `localhost` | `5001` | Already in use by `IncTrak.Api`. |
 | Signup frontend mode | `127.0.0.1` | `5175` | Suggested future port when signup becomes its own app mode or dev entrypoint. |
 | Public vesting frontend mode | `127.0.0.1` | `5176` | Suggested future port for dedicated quick-vesting dev flow. |
 | Optional Worker local dev | `127.0.0.1` | `8788` | Suggested future port if a Cloudflare Worker shell is added locally. |

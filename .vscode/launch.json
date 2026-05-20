@@ -2,14 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Backend: shared.inctrak.com (no browser)",
+      "name": "Backend: IncTrak.Api (no browser)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "backend: prepare local launch",
-      "program": "${workspaceFolder}/shared.inctrak.com/bin/Debug/net10.0/IncTrak.dll",
+      "program": "${workspaceFolder}/IncTrak.Api/bin/Debug/net10.0/IncTrak.dll",
       "args": [],
-      "cwd": "${workspaceFolder}/shared.inctrak.com",
-      "envFile": "${workspaceFolder}/.vscode/shared.inctrak-api.env",
+      "cwd": "${workspaceFolder}/IncTrak.Api",
+      "envFile": "${workspaceFolder}/.vscode/inctrak-api.env",
       "env": {
         "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000"
       },
@@ -64,7 +64,7 @@
     {
       "name": "Local: (frontend + vesting + signup) + backend",
       "configurations": [
-        "Backend: shared.inctrak.com (no browser)",
+        "Backend: IncTrak.Api (no browser)",
         "Frontend: Vite",
         "Frontend Vesting: Vite",
         "Frontend Signup: Vite"

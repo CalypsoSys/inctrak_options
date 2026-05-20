@@ -31,7 +31,7 @@ IncTrak provides an intuitive, always-accessible experience for both administrat
 
 ## Development
 
-The API lives in `shared.inctrak.com/`. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, the public quick-vesting app lives in `frontend-vesting/`, and the public workspace-signup app now lives in `frontend-signup/` as separate Vue + Vite frontends. The `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
+The API lives in `IncTrak.Api/`. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, the public quick-vesting app lives in `frontend-vesting/`, and the public workspace-signup app now lives in `frontend-signup/` as separate Vue + Vite frontends. The `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
 
 - `./build.sh` builds and tests the frontend, then builds the API project and its test project from the repo root.
 - `pnpm --dir frontend install --frozen-lockfile` installs frontend dependencies.
@@ -50,9 +50,9 @@ The API lives in `shared.inctrak.com/`. The main authenticated frontend lives in
 - `node --test scripts/tests/control-plane-schema.test.mjs` checks the control-plane bootstrap SQL.
 - `node --test scripts/tests/gitleaks-config.test.mjs` checks the Gitleaks repo configuration.
 - `node --test scripts/tests/template-bootstrap.test.mjs` checks the tenant bootstrap SQL.
-- `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
-- `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
-- `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` runs the API split tests.
+- `dotnet build IncTrak.Api/IncTrak.Api.csproj` builds the API directly.
+- `dotnet run --project IncTrak.Api/IncTrak.Api.csproj` starts the API locally.
+- `dotnet test IncTrak.Api.Tests/IncTrak.Api.Tests.csproj` runs the API split tests.
 
 For local SPA work, run the Vite dev server from `frontend/`. The SPA now calls relative `/api/*` paths, and Vite proxies those requests to `VITE_API_PROXY_TARGET`, which defaults to `http://localhost:5000`.
 

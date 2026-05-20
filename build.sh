@@ -17,5 +17,5 @@ pnpm build
 pnpm test
 popd >/dev/null
 
-dotnet build shared.inctrak.com/shared.inctrak.com.csproj
-dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj
+dotnet build IncTrak.Api/IncTrak.Api.csproj
+dotnet test IncTrak.Api.Tests/IncTrak.Api.Tests.csproj

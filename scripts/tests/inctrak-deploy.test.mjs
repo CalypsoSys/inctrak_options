@@ -56,7 +56,7 @@ test('inctrak config example includes top-level docker host settings and postgre
 });
 
 test('api Dockerfile includes CPU local AI native runtime support', () => {
-  const dockerfile = read('../../shared.inctrak.com/Dockerfile');
+  const dockerfile = read('../../IncTrak.Api/Dockerfile');
 
   assert.match(dockerfile, /apt-get install -y --no-install-recommends libgomp1 libstdc\+\+6/);
   assert.match(dockerfile, /libggml-base\.so\.0/);

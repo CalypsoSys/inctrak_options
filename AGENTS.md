@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-The active .NET API project is `shared.inctrak.com/`, which contains the stock-option management controllers, data
+The active .NET API project is `IncTrak.Api/`, which contains the stock-option management controllers, data
 access, and EF models. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA using
 Vue Router, Pinia, Tailwind CSS, and PrimeVue. The public vesting and signup apps live in `frontend-vesting/` and
 `frontend-signup/` as separate Vue + Vite frontends. Static marketing and documentation sites live in `inctrak.com/`,
@@ -18,9 +18,9 @@ Run commands from the repository root unless noted.
   vesting app.
 - `pnpm --dir frontend-signup build` and `pnpm --dir frontend-signup test` build and test the public
   signup app.
-- `dotnet build shared.inctrak.com/shared.inctrak.com.csproj` builds the API directly.
-- `dotnet run --project shared.inctrak.com/shared.inctrak.com.csproj` starts the API locally.
-- `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` runs the API split tests.
+- `dotnet build IncTrak.Api/IncTrak.Api.csproj` builds the API directly.
+- `dotnet run --project IncTrak.Api/IncTrak.Api.csproj` starts the API locally.
+- `dotnet test IncTrak.Api.Tests/IncTrak.Api.Tests.csproj` runs the API split tests.
 - `node --test scripts/tests/inctrak-deploy.test.mjs` checks deployment docs and stack assets.
 
 ## Coding Style & Naming Conventions
@@ -31,7 +31,7 @@ and request/response helpers in `Data/dto/`. Preserve current file naming patter
 closely.
 
 ## Testing Guidelines
-Run `./build.sh` and `dotnet test shared.inctrak.com.Tests/shared.inctrak.com.Tests.csproj` for behavior changes to the
+Run `./build.sh` and `dotnet test IncTrak.Api.Tests/IncTrak.Api.Tests.csproj` for behavior changes to the
 API host. For SPA changes, run the affected frontend build and test scripts, then smoke-test the static site from a
 local web server against the API. For deployment doc, Caddy, Docker, or rendered-config changes, run
 `node --test scripts/tests/inctrak-deploy.test.mjs`. Add new tests in sibling `*.Tests` projects and name files after
