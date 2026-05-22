@@ -114,9 +114,9 @@ export INCTRAK_REPO_ROOT=/absolute/path/to/your/inctrak_options/checkout
 Install the host logrotate policy:
 
 ```bash
-sudo cp "$INCTRAK_REPO_ROOT/scripts/caddy/caddy.logrotate" /etc/logrotate.d/inctrak-caddy
-sudo chmod 644 /etc/logrotate.d/inctrak-caddy
-sudo logrotate -d /etc/logrotate.d/inctrak-caddy
+sudo cp "$INCTRAK_REPO_ROOT/scripts/caddy/caddy.logrotate" /etc/logrotate.d/caddy
+sudo chmod 644 /etc/logrotate.d/caddy
+sudo logrotate -d /etc/logrotate.d/caddy
 ```
 
 Check the local ingress path:

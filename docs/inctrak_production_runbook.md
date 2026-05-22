@@ -395,10 +395,10 @@ Install logrotate policies:
 
 ```bash
 sudo cp /srv/stacks/inctrak/api/scripts/inctrak.logrotate /etc/logrotate.d/inctrak
-sudo cp /srv/stacks/inctrak/api/scripts/caddy.logrotate /etc/logrotate.d/inctrak-caddy
-sudo chmod 644 /etc/logrotate.d/inctrak /etc/logrotate.d/inctrak-caddy
+sudo cp /srv/stacks/inctrak/api/scripts/caddy.logrotate /etc/logrotate.d/caddy
+sudo chmod 644 /etc/logrotate.d/inctrak /etc/logrotate.d/caddy
 sudo logrotate -d /etc/logrotate.d/inctrak
-sudo logrotate -d /etc/logrotate.d/inctrak-caddy
+sudo logrotate -d /etc/logrotate.d/caddy
 ```
 
 ## Preflight checks on the server

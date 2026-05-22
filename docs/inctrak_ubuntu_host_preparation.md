@@ -277,9 +277,9 @@ Install the checked-in Caddy logrotate policy after this repo is available on th
 
 ```bash
 export INCTRAK_REPO_ROOT=/absolute/path/to/your/inctrak_options/checkout
-sudo cp "$INCTRAK_REPO_ROOT/scripts/caddy/caddy.logrotate" /etc/logrotate.d/inctrak-caddy
-sudo chmod 644 /etc/logrotate.d/inctrak-caddy
-sudo logrotate -d /etc/logrotate.d/inctrak-caddy
+sudo cp "$INCTRAK_REPO_ROOT/scripts/caddy/caddy.logrotate" /etc/logrotate.d/caddy
+sudo chmod 644 /etc/logrotate.d/caddy
+sudo logrotate -d /etc/logrotate.d/caddy
 ```
 
 See [caddy_host_setup.md](caddy_host_setup.md) for the dedicated Caddy setup and validation guide.
