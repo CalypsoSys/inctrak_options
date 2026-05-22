@@ -337,18 +337,15 @@ The Inctrak repo lives in WSL for this workflow, while Windows PowerShell owns t
 files that PowerShell must copy into a Windows-visible transfer subfolder from WSL:
 
 ```bash
-mkdir -p /mnt/c/transfer/inctrak-deploy/docker/inctrak
-mkdir -p /mnt/c/transfer/inctrak-deploy/inctrak.db
-mkdir -p /mnt/c/transfer/inctrak-deploy/scripts/inctrak
-mkdir -p /mnt/c/transfer/inctrak-deploy/scripts/caddy
+mkdir -p /mnt/c/transfer/inctrak-deploy
 
-cp docker/inctrak/docker-compose.yml /mnt/c/transfer/inctrak-deploy/docker/inctrak/docker-compose.yml
-cp inctrak.db/control_plane.sql /mnt/c/transfer/inctrak-deploy/inctrak.db/control_plane.sql
-cp inctrak.db/inctrak_feedback.sql /mnt/c/transfer/inctrak-deploy/inctrak.db/inctrak_feedback.sql
-cp inctrak.db/inctrak.sql /mnt/c/transfer/inctrak-deploy/inctrak.db/inctrak.sql
-cp scripts/inctrak/compose-inctrak.sh /mnt/c/transfer/inctrak-deploy/scripts/inctrak/compose-inctrak.sh
-cp scripts/inctrak/inctrak.logrotate /mnt/c/transfer/inctrak-deploy/scripts/inctrak/inctrak.logrotate
-cp scripts/caddy/caddy.logrotate /mnt/c/transfer/inctrak-deploy/scripts/caddy/caddy.logrotate
+cp docker/inctrak/docker-compose.yml /mnt/c/transfer/inctrak-deploy/docker-compose.yml
+cp inctrak.db/control_plane.sql /mnt/c/transfer/inctrak-deploy/control_plane.sql
+cp inctrak.db/inctrak_feedback.sql /mnt/c/transfer/inctrak-deploy/inctrak_feedback.sql
+cp inctrak.db/inctrak.sql /mnt/c/transfer/inctrak-deploy/inctrak.sql
+cp scripts/inctrak/compose-inctrak.sh /mnt/c/transfer/inctrak-deploy/compose-inctrak.sh
+cp scripts/inctrak/inctrak.logrotate /mnt/c/transfer/inctrak-deploy/inctrak.logrotate
+cp scripts/caddy/caddy.logrotate /mnt/c/transfer/inctrak-deploy/caddy.logrotate
 ```
 
 If using the embedded GGUF model, stage the model into a Windows-visible transfer folder too:
@@ -373,13 +370,13 @@ $modelTransfer = "C:\transfer\inctrak-models"
 
 scp C:\transfer\inctrak-api-latest.tar.gz ${server}:/srv/stacks/inctrak/api/
 scp C:\transfer\render-config-env ${server}:/srv/stacks/inctrak/api/scripts/render-config-env
-scp "$transfer\docker\inctrak\docker-compose.yml" ${server}:/srv/stacks/inctrak/api/docker-compose.yml
-scp "$transfer\inctrak.db\control_plane.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/control_plane.sql
-scp "$transfer\inctrak.db\inctrak_feedback.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/inctrak_feedback.sql
-scp "$transfer\inctrak.db\inctrak.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/inctrak.sql
-scp "$transfer\scripts\inctrak\compose-inctrak.sh" ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh
-scp "$transfer\scripts\inctrak\inctrak.logrotate" ${server}:/srv/stacks/inctrak/api/scripts/inctrak.logrotate
-scp "$transfer\scripts\caddy\caddy.logrotate" ${server}:/srv/stacks/inctrak/api/scripts/caddy.logrotate
+scp "$transfer\docker-compose.yml" ${server}:/srv/stacks/inctrak/api/docker-compose.yml
+scp "$transfer\control_plane.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/control_plane.sql
+scp "$transfer\inctrak_feedback.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/inctrak_feedback.sql
+scp "$transfer\inctrak.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/inctrak.sql
+scp "$transfer\compose-inctrak.sh" ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh
+scp "$transfer\inctrak.logrotate" ${server}:/srv/stacks/inctrak/api/scripts/inctrak.logrotate
+scp "$transfer\caddy.logrotate" ${server}:/srv/stacks/inctrak/api/scripts/caddy.logrotate
 scp "$modelTransfer\qwen2.5-1.5b-instruct-q4_k_m.gguf" ${server}:/srv/models/inctrak/
 ```
 
