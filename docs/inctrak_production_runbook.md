@@ -58,7 +58,6 @@ Expected structure:
   inctrak.db/
   scripts/
     compose-inctrak.sh
-    render-config-env
     inctrak.logrotate
 
 /srv/backups/inctrak/incoming
@@ -67,6 +66,7 @@ Expected structure:
 /srv/logs/inctrak/postgres
 /srv/logs/caddy
 /srv/models/inctrak
+/srv/utilities/bin/render-config-env
 ```
 
 Create the required directories if they do not already exist:
@@ -149,7 +149,8 @@ C:\transfer\inctrak-api-latest.tar.gz
 
 ## Build the shared YAML-to-env renderer
 
-Build the shared renderer from its repo in WSL/Linux so the server receives a Linux binary:
+Build the shared renderer from its repo in dev/WSL so the server receives a Linux binary. Do not build this on the
+production host:
 
 ```bash
 cd ~/work/calypsosys-workbench/repos/babalu-yaml-env
@@ -246,7 +247,7 @@ Notes:
 `scripts/inctrak/config.local.yaml` is only the local VS Code example for this machine. It can show the shape of the
 settings, but it is not copied to production and its host paths should not be reused blindly. Production values live in
 the server-local `/srv/stacks/inctrak/api/config.yaml`, and `scripts/compose-inctrak.sh` runs
-`scripts/render-config-env` each time to turn that YAML into the flattened `AppSettings__...` environment variables that
+`/srv/utilities/bin/render-config-env` each time to turn that YAML into the flattened `AppSettings__...` environment variables that
 Docker Compose passes into the API container.
 
 The short version:
@@ -363,13 +364,21 @@ C:\transfer\inctrak-models\qwen2.5-1.5b-instruct-q4_k_m.gguf
 
 Then copy from Windows PowerShell:
 
+Prepare the shared utility directory manually on the Ubuntu host before the first copy:
+
+```bash
+sudo mkdir -p /srv/utilities/bin
+sudo chown "$USER:$USER" /srv/utilities/bin
+chmod 755 /srv/utilities /srv/utilities/bin
+```
+
 ```powershell
 $server = "joe@192.168.50.95"
 $transfer = "C:\transfer\inctrak-deploy"
 $modelTransfer = "C:\transfer\inctrak-models"
 
 scp C:\transfer\inctrak-api-latest.tar.gz ${server}:/srv/stacks/inctrak/api/
-scp C:\transfer\render-config-env ${server}:/srv/stacks/inctrak/api/scripts/render-config-env
+scp C:\transfer\render-config-env ${server}:/srv/utilities/bin/render-config-env
 scp "$transfer\docker-compose.yml" ${server}:/srv/stacks/inctrak/api/docker-compose.yml
 scp "$transfer\control_plane.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/control_plane.sql
 scp "$transfer\inctrak_feedback.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/inctrak_feedback.sql
@@ -384,7 +393,7 @@ After copying artifacts and editing `config.yaml`, on the Ubuntu host:
 
 ```bash
 chmod +x /srv/stacks/inctrak/api/scripts/compose-inctrak.sh
-chmod +x /srv/stacks/inctrak/api/scripts/render-config-env
+chmod 755 /srv/utilities/bin/render-config-env
 chmod 600 /srv/stacks/inctrak/api/config.yaml
 ```
 
@@ -412,7 +421,7 @@ test -f inctrak.db/control_plane.sql && echo "control-plane SQL present"
 test -f inctrak.db/inctrak_feedback.sql && echo "feedback SQL present"
 test -f inctrak.db/inctrak.sql && echo "template SQL present"
 test -x scripts/compose-inctrak.sh && echo "compose wrapper present"
-test -x scripts/render-config-env && echo "render binary present"
+test -x /srv/utilities/bin/render-config-env && echo "render utility present"
 test -d /srv/models/inctrak && echo "local AI model directory present"
 test -f /srv/models/inctrak/qwen2.5-1.5b-instruct-q4_k_m.gguf && echo "local AI model present"
 sudo caddy validate --config /etc/caddy/Caddyfile

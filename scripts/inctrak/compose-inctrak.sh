@@ -17,7 +17,12 @@ fi
 STACK_DIR="${STACK_DIR:-$DEFAULT_STACK_DIR}"
 COMPOSE_FILE="${COMPOSE_FILE:-$STACK_DIR/docker-compose.yml}"
 CONFIG_FILE="${CONFIG_FILE:-$DEFAULT_CONFIG_FILE}"
-RENDERER_PATH="$SCRIPT_DIR/render-config-env"
+DEFAULT_RENDERER_PATH="/srv/utilities/bin/render-config-env"
+RENDERER_PATH="${RENDERER_PATH:-$DEFAULT_RENDERER_PATH}"
+
+if [ "$RENDERER_PATH" = "$DEFAULT_RENDERER_PATH" ] && [ ! -x "$RENDERER_PATH" ] && [ -x "$SCRIPT_DIR/render-config-env" ]; then
+    RENDERER_PATH="$SCRIPT_DIR/render-config-env"
+fi
 
 if [ ! -f "$COMPOSE_FILE" ]; then
     echo "Compose file not found: $COMPOSE_FILE" >&2
@@ -37,6 +42,8 @@ trap cleanup EXIT
 
 if [ ! -x "$RENDERER_PATH" ]; then
     echo "Render binary is not executable: $RENDERER_PATH" >&2
+    echo "Build render-config-env in dev/WSL, then copy it to $DEFAULT_RENDERER_PATH on prod." >&2
+    echo "Set RENDERER_PATH to override the renderer path for local testing." >&2
     exit 1
 fi
 

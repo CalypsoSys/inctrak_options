@@ -15,6 +15,8 @@ test('inctrak compose wrapper defaults to repo docker stack and local config fil
 
   assert.match(script, /DEFAULT_STACK_DIR="\$REPO_ROOT\/docker\/inctrak"/);
   assert.match(script, /DEFAULT_CONFIG_FILE="\$SCRIPT_DIR\/config\.yaml"/);
+  assert.match(script, /DEFAULT_RENDERER_PATH="\/srv\/utilities\/bin\/render-config-env"/);
+  assert.match(script, /RENDERER_PATH="\$\{RENDERER_PATH:-\$DEFAULT_RENDERER_PATH\}"/);
   assert.match(script, /RENDERER_PATH="\$SCRIPT_DIR\/render-config-env"/);
   assert.match(script, /Render binary is not executable: \$RENDERER_PATH/);
   assert.match(script, /docker compose -f "\$COMPOSE_FILE" --env-file "\$TEMP_ENV_FILE" "\$@"/);
@@ -131,7 +133,9 @@ test('production runbook stages WSL repo files for PowerShell scp', () => {
   assert.ok(runbook.includes('scp "$transfer\\control_plane.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/control_plane.sql'));
   assert.ok(runbook.includes('scp "$transfer\\inctrak_feedback.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/inctrak_feedback.sql'));
   assert.ok(runbook.includes('scp "$transfer\\inctrak.sql" ${server}:/srv/stacks/inctrak/api/inctrak.db/inctrak.sql'));
+  assert.ok(runbook.includes('scp C:\\transfer\\render-config-env ${server}:/srv/utilities/bin/render-config-env'));
   assert.ok(runbook.includes('scp "$transfer\\compose-inctrak.sh" ${server}:/srv/stacks/inctrak/api/scripts/compose-inctrak.sh'));
+  assert.ok(runbook.includes('chmod 755 /srv/utilities/bin/render-config-env'));
   assert.ok(runbook.includes('scp "$modelTransfer\\qwen2.5-1.5b-instruct-q4_k_m.gguf" ${server}:/srv/models/inctrak/'));
   assert.equal(runbook.includes('/path/to/repo/inctrak.db'), false);
   assert.equal(runbook.includes('scp -i'), false);
