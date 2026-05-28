@@ -7,7 +7,7 @@ This repo now deploys as a small family of sites, not a single frontend:
 - `signup.inctrak.com` = public signup app
 - `vesting.inctrak.com` = public vesting calculator
 - `docs.inctrak.com` = product documentation
-- `blog.inctrak.com` = static blog
+- `blog.inctrak.com` = WordPress site owned by `../calypsosys-wordpress`
 
 The backend API stays in your lab on Docker and is exposed through Cloudflare Tunnel. The practical production
 shape is:
@@ -69,9 +69,9 @@ Recommended Worker route shape when a Worker sits in front of tenant traffic:
 *.inctrak.com/*
 ```
 
-Exact hostnames such as `shared.inctrak.com`, `signup.inctrak.com`, `vesting.inctrak.com`, `docs.inctrak.com`, and
-`blog.inctrak.com` should remain explicit records/routes so they can keep their current Pages projects and static-site
-behavior.
+Exact hostnames such as `shared.inctrak.com`, `signup.inctrak.com`, `vesting.inctrak.com`, and `docs.inctrak.com`
+should remain explicit records/routes so they can keep their current Pages projects and static-site behavior.
+`blog.inctrak.com` is managed by the WordPress deployment in `../calypsosys-wordpress`.
 
 When tenant traffic reaches the API through a gateway, the gateway must preserve the original tenant host with:
 
@@ -249,28 +249,8 @@ Notes:
 
 ### 6. Blog site
 
-Directory:
-
-```text
-blog.inctrak.com/
-```
-
-Custom domain:
-
-```text
-blog.inctrak.com
-```
-
-Recommended Pages settings:
-
-- Root directory: `blog.inctrak.com`
-- Framework preset: `None`
-- Build command: none
-- Build output directory: `.`
-
-Notes:
-
-- Pure static content in the current repo
+`blog.inctrak.com` is a WordPress site. Keep its Docker, Caddy, backup, and restore artifacts in
+`../calypsosys-wordpress`; this repo should only link to the public blog host.
 
 ## Local development
 
@@ -314,7 +294,7 @@ production:
 - `https://signup.inctrak.com`
 - `https://vesting.inctrak.com`
 
-`docs.inctrak.com` and `blog.inctrak.com` do not currently need API access.
+`docs.inctrak.com` does not currently need API access. `blog.inctrak.com` is outside this repo's Pages gateway.
 
 Recommended production value for `AppSettings:AllowedOrigins`:
 
@@ -364,8 +344,9 @@ http://127.0.0.1:8082
    - `INTERNAL_API_KEY=<gateway secret>`
 5. Configure `signup.inctrak.com`, `vesting.inctrak.com`, and `inctrak.com` Pages with the same `API_BASE_URL` and `INTERNAL_API_KEY`.
 6. Deploy `shared.inctrak.com`, `signup.inctrak.com`, `vesting.inctrak.com`, and `inctrak.com`.
-7. Deploy `docs.inctrak.com` and `blog.inctrak.com`.
-8. Smoke-test:
+7. Deploy `docs.inctrak.com`.
+8. Confirm `blog.inctrak.com` is routed by the WordPress deployment in `../calypsosys-wordpress`.
+9. Smoke-test:
    - marketing contact form
    - vesting interpret/calculate/contact
    - signup page render

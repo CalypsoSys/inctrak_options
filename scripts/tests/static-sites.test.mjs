@@ -75,20 +75,14 @@ test('inctrak.com contact form uses the marketing contact-us message type and ne
   assert.doesNotMatch(script, /https:\/\/shared\.inctrak\.com\/api\/feedback\/save_message\//);
 });
 
-test('inctrak.com blog nav opens a coming soon modal with quick vesting CTA', () => {
+test('inctrak.com blog nav links to the WordPress-owned blog host', () => {
   const html = read('../../inctrak.com/index.html');
   const script = read('../../inctrak.com/js/site.js');
-  const css = read('../../inctrak.com/style.css');
 
-  assert.match(html, /data-blog-coming-soon/);
-  assert.match(html, /id="blog-coming-soon-modal"/);
-  assert.match(html, />Coming Soon</);
-  assert.match(html, /href="https:\/\/vesting\.inctrak\.com"/);
-  assert.match(script, /function initBlogComingSoonModal\(\)/);
-  assert.match(script, /modal\.classList\.add\("show"\)/);
-  assert.match(script, /modal-backdrop fade show/);
-  assert.match(script, /initBlogComingSoonModal\(\);/);
-  assert.match(css, /\.blog-modal__panel/);
+  assert.match(html, /href="https:\/\/blog\.inctrak\.com" target="_blank">Blog<\/a>/);
+  assert.doesNotMatch(html, /data-blog-coming-soon/);
+  assert.doesNotMatch(html, /blog-coming-soon-modal/);
+  assert.doesNotMatch(script, /initBlogComingSoonModal/);
 });
 
 test('inctrak.com has a Pages Function gateway for marketing contact submissions', () => {
@@ -159,13 +153,6 @@ test('public IncTrak sites publish SEO metadata, robots, and sitemaps', () => {
       sitemapPath: '../../frontend-vesting/public/sitemap.xml',
       canonical: 'https://vesting.inctrak.com/',
       sitemapHost: 'https://vesting.inctrak.com/'
-    },
-    {
-      htmlPath: '../../blog.inctrak.com/index.html',
-      robotsPath: '../../blog.inctrak.com/robots.txt',
-      sitemapPath: '../../blog.inctrak.com/sitemap.xml',
-      canonical: 'https://blog.inctrak.com/',
-      sitemapHost: 'https://blog.inctrak.com/'
     }
   ];
 
@@ -216,10 +203,7 @@ test('SEO files exist for the public IncTrak host roots', () => {
     '../../frontend-signup/public/robots.txt',
     '../../frontend-signup/public/sitemap.xml',
     '../../frontend-vesting/public/robots.txt',
-    '../../frontend-vesting/public/sitemap.xml',
-    '../../blog.inctrak.com/index.html',
-    '../../blog.inctrak.com/robots.txt',
-    '../../blog.inctrak.com/sitemap.xml'
+    '../../frontend-vesting/public/sitemap.xml'
   ];
 
   for (const path of paths) {

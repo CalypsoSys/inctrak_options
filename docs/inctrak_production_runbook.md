@@ -19,7 +19,7 @@ Public sites on Cloudflare:
 - `signup.inctrak.com`
 - `vesting.inctrak.com`
 - `docs.inctrak.com`
-- `blog.inctrak.com`
+- `blog.inctrak.com` through the WordPress deployment in `../calypsosys-wordpress`
 
 Private lab origin behind Cloudflare Tunnel:
 
@@ -629,9 +629,8 @@ systemctl is-active --quiet cloudflared && echo "cloudflared running"
 
 ### `blog.inctrak.com`
 
-- Root directory: `blog.inctrak.com`
-- No build command
-- Output: `.`
+The blog is owned by the WordPress repo at `../calypsosys-wordpress`. Do not deploy a static `blog.inctrak.com`
+folder from this repo.
 
 ## Smoke-test checklist
 

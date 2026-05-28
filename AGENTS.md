@@ -4,8 +4,8 @@
 The active .NET API project is `IncTrak.Api/`, which contains the stock-option management controllers, data
 access, and EF models. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA using
 Vue Router, Pinia, Tailwind CSS, and PrimeVue. The public vesting and signup apps live in `frontend-vesting/` and
-`frontend-signup/` as separate Vue + Vite frontends. Static marketing and documentation sites live in `inctrak.com/`,
-`docs.inctrak.com/`, and `blog.inctrak.com/`. SQL reference scripts are under `inctrak.db/`. Docker deployment assets
+`frontend-signup/` as separate Vue + Vite frontends. Static marketing and documentation sites live in `inctrak.com/`
+and `docs.inctrak.com/`; WordPress sites, including `blog.inctrak.com`, live in `../calypsosys-wordpress`. SQL reference scripts are under `inctrak.db/`. Docker deployment assets
 live in `docker/inctrak/`, `scripts/inctrak/`, and `scripts/caddy/`; production operations are documented in
 `docs/inctrak_production_runbook.md`.
 

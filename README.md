@@ -27,11 +27,11 @@ IncTrak provides an intuitive, always-accessible experience for both administrat
 - [Website](https://www.inctrak.com/)  
 - [Documentation](https://docs.inctrak.com/)  
 - [Shared Portal](https://shared.inctrak.com/)  
-- [Blog](https://blog.inctrak.com/)  
+- [Blog](https://blog.inctrak.com/)
 
 ## Development
 
-The API lives in `IncTrak.Api/`. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, the public quick-vesting app lives in `frontend-vesting/`, and the public workspace-signup app now lives in `frontend-signup/` as separate Vue + Vite frontends. The `inctrak.com/`, `docs.inctrak.com/`, and `blog.inctrak.com/` folders remain plain static sites.
+The API lives in `IncTrak.Api/`. The main authenticated frontend lives in `frontend/` as a Vue 3 + TypeScript + Vite SPA, the public quick-vesting app lives in `frontend-vesting/`, and the public workspace-signup app now lives in `frontend-signup/` as separate Vue + Vite frontends. The `inctrak.com/` and `docs.inctrak.com/` folders remain plain static sites. WordPress site ownership, including `blog.inctrak.com`, lives in `../calypsosys-wordpress`.
 
 - `./build.sh` builds and tests the frontend, then builds the API project and its test project from the repo root.
 - `pnpm --dir frontend install --frozen-lockfile` installs frontend dependencies.

@@ -2,3 +2,9 @@ title = "IncTrak Gitleaks configuration"
 
 [extend]
 useDefault = true
+
+[[allowlists]]
+description = "Local VS Code launch env files are ignored developer-only secret stores"
+paths = [
+  '''^\.vscode/.*\.env$'''
+]

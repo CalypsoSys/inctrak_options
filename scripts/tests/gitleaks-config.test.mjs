@@ -12,6 +12,7 @@ test('gitleaks config extends the default rule set', () => {
   assert.match(config, /title = "IncTrak Gitleaks configuration"/)
   assert.match(config, /\[extend\]/)
   assert.match(config, /useDefault = true/)
+  assert.match(config, /\.vscode\/\.\*\\\.env/)
 })
 
 test('pre-commit config includes the gitleaks hook', () => {
