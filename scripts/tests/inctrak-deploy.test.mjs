@@ -81,7 +81,8 @@ test('production docs route Cloudflare Tunnel through host Caddy', () => {
 
   assert.match(runbook, /Cloudflare Tunnel -> host-installed Caddy/);
   assert.match(runbook, /Caddy -> `inctrak-api`/);
-  assert.match(runbook, /reverse_proxy 127\.0\.0\.1:8082/);
+  assert.match(runbook, /calypsosys-host\.Caddyfile\.example/);
+  assert.match(runbook, /api\.inctrak\.com -> 127\.0\.0\.1:8082/);
   assert.match(hostPrep, /In the recommended steady state, Cloudflare Tunnel fronts Caddy/);
   assert.match(caddy, /sudo caddy validate --config \/etc\/caddy\/Caddyfile/);
   assert.match(gateway, /host-installed Caddy/);

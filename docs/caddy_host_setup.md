@@ -61,28 +61,21 @@ sudo apt install -y caddy
 For the Cloudflare Tunnel pattern used here, Caddy only needs to listen on the host. Public access should arrive
 through Cloudflare Tunnel.
 
-## Recommended Caddyfile
+## Shared Host Caddyfile
 
-Example:
+The authoritative Caddyfile is host-owned, not repo-owned. Keep the deployable
+`/etc/caddy/Caddyfile` on the server and use the shared workbench reference as the
+starting point:
 
-```caddy
-{
-    auto_https off
-
-    log {
-        output file /srv/logs/caddy/caddy.log
-        format console
-    }
-}
-
-http://api.inctrak.com {
-    reverse_proxy 127.0.0.1:8082
-}
+```text
+CalypsoSys operations workbench:
+  docs/caddy.md
+  templates/caddy/calypsosys-host.Caddyfile.example
 ```
 
 Recommended routing pattern:
 
-- `api.inctrak.com` -> `inctrak-api` on `127.0.0.1:8082`
+- `api.inctrak.com` -> `127.0.0.1:8082`
 - future local origins -> their own hostnames and upstream ports
 
 ## Start and verify Caddy

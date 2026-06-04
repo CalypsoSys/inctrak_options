@@ -33,16 +33,18 @@ Recommended request path:
 - Cloudflare Tunnel -> host-installed Caddy on the Ubuntu host
 - Caddy -> `inctrak-api`
 
-At minimum, host Caddy should include:
+Use the shared workbench host Caddyfile guidance as the starting point:
 
-```caddy
-{
-    auto_https off
-}
+```text
+CalypsoSys operations workbench:
+  docs/caddy.md
+  templates/caddy/calypsosys-host.Caddyfile.example
+```
 
-http://api.inctrak.com {
-    reverse_proxy 127.0.0.1:8082
-}
+IncTrak needs this route in the shared host Caddyfile:
+
+```text
+api.inctrak.com -> 127.0.0.1:8082
 ```
 
 ## Server layout
@@ -153,7 +155,7 @@ Build the shared renderer from its repo in dev/WSL so the server receives a Linu
 production host:
 
 ```bash
-cd ~/work/calypsosys-workbench/repos/babalu-yaml-env
+cd /path/to/babalu-yaml-env
 mkdir -p /mnt/c/transfer
 if [ -f /mnt/c/transfer/render-config-env ]; then mv /mnt/c/transfer/render-config-env /mnt/c/transfer/render-config-env.lastgood; fi
 go build -o /mnt/c/transfer/render-config-env ./cmd/babalu_yaml_env
