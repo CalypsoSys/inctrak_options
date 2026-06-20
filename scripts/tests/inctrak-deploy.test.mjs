@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 function read(path) {
   return readFileSync(new URL(path, import.meta.url), 'utf8');
@@ -8,6 +10,25 @@ function read(path) {
 
 function exists(path) {
   return existsSync(new URL(path, import.meta.url));
+}
+
+function collectHtmlFiles(path, files = []) {
+  const skipDirectories = new Set(['.test-dist', 'bin', 'node_modules', 'obj']);
+
+  for (const entry of readdirSync(path, { withFileTypes: true })) {
+    if (entry.isDirectory() && skipDirectories.has(entry.name)) {
+      continue;
+    }
+
+    const childPath = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, path);
+    if (entry.isDirectory()) {
+      collectHtmlFiles(childPath, files);
+    } else if (/\.html?$/i.test(entry.name)) {
+      files.push(childPath);
+    }
+  }
+
+  return files;
 }
 
 test('inctrak compose wrapper defaults to repo docker stack and local config file', () => {
@@ -185,4 +206,32 @@ test('public Pages apps have API gateway functions', () => {
     assert.match(gateway, /X-Internal-Api-Key/);
     assert.match(gateway, /X-Api-Gateway/);
   }
+});
+
+test('public HTML files include Google Analytics tag', () => {
+  const repoRoot = new URL('../../', import.meta.url);
+  const siteRoots = [
+    '../../docs.inctrak.com/',
+    '../../frontend/',
+    '../../frontend-signup/',
+    '../../frontend-vesting/',
+    '../../inctrak.com/',
+  ];
+  const measurementId = 'G-H0HKSC3ZGV';
+  const htmlFiles = siteRoots.flatMap((siteRoot) => collectHtmlFiles(new URL(siteRoot, import.meta.url)));
+
+  assert.ok(htmlFiles.length > 0);
+
+  const invalidFiles = htmlFiles
+    .filter((file) => {
+      const html = readFileSync(file, 'utf8');
+      const measurementIdCount = html.match(new RegExp(measurementId, 'g'))?.length ?? 0;
+
+      return measurementIdCount !== 2
+        || !html.includes(`https://www.googletagmanager.com/gtag/js?id=${measurementId}`)
+        || !html.includes(`gtag('config', '${measurementId}');`);
+    })
+    .map((file) => relative(fileURLToPath(repoRoot), fileURLToPath(file)));
+
+  assert.deepEqual(invalidFiles, []);
 });
